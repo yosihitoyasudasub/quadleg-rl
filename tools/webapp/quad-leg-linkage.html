@@ -58,6 +58,7 @@ legend{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:upperc
 .canvasWrap{position:relative;padding:0;overflow:hidden}
 canvas{display:block;width:100%;touch-action:none}
 #mech{height:520px;cursor:crosshair}
+#front{height:300px}
 .legendBar{display:flex;flex-wrap:wrap;gap:12px 18px;padding:8px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
 .legendBar i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
 .chartHead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px 0}
@@ -92,7 +93,7 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
 
 <header>
   <h1>Quad Leg Linkage Lab</h1>
-  <span class="sub">四脚ロボット 脚リンク機構 ─ 股関節2サーボ＋四節リンク の静的トルク計算</span>
+  <span class="sub">四脚ロボット 脚機構 ─ 外転＋股＋膝の3自由度、静的トルク計算</span>
   <span class="sp"></span>
   <button class="btn" id="presetVideo" type="button">動画の条件を読込</button>
   <button class="btn" id="reset" type="button">初期値</button>
@@ -125,6 +126,15 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <p class="hint">角度は +X 軸（前方）から反時計回り。図中の足先・膝・クランク先端はドラッグで動かせます（足先は逆運動学）。</p>
     </fieldset>
     <fieldset>
+      <legend>外転軸（ロール）と胴体</legend>
+      <p class="hint" style="margin:0 0 4px">正面図の座標。ロール軸を原点とし、股ピッチ軸（サーボ①のホーン軸）までのオフセットで脚モジュールの取り付けを表す。ロールトルクは「1脚あたり垂直力 × ロール軸から足先までの水平距離」で決まる。</p>
+      <div class="row" data-k="oy"><label><b>ロール軸→股軸 横</b><span class="sym">oy mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="oz"><label><b>ロール軸→股軸 下</b><span class="sym">oz mm</span></label><input type="number" step="1"><input class="l" type="range" min="-40" max="80" step="1"></div>
+      <div class="row" data-k="t3"><label><b>外転角</b><span class="sym">φ °</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="bodyW"><label><b>胴体幅（ロール軸間）</b><span class="sym">mm</span></label><input type="number" step="2"><input class="l" type="range" min="40" max="200" step="2"></div>
+      <div class="row" data-k="bodyL"><label><b>胴体長（前後脚間）</b><span class="sym">mm</span></label><input type="number" step="2"><input class="l" type="range" min="60" max="300" step="2"></div>
+    </fieldset>
+    <fieldset>
       <legend>荷重</legend>
       <div class="row" data-k="mass"><label><b>機体総質量</b><span class="sym">m kg</span></label><input type="number" step="0.1"><input class="l" type="range" min="0.2" max="15" step="0.1"></div>
       <div class="row" data-k="legs"><label><b>接地脚数</b><span class="sym">n</span></label><select><option value="1">1</option><option value="2">2（小走り）</option><option value="3">3</option><option value="4">4（静止）</option></select></div>
@@ -155,6 +165,14 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
         <span><i style="background:var(--accent)"></i>接地反力・必要トルク</span>
       </div>
     </div>
+    <div class="panel canvasWrap">
+      <canvas id="front"></canvas>
+      <div class="legendBar">
+        <span><i style="background:var(--steel)"></i>正面図：胴体とロール軸</span>
+        <span><i style="background:var(--link)"></i>ロール軸→股軸ブラケット</span>
+        <span><i style="background:var(--accent)"></i>ロール軸から足先までの水平距離 d</span>
+      </div>
+    </div>
     <div class="panel">
       <div class="chartHead"><h2>トルク掃引 ─ 足先を現在の高さで前後に動かした場合</h2><span id="chartSub" class="mono"></span></div>
       <canvas id="chart"></canvas>
@@ -166,7 +184,10 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     <div class="big">
       <div><div class="k">サーボ① 股関節</div><div class="v mono" id="tau1">–</div><div class="u mono" id="tau1b">–</div><div class="bar"><i id="bar1"></i></div></div>
       <div><div class="k">サーボ② 膝駆動</div><div class="v mono" id="tau2">–</div><div class="u mono" id="tau2b">–</div><div class="bar"><i id="bar2"></i></div></div>
+      <div><div class="k">サーボ③ 外転</div><div class="v mono" id="tau3">–</div><div class="u mono" id="tau3b">–</div><div class="bar"><i id="bar3"></i></div></div>
     </div>
+    <div class="sectionTitle">外転軸（ロール）</div>
+    <dl id="rollList"></dl>
     <div class="sectionTitle">荷重条件</div>
     <dl id="loadList"></dl>
     <div class="sectionTitle">リンク機構</div>
@@ -193,8 +214,8 @@ const SERVOS={
   //   4-Ø4（リベット）＋4-Ø1.6（BTS2.6 タッピング）いずれも P.C.D 12
   5:{name:'XL-320 7.4V',stall:4.0,sW:24,sH:36,sOff:9,sPCD:12,sN:8},
 };
-const DEF={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.5,fxr:0,servo:0,stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22,sN:8,sA1:90,sA2:90};
-const VIDEO={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.0,fxr:0,servo:3,stall:11,sW:20,sH:40,sOff:10,sPCD:0,sA1:90,sA2:90};
+const DEF={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.5,fxr:0,servo:0,stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22,sN:8,sA1:90,sA2:90,oy:27,oz:0,t3:0,bodyW:80,bodyL:140};
+const VIDEO={oy:27,oz:0,t3:0,bodyW:80,bodyL:140,bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.0,fxr:0,servo:3,stall:11,sW:20,sH:40,sOff:10,sPCD:0,sA1:90,sA2:90};
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.sH=s.sH;P.sOff=s.sOff;P.sPCD=s.sPCD;P.sN=s.sN||8;}}
 function servoRect(c,ang){ // 4 corners (mm) of servo footprint, horn axis at c, body long axis at ang
@@ -300,6 +321,8 @@ function exportText(){
     lines.push('load: Fy '+Fy.toFixed(1)+' N, Fx '+Fx.toFixed(1)+' N');
     lines.push('tau1: '+(Math.abs(s.tau1)/KGCM).toFixed(2)+' kg·cm ('+(Math.abs(s.tau1)/st*100).toFixed(0)+'% stall)  tau2: '+(Math.abs(s.tau2)/KGCM).toFixed(2)+' kg·cm ('+(Math.abs(s.tau2)/st*100).toFixed(0)+'% stall)');
     lines.push('rodForce: '+s.rodF.toFixed(1)+' N  transmissionAngle: '+s.mu.toFixed(1)+'°  jacobianDet: '+s.det.toFixed(0));
+    const g=rollGeom(s);
+    lines.push('roll: d '+g.F.y.toFixed(1)+' mm  tau3 '+Math.abs(g.tau3).toFixed(3)+' N·m ('+(Math.abs(g.tau3)/st*100).toFixed(0)+'% stall)  zeroAngle '+g.phi0.toFixed(1)+'°  stance '+g.stance.toFixed(0)+' mm');
     const coax=Math.hypot(P.bx,P.by)<1e-6,clash=!coax&&polysOverlap(servoRect(s.O,P.sA1),servoRect(s.B,P.sA2));
     lines.push('servoClash: '+(coax?'coaxial':clash?'YES':'no'));
   }else lines.push('linkage: NOT closed');
@@ -314,6 +337,7 @@ document.getElementById('pasteCfg').onclick=()=>{const t=window.prompt('params: 
 /* ---------- canvas ---------- */
 const mech=document.getElementById('mech'),mctx=mech.getContext('2d');
 const chart=document.getElementById('chart'),cctx=chart.getContext('2d');
+const front=document.getElementById('front'),fctx=front.getContext('2d');
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 let view={s:1,cx:0,cy:0};
 function fit(w,h){
@@ -459,6 +483,74 @@ function drawChart(s){
   const peak=Math.max(0,...reach.map(p=>Math.max(p.a,p.b)));
   document.getElementById('chartSub').textContent='高さ '+s.F.y.toFixed(0)+' mm ／ 到達 '+reach.length+' 点 ／ 掃引内ピーク '+peak.toFixed(2)+' kg·cm';
 }
+// ---- 外転軸（ロール）: 正面図の幾何とトルク ----
+// 座標は正面図（+Y 右、+Z 上）。ロール軸を原点、oz は下向き正。
+// ロール軸は X（前後）方向なので、股ピッチ軸まわりの平面運動は横方向に影響しない。
+// 足先は脚平面内で股ピッチ軸の drop = -F.y だけ真下に来る。
+function rollGeom(s){
+  const phi=P.t3*D2R,c=Math.cos(phi),sn=Math.sin(phi);
+  const drop=s.ok?-s.F.y:0;
+  const O={y:P.oy*c+P.oz*sn, z:P.oy*sn-P.oz*c};
+  const F={y:P.oy*c+(P.oz+drop)*sn, z:P.oy*sn-(P.oz+drop)*c};
+  const{Fy}=loads(P);
+  const tau3=Fy*F.y/1000;                                  // N·m（垂直力 × 水平距離）
+  const phi0=Math.atan2(-P.oy,P.oz+drop)*R2D;              // ロールトルクが 0 になる外転角
+  const stance=P.bodyW+2*F.y;                              // 左右の足先間距離
+  return{phi,drop,O,F,tau3,phi0,stance,Fy};
+}
+
+function drawFront(s,g){
+  const{w,h,d}=sizeCanvas(front),ctx=fctx;
+  ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  const ink=css('--ink'),ink2=css('--ink2'),ink3=css('--ink3'),steel=css('--steel'),
+        link=css('--link'),accent=css('--accent'),grid2=css('--grid2');
+  const halfW=P.bodyW/2;
+  const spanY=Math.max(halfW+Math.abs(g.F.y),halfW+40)+20;
+  const spanZ=Math.max(g.drop+Math.abs(P.oz),40)+40;
+  const sc=Math.min((w-50)/(2*spanY),(h-50)/spanZ);
+  const cx=w/2,cy=28;                                       // 胴体中心線の高さを上端付近に置く
+  const X=y=>cx+y*sc,Z=z=>cy-z*sc;
+  // 地面
+  const zg=Math.min(g.F.z,-1);
+  ctx.strokeStyle=grid2;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(10,Z(zg));ctx.lineTo(w-10,Z(zg));ctx.stroke();
+  ctx.fillStyle=ink3;ctx.font='11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillText('地面',12,Z(zg)-4);
+  // 胴体
+  const bh=26;
+  ctx.fillStyle=steel;ctx.globalAlpha=.25;ctx.fillRect(X(-halfW),Z(bh/2),(halfW*2)*sc,bh*sc);ctx.globalAlpha=1;
+  ctx.strokeStyle=steel;ctx.lineWidth=2;ctx.strokeRect(X(-halfW),Z(bh/2),(halfW*2)*sc,bh*sc);
+  // 左右の脚（右脚が入力値、左脚はミラー）
+  for(const side of[1,-1]){
+    const R={y:side*halfW,z:0},
+          O={y:side*(halfW+g.O.y),z:g.O.z},
+          F={y:side*(halfW+g.F.y),z:g.F.z};
+    // ロール軸の鉛直線
+    ctx.strokeStyle=grid2;ctx.setLineDash([4,4]);ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X(R.y),Z(bh/2));ctx.lineTo(X(R.y),Z(zg));ctx.stroke();ctx.setLineDash([]);
+    // ブラケット（ロール軸→股ピッチ軸）
+    ctx.strokeStyle=link;ctx.lineWidth=6;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(X(R.y),Z(R.z));ctx.lineTo(X(O.y),Z(O.z));ctx.stroke();
+    // 脚（股ピッチ軸→足先。脚平面内の前後成分は正面図には出ない）
+    ctx.strokeStyle=steel;ctx.lineWidth=5;
+    ctx.beginPath();ctx.moveTo(X(O.y),Z(O.z));ctx.lineTo(X(F.y),Z(F.z));ctx.stroke();
+    // 軸と足先
+    for(const[pt,r,col]of[[R,5,accent],[O,4,ink2],[F,4,ink]]){
+      ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(pt.y),Z(pt.z),r,0,7);ctx.fill();
+    }
+    if(side>0){
+      // 水平距離 d の寸法線
+      ctx.strokeStyle=accent;ctx.lineWidth=1.5;
+      const zd=Z(F.z)+16;
+      ctx.beginPath();ctx.moveTo(X(R.y),zd);ctx.lineTo(X(F.y),zd);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(X(R.y),Z(F.z));ctx.lineTo(X(R.y),zd+4);ctx.moveTo(X(F.y),Z(F.z));ctx.lineTo(X(F.y),zd+4);ctx.stroke();
+      ctx.fillStyle=accent;ctx.textAlign='center';ctx.font='12px ui-monospace,monospace';
+      ctx.fillText('d = '+g.F.y.toFixed(1)+' mm',(X(R.y)+X(F.y))/2,zd+16);
+    }
+  }
+  // スタンス幅
+  ctx.fillStyle=ink3;ctx.textAlign='center';ctx.font='11px ui-monospace,monospace';
+  ctx.fillText('スタンス幅 '+g.stance.toFixed(0)+' mm / 外転角 '+P.t3.toFixed(0)+'°',w/2,h-8);
+}
+
 function niceStep(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return(f<1.5?1:f<3.5?2:f<7.5?5:10)*p;}
 
 /* ---------- results ---------- */
@@ -469,14 +561,17 @@ function rowsHTML(items){return items.map(([k,v,c])=>'<div><dt>'+k+'</dt><dd cla
 function update(){
   save();
   const s=statics(P,P.t1,P.t2);
-  drawMech(s);drawChart(s);
+  const g=rollGeom(s);
+  drawMech(s);drawChart(s);drawFront(s,g);
   const{Fx,Fy}=loads(P);
   const pill=$('pill');
   if(!s.ok){pill.className='pill na';pill.textContent='リンクが成立しません';
-    $('tau1').textContent=$('tau2').textContent='–';$('tau1b').textContent=$('tau2b').textContent='';$('bar1').style.width=$('bar2').style.width='0';
+    $('tau1').textContent=$('tau2').textContent=$('tau3').textContent='–';$('tau1b').textContent=$('tau2b').textContent=$('tau3b').textContent='';$('bar1').style.width=$('bar2').style.width=$('bar3').style.width='0';
+    $('rollList').innerHTML='';
     $('loadList').innerHTML=rowsHTML([['接地反力 垂直',fmt(Fy,1)+' N'],['接地反力 水平',fmt(Fx,1)+' N']]);
     $('linkList').innerHTML='';$('budgetList').innerHTML='';return;}
-  const stallNm=P.stall*KGCM,r1=Math.abs(s.tau1)/stallNm,r2=Math.abs(s.tau2)/stallNm,rmax=Math.max(r1,r2);
+  const stallNm=P.stall*KGCM,r1=Math.abs(s.tau1)/stallNm,r2=Math.abs(s.tau2)/stallNm,
+        r3=Math.abs(g.tau3)/stallNm,rmax=Math.max(r1,r2,r3);
   const lvl=cls(rmax);
   pill.className='pill '+lvl;
   pill.textContent=lvl===''?'余裕あり ─ 最大負荷 '+(rmax*100).toFixed(0)+'% of ストール':lvl==='warn'?'余裕薄 ─ 最大負荷 '+(rmax*100).toFixed(0)+'% of ストール':'ストール超過 ─ '+(rmax*100).toFixed(0)+'%';
@@ -484,6 +579,18 @@ function update(){
   $('tau2').textContent=fmt(Math.abs(s.tau2)/KGCM)+' kg·cm';$('tau2b').textContent=fmt(Math.abs(s.tau2),3)+' N·m  '+(s.tau2>=0?'CCW':'CW');
   $('bar1').style.width=Math.min(100,r1*100)+'%';$('bar1').className=cls(r1);
   $('bar2').style.width=Math.min(100,r2*100)+'%';$('bar2').className=cls(r2);
+  $('tau3').textContent=fmt(Math.abs(g.tau3)/KGCM)+' kg·cm';$('tau3b').textContent=fmt(Math.abs(g.tau3),3)+' N·m  '+(g.tau3>=0?'外側へ':'内側へ');
+  $('bar3').style.width=Math.min(100,r3*100)+'%';$('bar3').className=cls(r3);
+  // 連続定格はストールの 1/3 が目安（XL-320 なら 0.13 N·m）
+  const contNm=stallNm/3;
+  $('rollList').innerHTML=rowsHTML([
+    ['ロール軸→足先 水平距離 d',fmt(g.F.y,1)+' mm',Math.abs(g.F.y)>40?'crit':Math.abs(g.F.y)>30?'warn':'good'],
+    ['外転トルク τ3',fmt(Math.abs(g.tau3),3)+' N·m（連続定格 '+fmt(contNm,3)+' N·m）',Math.abs(g.tau3)>contNm?(Math.abs(g.tau3)>stallNm?'crit':'warn'):'good'],
+    ['τ3 が 0 になる外転角',fmt(g.phi0,1)+'°（現在 '+fmt(P.t3,0)+'°）'],
+    ['スタンス幅（左右の足先間）',fmt(g.stance,0)+' mm'],
+    ['足先の接地高さ（ロール軸から）',fmt(-g.F.z,1)+' mm'],
+    ['胴体 長 × 幅',fmt(P.bodyL,0)+' × '+fmt(P.bodyW,0)+' mm'],
+  ]);
   $('loadList').innerHTML=rowsHTML([
     ['1脚あたり垂直力',fmt(Fy,1)+' N（'+fmt(Fy/G,2)+' kgf）'],
     ['水平力',fmt(Fx,1)+' N'],
