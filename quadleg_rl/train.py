@@ -24,7 +24,28 @@ os.environ["XLA_FLAGS"] = os.environ.get("XLA_FLAGS", "") + " --xla_gpu_triton_g
 
 import jax  # noqa: E402
 import jax.numpy as jp  # noqa: E402
+import numpy as np  # noqa: E402
 import mujoco  # noqa: E402
+
+# --- 互換シム -------------------------------------------------------------
+# PyPI の brax 0.14.2 は jax.device_put_replicated を呼ぶが、この API は JAX 0.10 で
+# 削除されている（brax main では jax.device_put に修正済みだが未リリース）。
+# brax main が入っていればここは通らない。PyPI 版しか無い環境のための保険。
+if not hasattr(jax, "device_put_replicated"):
+    def _device_put_replicated(x, devices):
+        mesh = jax.sharding.Mesh(np.array(devices), ("_device_put_replicated",))
+        sharding = jax.sharding.NamedSharding(
+            mesh, jax.sharding.PartitionSpec("_device_put_replicated"))
+
+        def put(v):
+            stack = jp.stack if isinstance(v, jax.Array) else np.stack
+            return jax.device_put(stack([v] * len(devices)), sharding)
+
+        return jax.tree_util.tree_map(put, x)
+
+    jax.device_put_replicated = _device_put_replicated
+    print("[quadleg_rl] jax.device_put_replicated を補完しました（brax 0.14.2 対策）")
+# --------------------------------------------------------------------------
 from brax.training.agents.ppo import networks as ppo_networks  # noqa: E402
 from brax.training.agents.ppo import train as ppo  # noqa: E402
 from mujoco_playground import registry, wrapper  # noqa: E402
