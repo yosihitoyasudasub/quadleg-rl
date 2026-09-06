@@ -105,7 +105,9 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="sW"><label><b>本体幅</b><span class="sym">W mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="60" step="0.5"></div>
       <div class="row" data-k="sH"><label><b>本体長さ</b><span class="sym">H mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="80" step="0.5"></div>
       <div class="row" data-k="sOff"><label><b>ホーン軸〜本体端</b><span class="sym">off mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="0" max="30" step="0.5"></div>
-      <div class="row" data-k="sA"><label><b>本体の向き</b><span class="sym">°</span></label><input type="number" step="5"><input class="l" type="range" min="-180" max="180" step="5"></div>
+      <div class="row" data-k="sA1"><label><b>サーボ① 本体の向き</b><span class="sym">°</span></label><input type="number" step="15"><input class="l" type="range" min="-180" max="180" step="15"></div>
+      <div class="row" data-k="sA2"><label><b>サーボ② 本体の向き</b><span class="sym">°</span></label><input type="number" step="15"><input class="l" type="range" min="-180" max="180" step="15"></div>
+      <p class="hint">ホーン軸を中心に本体の長手方向が伸びる向き（+X から反時計回り）。90°＝上向き、0°＝前向き、180°＝後ろ向き。運動学には影響せず、干渉と外形だけに効く。</p>
     </fieldset>
     <fieldset>
       <legend>外転軸（ロール）と胴体</legend>
@@ -168,7 +170,7 @@ const SERVOS=[
   {name:"XL430-W250",   stall:14.8, sW:28.5, sH:46.5, sOff:12},
 ];
 const DEF={d0:30,l1:25,l2:70,fx:0,fy:-67,mass:1.0,legs:2,sf:1.5,fxr:0,
-           servo:0,stall:4.0,sW:24,sH:36,sOff:9,sA:90,
+           servo:0,stall:4.0,sW:24,sH:36,sOff:9,sA1:90,sA2:90,
            oy:0,oz:0,t3:0,bodyW:110,bodyL:140};
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.sH=s.sH;P.sOff=s.sOff;}}
@@ -198,6 +200,24 @@ function fk(p,t1,t2){
   return {A,B,F:{x:mx+h*dy/d, y:my-h*dx/d}};
 }
 function loads(p){const Fy=p.mass*G/p.legs*p.sf;return{Fx:Fy*p.fxr/100,Fy};}
+// サーボ本体の四隅（ホーン軸 c、向き angDeg）。干渉チェックと描画に使う
+function servoRect(p,c,angDeg){
+  const a=angDeg*D2R, ca=Math.cos(a), sa=Math.sin(a), w=p.sW/2;
+  // ローカル u=幅方向、v=長手方向（ホーン軸から -sOff 〜 +(sH-sOff)）。
+  // 長手方向の単位ベクトルが (ca,sa)、幅方向が (-sa,ca)。
+  return [[-w,-p.sOff],[w,-p.sOff],[w,p.sH-p.sOff],[-w,p.sH-p.sOff]].map(([u,v])=>({
+    x:c.x - u*sa + v*ca, y:c.y + u*ca + v*sa}));
+}
+function polysOverlap(A,B){            // 分離軸判定（凸四角形）
+  for(const P of [A,B]) for(let i=0;i<P.length;i++){
+    const q=P[(i+1)%P.length], nx=-(q.y-P[i].y), ny=q.x-P[i].x;
+    let a0=1e9,a1=-1e9,b0=1e9,b1=-1e9;
+    for(const v of A){const d=v.x*nx+v.y*ny;a0=Math.min(a0,d);a1=Math.max(a1,d);}
+    for(const v of B){const d=v.x*nx+v.y*ny;b0=Math.min(b0,d);b1=Math.max(b1,d);}
+    if(a1<b0||b1<a0)return false;
+  }
+  return true;
+}
 function statics(p,fx,fy){
   const r=ik(p,fx,fy); if(!r)return{ok:false};
   const s=fk(p,r.t1,r.t2); if(!s)return{ok:false};
@@ -301,13 +321,14 @@ function drawMech(s){
     ctx.fillText('足先が到達範囲の外です（各軸から '+Math.abs(P.l1-P.l2).toFixed(0)+'〜'+(P.l1+P.l2).toFixed(0)+' mm）',w/2,h/2);
     return;}
   const A=W2S(s.A), B=W2S(s.B), F=W2S(s.F);
-  // サーボ本体（軸ごとに1個ずつ。d0=0 なら背中合わせで重なる）
-  const a=P.sA*D2R;
-  for(const c of [P1,P2]){
-    ctx.save();ctx.translate(c.x,c.y);ctx.rotate(-a);
-    ctx.strokeStyle=ink3;ctx.setLineDash([3,3]);ctx.lineWidth=1;
-    ctx.strokeRect(-P.sW/2*view.s, -P.sOff*view.s, P.sW*view.s, P.sH*view.s);
-    ctx.setLineDash([]);ctx.restore();}
+  // サーボ本体（軸ごとに1個ずつ）。重なっていれば赤で描く
+  const R1=servoRect(P,{x:-P.d0/2,y:0},P.sA1), R2=servoRect(P,{x:P.d0/2,y:0},P.sA2);
+  const clash=polysOverlap(R1,R2);
+  ctx.strokeStyle=clash?accent:ink3;ctx.setLineDash([3,3]);ctx.lineWidth=clash?2:1;
+  for(const R of [R1,R2]){
+    ctx.beginPath();R.forEach((v,i)=>{const q=W2S(v);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);});
+    ctx.closePath();ctx.stroke();}
+  ctx.setLineDash([]);
   // 下腿
   ctx.strokeStyle=steel;ctx.lineWidth=6;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(F.x,F.y);ctx.stroke();
@@ -450,8 +471,10 @@ function update(){
   $('mechList').innerHTML=rowsHTML([
     ['クランク角 θ1 / θ2',fmt(s.t1*R2D,1)+'° / '+fmt(s.t2*R2D,1)+'°'],
     ['内角（下腿どうし）',fmt(s.inner,1)+'°',innerCls],
-    ['サーボ軸間 d0',fmt(P.d0,0)+' mm'+(P.d0<P.sW?'（本体が干渉：'+fmt(P.sW,0)+' mm 以上必要）':'')
-      ,P.d0<P.sW?'warn':'good'],
+    ['サーボ軸間 d0',fmt(P.d0,0)+' mm'],
+    ['サーボ本体どうしの干渉',(()=>{const c=polysOverlap(servoRect(P,{x:-P.d0/2,y:0},P.sA1),servoRect(P,{x:P.d0/2,y:0},P.sA2));
+      return c?'重なっている':'なし';})(),
+      polysOverlap(servoRect(P,{x:-P.d0/2,y:0},P.sA1),servoRect(P,{x:P.d0/2,y:0},P.sA2))?'crit':'good'],
     ['各軸からの距離範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
     ['ヤコビアン行列式',fmt(s.det,0)+' mm²/rad²',Math.abs(s.det)<P.l1*P.l2*0.15?'warn':''],
     ['サーボ',SERVOS[P.servo]?SERVOS[P.servo].name:'カスタム'],
