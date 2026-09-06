@@ -19,7 +19,7 @@ quadleg-rl/
 1. **Zed で編集** — `quadleg_rl/` にロジックを書く。ノートブックは呼び出すだけ。
 2. **GitHub に push** — `git push`
 3. **Colab で学習** — `notebooks/01_go1_playground.ipynb` を Colab で開く
-   （GitHub 上のファイルを `https://colab.research.google.com/github/<user>/quadleg-rl/blob/main/notebooks/01_go1_playground.ipynb` で直接開ける）。
+   （GitHub 上のファイルを `https://colab.research.google.com/github/yosihitoyasudasub/quadleg-rl/blob/main/notebooks/01_go1_playground.ipynb` で直接開ける）。
    セル 2 で `git clone`/`pull`、セル 5 で学習、セル 6-7 で動画。
 4. チェックポイントと動画は Google Drive `MyDrive/quadleg-rl/logs/` に残る。
 
