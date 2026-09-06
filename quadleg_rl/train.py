@@ -214,6 +214,37 @@ def summarize(env, states) -> dict:
     return info
 
 
+def probe(result: TrainResult, commands=((0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
+                                        (0.0, 0.0, 1.0), (0.0, 0.0, 0.0)),
+          episode_length: int = 300, seed: int = 0):
+    """複数の指令でロールアウトし、指令に追従しているかを数値で確認する（描画なしなので速い）。
+
+    dx が指令方向に伸びていれば追従、どの指令でも 0 付近ならポリシーが指令を無視している。
+    """
+    rows = []
+    for cmd in commands:
+        env, states = rollout(result, episode_length=episode_length, seed=seed, command=tuple(cmd))
+        info = summarize(env, states)
+        yaw_rate = None
+        q0, q1 = np.asarray(states[0].data.qpos), np.asarray(states[-1].data.qpos)
+        if len(q1) > 6:   # free joint のクォータニオンから yaw 変化を出す
+            def yaw(q):
+                w, x, y, z = q[3:7]
+                return np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+            dt = float(env.dt) * (len(states) - 1)
+            yaw_rate = round(float(np.unwrap([yaw(q0), yaw(q1)])[1] - yaw(q0)) / dt, 3) if dt else 0.0
+        rew = {k: float(np.mean([np.asarray(s.metrics[k]) for s in states[1:]]))
+               for k in states[-1].metrics if "tracking" in k}
+        rows.append(dict(command=tuple(cmd), dx=info["dx_m"], dy=info["dy_m"],
+                         speed=info["speed_mps"], yaw_rate=yaw_rate,
+                         **{k.split("/")[-1]: round(v, 3) for k, v in rew.items()}))
+    print("
+=== probe ===")
+    for r in rows:
+        print(r)
+    return rows
+
+
 def render_video(result: TrainResult, out_path: str | os.PathLike = "rollout.mp4", render_every: int = 2,
                  width: int = 640, height: int = 480, camera: Optional[str] = "track",
                  **rollout_kwargs) -> Path:
