@@ -31,6 +31,20 @@ from mujoco_playground import registry, wrapper  # noqa: E402
 from mujoco_playground.config import locomotion_params  # noqa: E402
 
 
+# Playground の一部環境（Go1 Joystick など）は既定 config が impl="warp" で、
+# mujoco-warp（warp-lang）未導入の環境では mjx.put_model が AttributeError になる。
+# 既定では JAX 実装に落とす。warp を入れてある環境では impl="warp" / None を渡す。
+DEFAULT_IMPL: Optional[str] = os.environ.get("QUADLEG_MJX_IMPL", "jax") or None
+
+
+def _with_impl(env_cfg, overrides: dict, impl: Optional[str]) -> dict:
+    """config に impl キーがある Playground バージョンでのみ上書きする。"""
+    out = dict(overrides)
+    if impl and "impl" in env_cfg:
+        out.setdefault("impl", impl)
+    return out
+
+
 @dataclass
 class TrainResult:
     env_name: str
@@ -42,6 +56,7 @@ class TrainResult:
     history: list = field(default_factory=list)   # [(steps, reward)]
     jit_time: float = 0.0
     train_time: float = 0.0
+    impl: Optional[str] = None
 
 
 def gpu_info() -> str:
@@ -57,6 +72,7 @@ def train(
     num_envs: Optional[int] = None,
     num_evals: Optional[int] = None,
     domain_randomization: bool = True,
+    impl: Optional[str] = DEFAULT_IMPL,
     restore_checkpoint_path: Optional[str] = None,
     env_config_overrides: Optional[dict] = None,
     progress_cb: Optional[Callable[[int, dict], None]] = None,
@@ -70,7 +86,7 @@ def train(
     if num_evals is not None:
         ppo_params.num_evals = num_evals
 
-    overrides = dict(env_config_overrides or {})
+    overrides = _with_impl(env_cfg, env_config_overrides or {}, impl)
     env = registry.load(env_name, config=env_cfg, config_overrides=overrides)
     eval_env = registry.load(env_name, config=registry.get_default_config(env_name), config_overrides=overrides)
 
@@ -124,15 +140,17 @@ def train(
     jit_time = times[1] - times[0] if len(times) > 1 else 0.0
     train_time = times[-1] - times[1] if len(times) > 1 else 0.0
     print(f"done. JIT {jit_time:.0f}s, train {train_time:.0f}s")
-    return TrainResult(env_name, env_cfg, ppo_params, make_inference_fn, params, logdir, history, jit_time, train_time)
+    return TrainResult(env_name, env_cfg, ppo_params, make_inference_fn, params, logdir, history,
+                       jit_time, train_time, impl)
 
 
 def rollout(result: TrainResult, episode_length: Optional[int] = None, seed: int = 0,
             command: Optional[tuple] = None, env_config_overrides: Optional[dict] = None):
     """学習済みポリシーでロールアウトし、レンダリング用の状態列を返す。
     command=(vx, vy, yaw_rate) を与えると Joystick 環境の指令を固定する。"""
-    env = registry.load(result.env_name, config=registry.get_default_config(result.env_name),
-                        config_overrides=env_config_overrides or {})
+    cfg = registry.get_default_config(result.env_name)
+    env = registry.load(result.env_name, config=cfg,
+                        config_overrides=_with_impl(cfg, env_config_overrides or {}, result.impl))
     ep_len = episode_length or int(result.ppo_params.episode_length)
     inference_fn = jax.jit(result.make_inference_fn(result.params, deterministic=True))
     jit_reset, jit_step = jax.jit(env.reset), jax.jit(env.step)

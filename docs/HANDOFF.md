@@ -54,6 +54,10 @@ XL-320 での余裕: 質量 1 kg で股 58%、膝 30%。**質量 0.7 kg 目標**
 
 - `quadleg_rl/train.py`
   - `locomotion_params.brax_ppo_config(env_name)` の戻り値（ConfigDict）から `network_factory` / `num_eval_envs` を取り出して `ppo.train` に渡している。Playground のバージョンによりキー名が変わる可能性
+  - MJX の実装選択: Playground の Go1 Joystick は既定 config が `impl="warp"`。`mujoco-warp` 未導入の環境では
+    `mjx.put_model` が `AttributeError: type object 'int' has no attribute 'WARP'` で落ちるため、`train()` は
+    既定で `impl="jax"` に上書きする（`DEFAULT_IMPL` / 環境変数 `QUADLEG_MJX_IMPL` で変更可）。warp を入れた環境で
+    速度を狙うなら `impl="warp"` を明示する
   - `rollout()` で `state.info["command"]` を直接書き換えて指令を固定している。Joystick 環境が `info["command"]` を持つ前提
   - `env.render()` は `State` のリストを受け取る（`.data` ではない）
   - チェックポイント再開: `restore_checkpoint_path` に run の `checkpoints/` を渡すと最新の数字ディレクトリを選ぶ
