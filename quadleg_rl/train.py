@@ -238,8 +238,7 @@ def probe(result: TrainResult, commands=((0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
         rows.append(dict(command=tuple(cmd), dx=info["dx_m"], dy=info["dy_m"],
                          speed=info["speed_mps"], yaw_rate=yaw_rate,
                          **{k.split("/")[-1]: round(v, 3) for k, v in rew.items()}))
-    print("
-=== probe ===")
+    print("=== probe ===")
     for r in rows:
         print(r)
     return rows
