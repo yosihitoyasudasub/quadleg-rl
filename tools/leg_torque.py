@@ -51,6 +51,11 @@ def statics(p, t1, t2):
     tx, ty = s["K"]
     sx, sy = s["F"][0] - s["K"][0], s["F"][1] - s["K"][1]
     s["knee"] = 180 - math.acos(max(-1, min(1, (tx * sx + ty * sy) / (p["L1"] * p["L2"])))) * R2D
+    # ロッドの軸力: クランク C-B とロッド方向の外積から。細長い棒なので座屈の目安になる
+    cx, cy = s["C"][0] - p["bx"], s["C"][1] - p["by"]
+    ux, uy = (s["D"][0] - s["C"][0]) / p["Lr"], (s["D"][1] - s["C"][1]) / p["Lr"]
+    cross = cx * uy - cy * ux
+    s["rodF"] = -s["tau2"] * 1000 / cross if abs(cross) > 1e-9 else float("nan")
     vx, vy = s["D"][0] - s["K"][0], s["D"][1] - s["K"][1]
     wx, wy = s["D"][0] - s["C"][0], s["D"][1] - s["C"][1]
     mu = math.acos(max(-1, min(1, (vx * wx + vy * wy) / (p["Le"] * p["Lr"])))) * R2D
