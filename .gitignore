@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+logs/
+*.mp4
+*.egg-info/
+.ipynb_checkpoints/
+tools/fusion/QuadLegLinkage/qll_last.json

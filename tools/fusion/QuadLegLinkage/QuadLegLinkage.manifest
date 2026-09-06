@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "5c1e2b7a-7f0d-4b6e-9d2a-3e8f61a0c4d2",
+    "author": "Quad Leg Linkage Lab",
+    "description": {
+        "": "四脚ロボット脚リンク機構（股関節2サーボ＋四節リンク）を生成するアドイン。ソリッドタブ→作成パネルにボタンを追加します。"
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

@@ -1,0 +1,27 @@
+# AGENTS.md — quadleg-rl の作業ルール（Zed エージェント向け）
+
+まず `docs/HANDOFF.md` を読むこと。目的・決定済み設計値・未検証箇所・TODO はそこにある。
+
+## プロジェクト概要
+四脚ロボット（XL-320 × 8、4 脚 × 2 自由度の平面リンク脚）の歩行を MuJoCo Playground（MJX / Brax PPO）で学習する。
+学習は Google Colab の GPU で実行。ローカル（Windows）は編集と軽い検証のみ。
+
+## 構成
+- `quadleg_rl/` — 学習ロジック。ノートブックにロジックを書かない
+- `notebooks/` — Colab 用の薄いラッパー（clone → install → train → 動画）
+- `tools/fusion/QuadLegLinkage/` — Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
+- `tools/webapp/` — リンク機構トルク計算 Web アプリ（単一 HTML）
+- `docs/` — 引き継ぎ・設計メモ
+
+## 約束事
+- 単位: 長さ mm、角度 deg（Web アプリ・Fusion）。MuJoCo/MJX 側は m・rad。変換箇所にコメントを書く
+- 座標系: 股関節 O 原点、+X 前方、+Y 上（脚の 2D 設計）。MJCF では Z 上に読み替える
+- サーボ仕様は `docs/HANDOFF.md` §3 の値を正とする（図面で確認済み）。推定値を入れる場合は「未検証」と明記
+- Playground / Brax の API はバージョン差が大きい。動かないときは公式 `learning/train_jax_ppo.py` と `learning/notebooks/locomotion.ipynb` の最新を参照して合わせる
+- 依存追加は `pyproject.toml` とノートブックの pip セルの両方に反映
+- 大きなバイナリ（動画・チェックポイント）はコミットしない（`.gitignore` 済み）
+
+## 次の実装対象（順に）
+1. 01 ノートブックを Colab で通す（`train.py` の修正）
+2. `quadleg_rl/envs/go1_2dof.py` — Go1 の外転関節を固定した 8 アクチュエータ環境
+3. `quadleg_rl/mjcf/` — 自作四脚 MJCF 生成（Web アプリ params → XML）と `02_custom_quadruped.ipynb`
