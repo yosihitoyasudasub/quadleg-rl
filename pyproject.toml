@@ -5,6 +5,7 @@ description = "Quadruped leg design + RL locomotion (MuJoCo Playground)"
 requires-python = ">=3.10"
 dependencies = [
     "playground",
+    "flax>=0.12",          # 古い flax は JAX 0.11 で削除された jax.core.get_opaque_trace_state を呼ぶ
     "mediapy",
     "matplotlib",
 ]
