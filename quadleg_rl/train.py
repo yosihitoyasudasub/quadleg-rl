@@ -184,23 +184,54 @@ def rollout(result: TrainResult, episode_length: Optional[int] = None, seed: int
         rng, key = jax.random.split(rng)
         act, _ = inference_fn(state.obs, key)
         state = jit_step(state, act)
+        # 環境側は一定間隔で command を再サンプリングするので、毎ステップ上書きし直す
         if command is not None and "command" in state.info:
             state.info["command"] = jp.array(command, dtype=jp.float32)
         states.append(state)
         if bool(state.done):
+            print(f"[rollout] done at step {len(states)-1}/{ep_len}（転倒などで早期終了）")
             break
     return env, states
 
 
+def summarize(env, states) -> dict:
+    """ロールアウトが期待どおりか数値で確認する。動画が「動いていない」ときの切り分け用。"""
+    qpos0, qpos1 = np.asarray(states[0].data.qpos), np.asarray(states[-1].data.qpos)
+    dt = float(env.dt)
+    duration = dt * (len(states) - 1)
+    dx, dy = float(qpos1[0] - qpos0[0]), float(qpos1[1] - qpos0[1])
+    info = {
+        "steps": len(states) - 1,
+        "duration_s": round(duration, 2),
+        "dx_m": round(dx, 3),
+        "dy_m": round(dy, 3),
+        "speed_mps": round((dx**2 + dy**2) ** 0.5 / duration, 3) if duration else 0.0,
+        "z_end_m": round(float(qpos1[2]), 3),
+    }
+    if "command" in states[-1].info:
+        info["command_end"] = np.asarray(states[-1].info["command"]).round(3).tolist()
+    print("[rollout]", info)
+    return info
+
+
 def render_video(result: TrainResult, out_path: str | os.PathLike = "rollout.mp4", render_every: int = 2,
-                 width: int = 640, height: int = 480, **rollout_kwargs) -> Path:
+                 width: int = 640, height: int = 480, camera: Optional[str] = "track",
+                 **rollout_kwargs) -> Path:
+    """camera="track" は Menagerie の Go1 等が持つ追従カメラ。無いモデルでは自由カメラに落とす。"""
     import mediapy as media
     env, states = rollout(result, **rollout_kwargs)
+    summarize(env, states)
     traj = states[::render_every]   # MjxEnv.render は State のリストを受け取る
     fps = 1.0 / env.dt / render_every
     opt = mujoco.MjvOption()
+    opt.geomgroup[2] = True    # 公式ノートブックと同じ表示設定（2=ビジュアル、3=コリジョン）
+    opt.geomgroup[3] = False
     opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = False
-    frames = env.render(traj, height=height, width=width, scene_option=opt)
+    try:
+        frames = env.render(traj, height=height, width=width, camera=camera, scene_option=opt)
+    except Exception as e:   # カメラ名が無いモデル
+        print(f"[render] camera={camera!r} を使えないので自由カメラで描画します: {e}")
+        frames = env.render(traj, height=height, width=width, scene_option=opt)
     out_path = Path(out_path)
     media.write_video(out_path, frames, fps=fps)
     print(f"video: {out_path}  ({len(frames)} frames, {fps:.0f} fps)")
