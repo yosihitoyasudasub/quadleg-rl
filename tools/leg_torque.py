@@ -114,3 +114,68 @@ def knee_ratio(p, t1, t2, d=1.0):
 def roll_torque(mass, legs, sf, d_mm):
     """外転軸: τ3 = 1脚あたり垂直力 × ロール軸から足先までの水平距離。"""
     return mass * G / legs * sf * d_mm / 1000
+
+
+# =====================================================================
+# 5 節リンク（2026-09-06 に採用）
+# 股関節 O に 2 本のクランク（長さ l1）が同軸で付き、それぞれの先から
+# 下腿（長さ l2）が伸びて足先 F で合流する。膝は受動関節。
+# 四節リンクと違い 2 個のサーボが荷重を分担し、脚にサーボが載らない。
+# =====================================================================
+
+def ik5(l1, l2, fx, fy):
+    """足先 (fx, fy) から 2 本のクランク角（rad）を解析的に求める。
+
+    円 O-l1 と円 F-l2 の交点が各クランクの先端。返り値は (後側, 前側)。
+    """
+    d = math.hypot(fx, fy)
+    if d > l1 + l2 or d < abs(l1 - l2) or d < 1e-9:
+        return None                     # 到達範囲の外
+    a = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
+    h2 = l1 * l1 - a * a
+    if h2 < 0:
+        return None
+    h = math.sqrt(h2)
+    mx, my = a * fx / d, a * fy / d
+    return (math.atan2(my - h * fx / d, mx + h * fy / d),
+            math.atan2(my + h * fx / d, mx - h * fy / d))
+
+
+def fk5(l1, l2, t1, t2):
+    """クランク角から足先を求める（下側の交点を選ぶ）。"""
+    A = (l1 * math.cos(t1), l1 * math.sin(t1))
+    B = (l1 * math.cos(t2), l1 * math.sin(t2))
+    dx, dy = B[0] - A[0], B[1] - A[1]
+    d = math.hypot(dx, dy)
+    if d < 1e-9 or d > 2 * l2:
+        return None
+    h = math.sqrt(max(0.0, l2 * l2 - d * d / 4))
+    mx, my = A[0] + dx / 2, A[1] + dy / 2
+    return dict(A=A, B=B, F=(mx + h * dy / d, my - h * dx / d))
+
+
+def stat5(l1, l2, fx, fy, mass, legs, sf, fxr=0.0):
+    """5 節リンクの静的トルク。内角は 2 本の下腿が足先でなす角（特異点の指標）。"""
+    r = ik5(l1, l2, fx, fy)
+    if not r:
+        return None
+    t1, t2 = r
+    s = fk5(l1, l2, t1, t2)
+    if not s or math.hypot(s["F"][0] - fx, s["F"][1] - fy) > 0.5:
+        return None                     # 別の分岐に落ちた
+    h = 1e-5
+    a, b = fk5(l1, l2, t1 + h, t2), fk5(l1, l2, t1, t2 + h)
+    if not a or not b:
+        return None
+    J = [[(a["F"][0] - s["F"][0]) / h, (b["F"][0] - s["F"][0]) / h],
+         [(a["F"][1] - s["F"][1]) / h, (b["F"][1] - s["F"][1]) / h]]
+    Fy = mass * G / legs * sf
+    Fx = Fy * fxr / 100
+    s["t1"], s["t2"] = t1, t2
+    s["tau1"] = -(J[0][0] * Fx + J[1][0] * Fy) / 1000
+    s["tau2"] = -(J[0][1] * Fx + J[1][1] * Fy) / 1000
+    s["det"] = J[0][0] * J[1][1] - J[0][1] * J[1][0]
+    v1 = (s["F"][0] - s["A"][0], s["F"][1] - s["A"][1])
+    v2 = (s["F"][0] - s["B"][0], s["F"][1] - s["B"][1])
+    s["inner"] = math.degrees(math.acos(max(-1, min(1, (v1[0] * v2[0] + v1[1] * v2[1]) / (l2 * l2)))))
+    return s

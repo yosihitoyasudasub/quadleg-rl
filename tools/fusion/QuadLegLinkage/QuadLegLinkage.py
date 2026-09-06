@@ -34,23 +34,23 @@ DEFAULTS = dict(
     link_w=14.0, link_t=4.0, gap=1.0, pin_d=3.0,
 )
 
-# サーボプリセット: (W 幅, H 長さ, D 奥行, off ホーン軸〜本体端, ホーン外径, PCD, 穴数, 穴径, 中心穴径)
+# サーボプリセット: (W 幅, H 長さ, D 奥行(ケースのみ), off ホーン軸〜本体端, ホーン外径, PCD, 穴数, 穴径, 中心穴径, ホーン突出)
 SERVOS = [
     # XM540: ROBOTIS 図面 XM540/XH540/XD540 (HINGE) 2019/03/18 より
     #   本体 33.5×58.5×44、ホーン軸は本体上端から 13.75、ホーン HN13-N101 Ø26、8-M2.5 P.C.D 22、
-    #   中央ボス Ø10（リンク側は Ø10.2 逃がし）、中心固定 WB M3x08、ケース固定 4-M2.5 (27×52)
-    ('XM540-W270 (DYNAMIXEL)', 33.5, 58.5, 44.0, 13.75, 26.0, 22.0, 8, 2.7, 10.2),
-    ('XL430-W250 (DYNAMIXEL)', 28.5, 46.5, 34.0, 19.0, 22.0, 16.0, 8, 2.1, 6.0),   # 未検証（図面要確認）
-    # X330: ROBOTIS 図面 X330 2020/05/28 より。本体 20×34×23（ホーン 3 突出で 26）、ホーン軸は上端から 9.5、
+    #   中央ボス Ø10（リンク側は Ø10.2 逃がし）、中心固定 WB M3x08、ケース固定 4-M2.5 (27×52)、ホーン突出 2.6
+    ('XM540-W270 (DYNAMIXEL)', 33.5, 58.5, 44.0, 13.75, 26.0, 22.0, 8, 2.7, 10.2, 2.6),
+    ('XL430-W250 (DYNAMIXEL)', 28.5, 46.5, 34.0, 19.0, 22.0, 16.0, 8, 2.1, 6.0, 3.0),   # 未検証（図面要確認）
+    # X330: ROBOTIS 図面 X330 2020/05/28 より。本体 20×34×23、ホーン突出 3（全長 26）、ホーン軸は上端から 9.5、
     #   ホーン Ø16、4-Ø1.6 P.C.D 12（M2 タッピング → リンク側 Ø2.2）、ケース固定穴 16×30
-    ('XL330-M288 (DYNAMIXEL)', 20.0, 34.0, 23.0, 9.5, 16.0, 12.0, 4, 2.2, 4.0),
-    # XL-320: ROBOTIS 図面 2019/05/23 より。本体 24×36×27、ホーン軸は上端から 9、ホーン Ø17.8、
+    ('XL330-M288 (DYNAMIXEL)', 20.0, 34.0, 23.0, 9.5, 16.0, 12.0, 4, 2.2, 4.0, 3.0),
+    # XL-320: ROBOTIS 図面 2019/05/23 より。本体 24×36×24、ホーン突出 3（全長 27）、ホーン軸は上端から 9、ホーン Ø17.8、
     #   4-Ø4 リベット穴 P.C.D 12（＋4-Ø1.6 タッピング穴 P.C.D 12、45° 位相）。ここではリベット穴 4 個を採用
-    ('XL-320 (DYNAMIXEL)',     24.0, 36.0, 27.0, 9.0, 17.8, 12.0, 4, 4.1, 6.0),
-    ('汎用 RC サーボ (SG90 級)', 12.2, 22.8, 29.0, 6.0, 7.0, 0.0, 0, 0.0, 3.0),
-    ('カスタム',               33.5, 58.5, 44.0, 13.75, 26.0, 22.0, 8, 2.7, 10.2),
+    ('XL-320 (DYNAMIXEL)',     24.0, 36.0, 24.0, 9.0, 17.8, 12.0, 4, 4.1, 6.0, 3.0),
+    ('汎用 RC サーボ (SG90 級)', 12.2, 22.8, 26.0, 6.0, 7.0, 0.0, 0, 0.0, 3.0, 3.0),
+    ('カスタム',               33.5, 58.5, 44.0, 13.75, 26.0, 22.0, 8, 2.7, 10.2, 2.6),
 ]
-SERVO_KEYS = ('sW', 'sH', 'sD', 'sOff', 'hornD', 'pcd', 'nHole', 'holeD', 'centerD')
+SERVO_KEYS = ('sW', 'sH', 'sD', 'sOff', 'hornD', 'pcd', 'nHole', 'holeD', 'centerD', 'hornT')
 
 CMD_ID = 'QuadLegLinkageCmd'
 PANEL_ID = 'SolidCreatePanel'          # ソリッドタブ → 作成パネル
@@ -215,14 +215,14 @@ def build_inputs(inputs, d):
     sv.update({k: d[k] for k in SERVO_KEYS if k in d})   # 前回値があれば優先
     g.addValueInput('sW', '本体幅 W（ホーン面）', 'mm', _mm(sv['sW']))
     g.addValueInput('sH', '本体長さ H', 'mm', _mm(sv['sH']))
-    g.addValueInput('sD', '本体奥行 D', 'mm', _mm(sv['sD']))
+    g.addValueInput('sD', '本体奥行 D（ケースのみ）', 'mm', _mm(sv['sD']))
     g.addValueInput('sOff', 'ホーン軸〜本体端', 'mm', _mm(sv['sOff']))
     g.addValueInput('hornD', 'ホーン外径', 'mm', _mm(sv['hornD']))
+    g.addValueInput('hornT', 'ホーン突出量', 'mm', _mm(sv['hornT']))
     g.addValueInput('pcd', 'ホーン穴 PCD', 'mm', _mm(sv['pcd']))
     g.addIntegerSpinnerCommandInput('nHole', 'ホーン穴数', 0, 16, 1, int(sv['nHole']))
     g.addValueInput('holeD', 'ホーン穴径', 'mm', _mm(sv['holeD']))
     g.addValueInput('centerD', '中心穴径（リンク側）', 'mm', _mm(sv['centerD']))
-    g.addBoolValueInput('mkServo', 'サーボ本体を生成', True, '', bool(d.get('mkServo', True)))
     g.addBoolValueInput('newDoc', '新規デザインに生成', True, '', bool(d.get('newDoc', True)))
 
     g = inputs.addGroupCommandInput('gShape', 'リンク形状').children
@@ -237,13 +237,12 @@ def build_inputs(inputs, d):
 def read_inputs(inputs):
     p = {}
     for k in ('bx', 'by', 'L1', 'L2', 'Lc', 'Lr', 'Le', 'sW', 'sH', 'sD', 'sOff',
-              'hornD', 'pcd', 'holeD', 'centerD', 'link_w', 'link_t', 'gap', 'pin_d'):
+              'hornD', 'hornT', 'pcd', 'holeD', 'centerD', 'link_w', 'link_t', 'gap', 'pin_d'):
         p[k] = inputs.itemById(k).value * 10.0          # cm → mm
     for k in ('sA1', 'sA2', 'delta', 't1', 't2'):
         p[k] = math.degrees(inputs.itemById(k).value)   # rad → deg
     p['cfg'] = 1 if inputs.itemById('cfg').selectedItem.index == 0 else -1
     p['nHole'] = inputs.itemById('nHole').value
-    p['mkServo'] = inputs.itemById('mkServo').value
     p['newDoc'] = inputs.itemById('newDoc').value
     p['servoIdx'] = inputs.itemById('servo').selectedItem.index
     p['servoName'] = inputs.itemById('servo').selectedItem.name
@@ -365,38 +364,42 @@ def build_model(p):
     root = design.rootComponent
     mm = 0.1
     T, s = p['link_t'] * mm, (p['link_t'] + p['gap']) * mm
+    hT, D = p['hornT'] * mm, p['sD'] * mm
     coax = math.hypot(p['bx'], p['by']) < 1e-6
-
-    # 層配置 (Z 下面):
-    #   通常: 胴体 -2s / クランク -s / 大腿 0 / 下腿 +s / ロッド +2s、サーボ2台とも胴体の裏 (-Z) 側
-    #   同軸: 胴体 -2s / 大腿 0 / 下腿 +s / ロッド +2s / クランク +3s、サーボ②は表 (+Z) 側に背中合わせ
-    z_crank = 3 * s if coax else -s
     horn = dict(hornD=p['hornD'], pcd=p['pcd'], n=p['nHole'], holeD=p['holeD'], centerD=p['centerD'])
     ctx = dict(p=p, mm=mm, T=T, horn=horn)
 
-    body_occ = make_body(root, ctx, pts, z=-2 * s)
-    thigh_occ = make_link(root, ctx, 'Thigh L1', [pts['O'], pts['K']], z=0.0, horn_at=[pts['O']])
-    shank_occ = make_link(root, ctx, 'Shank L2+Le', [pts['D'], pts['K'], pts['F']], z=s)
-    rod_occ = make_link(root, ctx, 'Rod Lr', [pts['C'], pts['D']], z=2 * s)
+    # 層配置（Z、サーボ①のケース前面を 0 とする。ホーンは実突出量 hT だけ出て、その面にリンクを直接固定）
+    #   サーボ① 本体 -D〜0 / ホーン① 0〜hT / 大腿 lay(0) / 下腿 lay(1) / ロッド lay(2)
+    #   同軸  : クランク lay(3)、その上にホーン②、サーボ② 本体（背中合わせで脚を挟む）
+    #   非同軸: クランク lay(0)（サーボ②も -D〜0 側、ホーン② 0〜hT）
+    #   胴体  : サーボのケースを保持するブラケット（両サーボの上端をまたぐ橋）。ホーン面には何も挟まない
+    def lay(i):
+        return hT + i * s
+
+    z_crank = lay(3) if coax else lay(0)
+    thigh_occ = make_link(root, ctx, 'Thigh L1', [pts['O'], pts['K']], z=lay(0), horn_at=[pts['O']])
+    shank_occ = make_link(root, ctx, 'Shank L2+Le', [pts['D'], pts['K'], pts['F']], z=lay(1))
+    rod_occ = make_link(root, ctx, 'Rod Lr', [pts['C'], pts['D']], z=lay(2))
     crank_occ = make_link(root, ctx, 'Crank Lc', [pts['B'], pts['C']], z=z_crank, horn_at=[pts['B']])
-    body_occ.isGrounded = True
 
-    if p['mkServo']:
-        D = p['sD'] * mm
-        # サーボ①: 胴体裏、ホーンは大腿の下面 (z=0) まで
-        sv1 = make_servo(root, ctx, 'Servo 1 ' + p['servoName'], pts['O'], p['sA1'],
-                         z0=-2 * s - D, horn_z0=-2 * s, horn_z1=0.0)
-        if coax:
-            sv2 = make_servo(root, ctx, 'Servo 2 ' + p['servoName'], pts['B'], p['sA2'],
-                             z0=4 * s, horn_z0=3 * s, horn_z1=4 * s)
-        else:
-            sv2 = make_servo(root, ctx, 'Servo 2 ' + p['servoName'], pts['B'], p['sA2'],
-                             z0=-2 * s - D, horn_z0=-2 * s, horn_z1=-s)
-        sv1.isGrounded = True
-        sv2.isGrounded = True
+    sv1 = make_servo(root, ctx, 'Servo 1 ' + p['servoName'], pts['O'], p['sA1'],
+                     z0=-D, horn_z0=0.0, horn_z1=hT)
+    if coax:
+        z_h2 = lay(3) + T                       # クランク上面
+        sv2 = make_servo(root, ctx, 'Servo 2 ' + p['servoName'], pts['B'], p['sA2'],
+                         z0=z_h2 + hT, horn_z0=z_h2, horn_z1=z_h2 + hT)
+        z_body = (-D, z_h2 + hT + D)
+    else:
+        sv2 = make_servo(root, ctx, 'Servo 2 ' + p['servoName'], pts['B'], p['sA2'],
+                         z0=-D, horn_z0=0.0, horn_z1=hT)
+        z_body = (-D, 0.0)
+    body_occ = make_body(root, ctx, pts, z_body)
+    for occ in (body_occ, sv1, sv2):
+        occ.isGrounded = True
 
-    revolute(root, body_occ, thigh_occ, pts['O'], mm, 'J_O hip servo 1')
-    revolute(root, body_occ, crank_occ, pts['B'], mm, 'J_B hip servo 2')
+    revolute(root, sv1, thigh_occ, pts['O'], mm, 'J_O hip servo 1')
+    revolute(root, sv2, crank_occ, pts['B'], mm, 'J_B hip servo 2')
     revolute(root, thigh_occ, shank_occ, pts['K'], mm, 'J_K knee')
     revolute(root, crank_occ, rod_occ, pts['C'], mm, 'J_C')
     revolute(root, rod_occ, shank_occ, pts['D'], mm, 'J_D')
@@ -412,7 +415,8 @@ def build_model(p):
             up.add('qll_' + k, adsk.core.ValueInput.createByString(expr), unit, 'Quad Leg Linkage Lab')
 
     _app.activeViewport.fit()
-    _ui.messageBox('生成完了\n足先 = (%.1f, %.1f) mm\nJ_O / J_B をドラッグして動作確認できます。' % pts['F'])
+    _ui.messageBox('生成完了\n足先 = (%.1f, %.1f) mm\nホーン突出 %.1f mm、リンク層ピッチ %.1f mm\n'
+                   'J_O / J_B をドラッグして動作確認できます。' % (pts['F'][0], pts['F'][1], p['hornT'], p['link_t'] + p['gap']))
 
 
 # ---------- スケッチ部品 ----------
@@ -501,24 +505,23 @@ def make_link(root, ctx, name, chain, z, horn_at=()):
     return occ
 
 
-def make_body(root, ctx, pts, z):
-    """胴体板: O と B を含む矩形にホーン通し穴。"""
+def make_body(root, ctx, pts, z_range):
+    """胴体ブラケット: 2 台のサーボ本体の上端をまたぐ橋（XY で帯、Z は両サーボの背面間）。
+    ホーン面とリンクの間には何も挟まない。実機ではサーボのケース穴で保持する部分の置き換え。"""
     import adsk.fusion
-    p, mm, T, horn = ctx['p'], ctx['mm'], ctx['T'], ctx['horn']
-    occ = _new_occ(root, 'Body (hip)')
+    p, mm, T = ctx['p'], ctx['mm'], ctx['T']
+    occ = _new_occ(root, 'Body (hip bracket)')
     comp = occ.component
-    O, B = pts['O'], pts['B']
-    pad = max(20.0, horn['hornD'])
-    x0, x1 = min(O[0], B[0]) - pad, max(O[0], B[0]) + pad
-    y0, y1 = min(O[1], B[1]) - pad * 0.7, max(O[1], B[1]) + pad
-    sk = comp.sketches.add(comp.xYConstructionPlane); sk.name = 'Body outline'
+    rects = servo_rect(pts['O'], p['sA1'], p['sW'], p['sH'], p['sOff']) + \
+        servo_rect(pts['B'], p['sA2'], p['sW'], p['sH'], p['sOff'])
+    xs, ys = [q[0] for q in rects], [q[1] for q in rects]
+    x0, x1 = min(xs) - 2.0, max(xs) + 2.0
+    y0 = max(ys) + 0.5                       # サーボ上端の少し上
+    y1 = y0 + p['link_t']
+    sk = comp.sketches.add(comp.xYConstructionPlane); sk.name = 'Body bracket'
     _rect(sk, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], mm)
-    _extrude_all(comp, sk, z, T, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
-    sk2 = comp.sketches.add(comp.xYConstructionPlane); sk2.name = 'Body holes'
-    _circle(sk2, O, horn['hornD'] + 1.0, mm)
-    if math.hypot(B[0] - O[0], B[1] - O[1]) > 1e-6:
-        _circle(sk2, B, horn['hornD'] + 1.0, mm)
-    _extrude_all(comp, sk2, z, T, adsk.fusion.FeatureOperations.CutFeatureOperation)
+    z_lo, z_hi = min(z_range), max(z_range)
+    _extrude_all(comp, sk, z_lo, z_hi - z_lo, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
     return occ
 
 

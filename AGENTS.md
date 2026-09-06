@@ -3,15 +3,17 @@
 まず `docs/HANDOFF.md` を読むこと。目的・決定済み設計値・未検証箇所・TODO はそこにある。
 
 ## プロジェクト概要
-四脚ロボット（XL-320 × 12、**4 脚 × 3 自由度**＝股外転・股ピッチ・膝）の歩行を MuJoCo Playground（MJX / Brax PPO）で学習する。
-膝は四節リンク駆動。2026-09-06 にサーボ数が判明し、2 自由度案から 3 自由度（Go1 と同じ構成）に変更した。
+四脚ロボット（XL-320 × 12、**4 脚 × 3 自由度**＝股外転 ＋ 股に同軸 2 サーボの **5 節リンク**）の歩行を
+MuJoCo Playground（MJX / Brax PPO）で学習する。
+2026-09-06 に 2 自由度案 → 3 自由度、四節リンク → 5 節リンクへ変更（経緯と根拠は HANDOFF §3）。
 学習は Google Colab の GPU で実行。ローカル（Windows）は編集と軽い検証のみ。
 
 ## 構成
 - `quadleg_rl/` — 学習ロジック。ノートブックにロジックを書かない
 - `notebooks/` — Colab 用の薄いラッパー（clone → install → train → 動画）
 - `tools/fusion/QuadLegLinkage/` — Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
-- `tools/webapp/` — リンク機構トルク計算 Web アプリ（単一 HTML）
+- `tools/webapp/` — 脚機構トルク計算 Web アプリ（`quad-leg-5bar.html` が現行、`quad-leg-linkage.html` は旧四節版）
+- `tools/leg_torque.py` — 設計値検証用の静的トルク計算
 - `docs/` — 引き継ぎ・設計メモ
 
 ## 約束事

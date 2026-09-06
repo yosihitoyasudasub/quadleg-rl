@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quad Leg 5-Bar Lab</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#dfe3e8;--ink:#111418;--ink2:#5b6470;--ink3:#8b94a0;
+--steel:#4a6fa5;--link:#2f9e8f;--spring:#c9762b;--accent:#d94f4f;--grid:#eef1f4;--grid2:#dde3ea;--surf:#f0f2f5;
+--good:#2f8f4e;--warn:#c98a12;--crit:#c0392b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--panel:#1b1f26;--line:#2b313b;
+--ink:#e8ecf1;--ink2:#a7b0bd;--ink3:#727d8c;--steel:#7aa7e0;--link:#4fd0bd;--spring:#e8a05a;--accent:#ff6b6b;
+--grid:#1f242c;--grid2:#2b313b;--surf:#232832;--good:#4cc27a;--warn:#e0b14a;--crit:#ff7b6b}}
+:root[data-theme="dark"]{--bg:#14171c;--panel:#1b1f26;--line:#2b313b;--ink:#e8ecf1;--ink2:#a7b0bd;--ink3:#727d8c;
+--steel:#7aa7e0;--link:#4fd0bd;--spring:#e8a05a;--accent:#ff6b6b;--grid:#1f242c;--grid2:#2b313b;--surf:#232832;
+--good:#4cc27a;--warn:#e0b14a;--crit:#ff7b6b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,"Segoe UI",sans-serif}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header h1{margin:0;font-size:16px;font-weight:650}
+header .sub{color:var(--ink2);font-size:12px}
+header .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:7px;padding:6px 11px;font-size:12px;cursor:pointer}
+.btn:hover{border-color:var(--ink3)}
+main{display:grid;grid-template-columns:290px minmax(0,1fr) 290px;gap:14px;padding:14px 20px 24px;align-items:start}
+@media (max-width:1100px){main{grid-template-columns:270px minmax(0,1fr)} .results{grid-column:1/-1}}
+@media (max-width:760px){main{grid-template-columns:1fr} .results{grid-column:auto}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.controls{padding:6px 14px 12px}
+fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:10px 0}
+fieldset:last-child{border-bottom:0}
+legend{font-size:12px;font-weight:650;color:var(--ink2);padding:0}
+.row{display:grid;grid-template-columns:1fr 74px;gap:6px 8px;align-items:center;margin:6px 0}
+.row label{font-size:12.5px;display:flex;justify-content:space-between;gap:6px}
+.row label b{font-weight:500}
+.row label span.sym{color:var(--ink3);font-family:ui-monospace,monospace;font-size:11px}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--steel)}
+.row input[type=number],.row select{border:1px solid var(--line);background:var(--surf);color:var(--ink);
+border-radius:6px;padding:3px 6px;font:12px ui-monospace,monospace;width:100%}
+.hint{color:var(--ink3);font-size:11.5px;margin:4px 0 0}
+.stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.canvasWrap{position:relative;padding:0;overflow:hidden}
+canvas{display:block;width:100%;touch-action:none}
+#mech{height:460px;cursor:crosshair}
+#front{height:250px}
+#chart{height:190px}
+.legendBar{display:flex;flex-wrap:wrap;gap:10px 16px;padding:8px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
+.legendBar i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.chartHead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px 0}
+.chartHead h2{margin:0;font-size:13px;font-weight:600}
+.chartHead span{font-size:11.5px;color:var(--ink3)}
+.results{padding:12px 14px}
+.status{margin-bottom:10px}
+.pill{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--surf);border:1px solid var(--line)}
+.pill::before{content:"● ";color:var(--good)}
+.pill.warn::before{color:var(--warn)} .pill.crit::before{color:var(--crit)} .pill.na::before{color:var(--ink3)}
+.big>div{padding:8px 0;border-bottom:1px solid var(--line)}
+.big .k{font-size:11.5px;color:var(--ink2)}
+.big .v{font-size:19px;font-weight:600}
+.big .u{font-size:11px;color:var(--ink3)}
+.bar{height:5px;background:var(--surf);border-radius:3px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);transition:width .12s}
+.bar i.warn{background:var(--warn)} .bar i.crit{background:var(--crit)}
+dl{margin:0;font-size:12.5px}
+dl div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed var(--line)}
+dt{color:var(--ink2)} dd{margin:0;font-family:ui-monospace,monospace}
+dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
+.sectionTitle{font-size:11.5px;font-weight:650;color:var(--ink2);margin:12px 0 4px}
+.note{color:var(--ink3);font-size:11.5px;margin:10px 0 0}
+.note code{background:var(--surf);padding:1px 4px;border-radius:4px}
+</style></head><body>
+
+<header>
+  <h1>Quad Leg 5-Bar Lab</h1>
+  <span class="sub">四脚ロボット 5節リンク脚 ─ 股に2サーボ同軸、足先で合流。静的トルク計算</span>
+  <span class="sp"></span>
+  <button class="btn" id="reset" type="button">初期値</button>
+  <button class="btn" id="copyCfg" type="button">設定と結果をコピー</button>
+  <button class="btn" id="pasteCfg" type="button">貼り付けて読込</button>
+</header>
+
+<main>
+  <section class="panel controls">
+    <fieldset>
+      <legend>リンク寸法</legend>
+      <p class="hint">股関節 O に2本のクランク（長さ l1）が同軸で付き、それぞれの先から下腿（長さ l2）が伸びて足先で合流する。足先の到達範囲は |l1−l2| 〜 l1+l2。</p>
+      <div class="row" data-k="l1"><label><b>クランク</b><span class="sym">l1 mm</span></label><input type="number" step="1"><input class="l" type="range" min="15" max="60" step="1"></div>
+      <div class="row" data-k="l2"><label><b>下腿</b><span class="sym">l2 mm</span></label><input type="number" step="1"><input class="l" type="range" min="30" max="100" step="1"></div>
+    </fieldset>
+    <fieldset>
+      <legend>足先位置（図をドラッグでも可）</legend>
+      <div class="row" data-k="fx"><label><b>前後</b><span class="sym">X mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="fy"><label><b>高さ</b><span class="sym">Y mm</span></label><input type="number" step="1"><input class="l" type="range" min="-110" max="-20" step="1"></div>
+    </fieldset>
+    <fieldset>
+      <legend>荷重</legend>
+      <div class="row" data-k="mass"><label><b>機体総質量</b><span class="sym">m kg</span></label><input type="number" step="0.1"><input class="l" type="range" min="0.2" max="4" step="0.1"></div>
+      <div class="row" data-k="legs"><label><b>接地脚数</b><span class="sym">n</span></label><select><option value="1">1</option><option value="2">2（トロット）</option><option value="3">3</option><option value="4">4（静止）</option></select></div>
+      <div class="row" data-k="sf"><label><b>動的係数</b><span class="sym">×</span></label><input type="number" step="0.1"><input class="l" type="range" min="1" max="3" step="0.1"></div>
+      <div class="row" data-k="fxr"><label><b>水平力（垂直力比）</b><span class="sym">Fx/Fy %</span></label><input type="number" step="5"><input class="l" type="range" min="-100" max="100" step="5"></div>
+    </fieldset>
+    <fieldset>
+      <legend>サーボ</legend>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">kg·cm</span></label><input type="number" step="0.1"><input class="l" type="range" min="1" max="30" step="0.1"></div>
+      <div class="row" data-k="sW"><label><b>本体幅</b><span class="sym">W mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="60" step="0.5"></div>
+      <div class="row" data-k="sH"><label><b>本体長さ</b><span class="sym">H mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="80" step="0.5"></div>
+      <div class="row" data-k="sOff"><label><b>ホーン軸〜本体端</b><span class="sym">off mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="0" max="30" step="0.5"></div>
+      <div class="row" data-k="sA"><label><b>本体の向き</b><span class="sym">°</span></label><input type="number" step="5"><input class="l" type="range" min="-180" max="180" step="5"></div>
+    </fieldset>
+    <fieldset>
+      <legend>外転軸（ロール）と胴体</legend>
+      <p class="hint">ロール軸は前後方向。<b>oy = 0</b> が脚平面を貫通する配置で、立ち姿勢の外転トルクがゼロになる。</p>
+      <div class="row" data-k="oy"><label><b>ロール軸→股軸 横</b><span class="sym">oy mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="oz"><label><b>ロール軸→股軸 下</b><span class="sym">oz mm</span></label><input type="number" step="1"><input class="l" type="range" min="-40" max="80" step="1"></div>
+      <div class="row" data-k="t3"><label><b>外転角</b><span class="sym">φ °</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="bodyW"><label><b>胴体幅（ロール軸間）</b><span class="sym">mm</span></label><input type="number" step="2"><input class="l" type="range" min="40" max="200" step="2"></div>
+      <div class="row" data-k="bodyL"><label><b>胴体長（前後脚間）</b><span class="sym">mm</span></label><input type="number" step="2"><input class="l" type="range" min="60" max="300" step="2"></div>
+    </fieldset>
+  </section>
+
+  <section class="stage">
+    <div class="panel canvasWrap">
+      <canvas id="mech"></canvas>
+      <div class="legendBar">
+        <span><i style="background:var(--link)"></i>クランク l1（サーボ直結）</span>
+        <span><i style="background:var(--steel)"></i>下腿 l2</span>
+        <span><i style="background:var(--accent)"></i>接地反力・必要トルク</span>
+        <span><i style="background:var(--grid2)"></i>足先の到達範囲</span>
+      </div>
+    </div>
+    <div class="panel canvasWrap">
+      <canvas id="front"></canvas>
+      <div class="legendBar">
+        <span><i style="background:var(--steel)"></i>正面図：胴体とロール軸</span>
+        <span><i style="background:var(--accent)"></i>ロール軸→足先の水平距離 d</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chartHead"><h2>トルク掃引 ─ 足先を現在の高さで前後に動かした場合</h2><span id="chartSub" class="mono"></span></div>
+      <canvas id="chart"></canvas>
+    </div>
+  </section>
+
+  <aside class="panel results">
+    <div class="status"><span class="pill" id="pill">計算中</span></div>
+    <div class="big">
+      <div><div class="k">サーボ① 後側クランク</div><div class="v mono" id="tau1">–</div><div class="u mono" id="tau1b">–</div><div class="bar"><i id="bar1"></i></div></div>
+      <div><div class="k">サーボ② 前側クランク</div><div class="v mono" id="tau2">–</div><div class="u mono" id="tau2b">–</div><div class="bar"><i id="bar2"></i></div></div>
+      <div><div class="k">サーボ③ 外転</div><div class="v mono" id="tau3">–</div><div class="u mono" id="tau3b">–</div><div class="bar"><i id="bar3"></i></div></div>
+    </div>
+    <div class="sectionTitle">機構</div>
+    <dl id="mechList"></dl>
+    <div class="sectionTitle">荷重条件</div>
+    <dl id="loadList"></dl>
+    <div class="sectionTitle">外転軸（ロール）</div>
+    <dl id="rollList"></dl>
+    <p class="note">静的釣合い（仮想仕事）で計算：<code>τ = −Jᵀ·F</code>、ヤコビアンは数値微分。リンク自重・摩擦・慣性は含まない。内角は2本の下腿が足先でなす角で、0° に近づくと特異点（脚が伸びきる／折り畳まる）で、その姿勢では足先を支えられない。</p>
+  </aside>
+</main>
+
+<script>
+(()=>{
+const D2R=Math.PI/180, R2D=180/Math.PI, G=9.80665, KGCM=0.0980665;
+// サーボプリセット: stall[kg·cm], 本体 W×H, ホーン軸〜本体端
+const SERVOS=[
+  {name:"XL-320 7.4V",  stall:4.0,  sW:24,   sH:36,   sOff:9},
+  {name:"XL330-M288 5V",stall:5.3,  sW:20,   sH:34,   sOff:9.5},
+  {name:"XL430-W250",   stall:14.8, sW:28.5, sH:46.5, sOff:12},
+];
+const DEF={l1:30,l2:65,fx:0,fy:-67,mass:1.0,legs:2,sf:1.5,fxr:0,
+           servo:0,stall:4.0,sW:24,sH:36,sOff:9,sA:90,
+           oy:0,oz:0,t3:0,bodyW:110,bodyL:140};
+let P=Object.assign({},DEF);
+function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.sH=s.sH;P.sOff=s.sOff;}}
+
+// ---------- 運動学 ----------
+// 足先 F から2本のクランク角を解析的に求める（円 O-l1 と円 F-l2 の交点）
+function ik(p,fx,fy){
+  const d=Math.hypot(fx,fy);
+  if(d>p.l1+p.l2||d<Math.abs(p.l1-p.l2)||d<1e-9)return null;
+  const a=(p.l1*p.l1-p.l2*p.l2+d*d)/(2*d), h2=p.l1*p.l1-a*a;
+  if(h2<0)return null;
+  const h=Math.sqrt(h2), mx=a*fx/d, my=a*fy/d;
+  return {t1:Math.atan2(my-h*fx/d, mx+h*fy/d),      // 後側
+          t2:Math.atan2(my+h*fx/d, mx-h*fy/d)};     // 前側
+}
+// クランク角から足先を求める（下側の交点を選ぶ）
+function fk(p,t1,t2){
+  const A={x:p.l1*Math.cos(t1),y:p.l1*Math.sin(t1)}, B={x:p.l1*Math.cos(t2),y:p.l1*Math.sin(t2)};
+  const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy);
+  if(d<1e-9||d>2*p.l2)return null;
+  const h=Math.sqrt(Math.max(0,p.l2*p.l2-d*d/4));
+  const mx=A.x+dx/2, my=A.y+dy/2;
+  return {A,B,F:{x:mx+h*dy/d, y:my-h*dx/d}};
+}
+function loads(p){const Fy=p.mass*G/p.legs*p.sf;return{Fx:Fy*p.fxr/100,Fy};}
+function statics(p,fx,fy){
+  const r=ik(p,fx,fy); if(!r)return{ok:false};
+  const s=fk(p,r.t1,r.t2); if(!s)return{ok:false};
+  if(Math.hypot(s.F.x-fx,s.F.y-fy)>0.5)return{ok:false};   // 別の分岐に落ちた
+  const h=1e-5;
+  const a=fk(p,r.t1+h,r.t2), b=fk(p,r.t1,r.t2+h);
+  if(!a||!b)return{ok:false};
+  const J=[[(a.F.x-s.F.x)/h,(b.F.x-s.F.x)/h],[(a.F.y-s.F.y)/h,(b.F.y-s.F.y)/h]];
+  const {Fx,Fy}=loads(p);
+  s.ok=true; s.t1=r.t1; s.t2=r.t2; s.J=J; s.Fx=Fx; s.Fy=Fy;
+  s.tau1=-(J[0][0]*Fx+J[1][0]*Fy)/1000;      // mm → m
+  s.tau2=-(J[0][1]*Fx+J[1][1]*Fy)/1000;
+  s.det=J[0][0]*J[1][1]-J[0][1]*J[1][0];
+  const v1x=s.F.x-s.A.x, v1y=s.F.y-s.A.y, v2x=s.F.x-s.B.x, v2y=s.F.y-s.B.y;
+  s.inner=Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/(p.l2*p.l2))))*R2D;
+  s.reach=Math.hypot(fx,fy);
+  return s;
+}
+// 外転軸: ロール軸から足先までの水平距離とトルク
+function rollGeom(p,s){
+  const phi=p.t3*D2R, c=Math.cos(phi), sn=Math.sin(phi);
+  const drop=s.ok?-s.F.y:0;
+  const O={y:p.oy*c+p.oz*sn, z:p.oy*sn-p.oz*c};
+  const F={y:p.oy*c+(p.oz+drop)*sn, z:p.oy*sn-(p.oz+drop)*c};
+  const {Fy}=loads(p);
+  return {phi,drop,O,F,tau3:Fy*F.y/1000,
+          phi0:Math.atan2(-p.oy,p.oz+drop)*R2D, stance:p.bodyW+2*F.y};
+}
+
+// ---------- 入力 ----------
+const rows=[...document.querySelectorAll('.row[data-k]')];
+function save(){try{localStorage.setItem('qll5',JSON.stringify(P));}catch(e){}}
+try{const t=localStorage.getItem('qll5');if(t)Object.assign(P,JSON.parse(t));}catch(e){}
+function bind(){
+  rows.forEach(r=>{
+    const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
+    const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
+      if(k==='servo')applyServo();else if(['stall','sW','sH','sOff'].includes(k))P.servo=9;
+      sync();update();};
+    if(num)num.addEventListener('input',e=>set(e.target.value));
+    if(rng)rng.addEventListener('input',e=>set(e.target.value));
+    if(sel)sel.addEventListener('change',e=>set(e.target.value));
+  });
+}
+function sync(){
+  rows.forEach(r=>{const k=r.dataset.k,v=P[k];
+    r.querySelectorAll('input').forEach(i=>{if(document.activeElement!==i||i.type==='range')i.value=v;});
+    const sel=r.querySelector('select');if(sel)sel.value=String(v);});
+}
+document.getElementById('reset').onclick=()=>{P=Object.assign({},DEF);sync();update();};
+function exportText(){
+  const s=statics(P,P.fx,P.fy), g=rollGeom(P,s), st=P.stall*KGCM;
+  const L=['# Quad Leg 5-Bar Lab 設定','params: '+JSON.stringify(P)];
+  if(s.ok){
+    L.push('crank: '+(s.t1*R2D).toFixed(1)+'° / '+(s.t2*R2D).toFixed(1)+'°  inner: '+s.inner.toFixed(1)+'°  reach: '+s.reach.toFixed(1)+' mm');
+    L.push('tau1: '+Math.abs(s.tau1).toFixed(3)+' Nm ('+(Math.abs(s.tau1)/st*100).toFixed(0)+'% stall)  tau2: '+Math.abs(s.tau2).toFixed(3)+' Nm ('+(Math.abs(s.tau2)/st*100).toFixed(0)+'%)');
+    L.push('roll: d '+g.F.y.toFixed(1)+' mm  tau3 '+Math.abs(g.tau3).toFixed(3)+' Nm  stance '+g.stance.toFixed(0)+' mm');
+  }else L.push('linkage: NOT reachable');
+  return L.join('\n');
+}
+document.getElementById('copyCfg').onclick=async()=>{const t=exportText(),b=document.getElementById('copyCfg');
+  try{await navigator.clipboard.writeText(t);b.textContent='コピーしました';}catch(e){window.prompt('コピーしてください',t);}
+  setTimeout(()=>b.textContent='設定と結果をコピー',1500);};
+document.getElementById('pasteCfg').onclick=()=>{const t=window.prompt('params: {...} を含むテキストを貼り付け');if(!t)return;
+  const m=t.match(/\{[^}]*\}/);if(!m)return;
+  try{const o=JSON.parse(m[0]);for(const k in DEF)if(typeof o[k]==='number')P[k]=o[k];sync();update();}catch(e){alert('読み込めませんでした');}};
+
+// ---------- 描画 ----------
+const mech=document.getElementById('mech'),mctx=mech.getContext('2d');
+const front=document.getElementById('front'),fctx=front.getContext('2d');
+const chart=document.getElementById('chart'),cctx=chart.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function sizeCanvas(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;
+  if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);}
+  return{w:r.width,h:r.height,d};}
+let view={s:1,cx:0,cy:0};
+const W2S=p=>({x:view.cx+p.x*view.s, y:view.cy-p.y*view.s});
+const S2W=(x,y)=>({x:(x-view.cx)/view.s, y:(view.cy-y)/view.s});
+
+function drawMech(s){
+  const{w,h,d}=sizeCanvas(mech),ctx=mctx;
+  ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  const ink=css('--ink'),ink2=css('--ink2'),ink3=css('--ink3'),steel=css('--steel'),link=css('--link'),
+        accent=css('--accent'),grid=css('--grid'),grid2=css('--grid2');
+  const R=P.l1+P.l2+15, top=Math.max(P.l1+P.sH,40)+15;
+  view.s=Math.min((w-40)/(2*R),(h-40)/(R+top)); view.cx=w/2; view.cy=25+top*view.s;
+  // グリッド
+  ctx.strokeStyle=grid;ctx.lineWidth=1;
+  for(let x=-200;x<=200;x+=10){const a=W2S({x,y:-200}),b=W2S({x,y:200});
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  for(let y=-200;y<=200;y+=10){const a=W2S({x:-200,y}),b=W2S({x:200,y});
+    ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  // 到達範囲（ドーナツ）
+  const O=W2S({x:0,y:0});
+  ctx.strokeStyle=grid2;ctx.setLineDash([5,5]);ctx.lineWidth=1.5;
+  for(const r of [Math.abs(P.l1-P.l2), P.l1+P.l2]){
+    ctx.beginPath();ctx.arc(O.x,O.y,r*view.s,0,7);ctx.stroke();}
+  ctx.setLineDash([]);
+  if(!s.ok){
+    ctx.fillStyle=ink3;ctx.font='13px system-ui';ctx.textAlign='center';
+    ctx.fillText('足先が到達範囲の外です（'+Math.abs(P.l1-P.l2).toFixed(0)+'〜'+(P.l1+P.l2).toFixed(0)+' mm）',w/2,h/2);
+    return;}
+  const A=W2S(s.A), B=W2S(s.B), F=W2S(s.F);
+  // サーボ本体（2個が同軸・背中合わせ。正面からは重なるので1つ描く）
+  const a=P.sA*D2R, ca=Math.cos(a), sa=Math.sin(a);
+  ctx.save();ctx.translate(O.x,O.y);ctx.rotate(-a);
+  ctx.strokeStyle=ink3;ctx.setLineDash([3,3]);ctx.lineWidth=1;
+  ctx.strokeRect(-P.sW/2*view.s, -P.sOff*view.s, P.sW*view.s, P.sH*view.s);
+  ctx.setLineDash([]);ctx.restore();
+  // 下腿
+  ctx.strokeStyle=steel;ctx.lineWidth=6;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(F.x,F.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(B.x,B.y);ctx.lineTo(F.x,F.y);ctx.stroke();
+  // クランク
+  ctx.strokeStyle=link;ctx.lineWidth=7;
+  ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(A.x,A.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  // 関節
+  for(const[p,r,c] of [[O,6,accent],[A,4.5,ink2],[B,4.5,ink2],[F,5,ink]]){
+    ctx.fillStyle=c;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();}
+  // 地面と反力
+  ctx.strokeStyle=grid2;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(10,F.y);ctx.lineTo(w-10,F.y);ctx.stroke();
+  ctx.strokeStyle=accent;ctx.lineWidth=2;
+  const alen=Math.min(60,Math.max(24,s.Fy*3));
+  ctx.beginPath();ctx.moveTo(F.x,F.y+alen);ctx.lineTo(F.x,F.y+6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(F.x-5,F.y+13);ctx.lineTo(F.x,F.y+5);ctx.lineTo(F.x+5,F.y+13);ctx.stroke();
+  // ラベル
+  ctx.fillStyle=ink2;ctx.font='11.5px ui-monospace,monospace';ctx.textAlign='left';
+  ctx.fillText('O 股関節（サーボ①②同軸）',O.x+10,O.y-8);
+  ctx.fillText('θ1 '+(s.t1*R2D).toFixed(1)+'°',A.x+8,A.y-6);
+  ctx.fillText('θ2 '+(s.t2*R2D).toFixed(1)+'°',B.x+8,B.y-6);
+  ctx.fillStyle=accent;
+  ctx.fillText(s.Fy.toFixed(1)+' N',F.x+10,F.y+alen-4);
+  ctx.fillStyle=ink;
+  ctx.fillText('足先 ('+s.F.x.toFixed(1)+', '+s.F.y.toFixed(1)+')',F.x+10,F.y+16);
+}
+
+function drawFront(s,g){
+  const{w,h,d}=sizeCanvas(front),ctx=fctx;
+  ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  const ink=css('--ink'),ink2=css('--ink2'),ink3=css('--ink3'),steel=css('--steel'),
+        link=css('--link'),accent=css('--accent'),grid2=css('--grid2');
+  if(!s.ok){ctx.fillStyle=ink3;ctx.font='13px system-ui';ctx.textAlign='center';
+    ctx.fillText('—',w/2,h/2);return;}
+  const halfW=P.bodyW/2;
+  const spanY=Math.max(halfW+Math.abs(g.F.y),halfW+40)+20;
+  const spanZ=Math.max(g.drop+Math.abs(P.oz),40)+40;
+  const sc=Math.min((w-50)/(2*spanY),(h-50)/spanZ), cx=w/2, cy=26;
+  const X=y=>cx+y*sc, Z=z=>cy-z*sc;
+  const zg=Math.min(g.F.z,-1);
+  ctx.strokeStyle=grid2;ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(10,Z(zg));ctx.lineTo(w-10,Z(zg));ctx.stroke();
+  ctx.fillStyle=ink3;ctx.font='11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillText('地面',12,Z(zg)-4);
+  const bh=26;
+  ctx.fillStyle=steel;ctx.globalAlpha=.25;ctx.fillRect(X(-halfW),Z(bh/2),halfW*2*sc,bh*sc);ctx.globalAlpha=1;
+  ctx.strokeStyle=steel;ctx.lineWidth=2;ctx.strokeRect(X(-halfW),Z(bh/2),halfW*2*sc,bh*sc);
+  for(const side of [1,-1]){
+    const R={y:side*halfW,z:0}, Op={y:side*(halfW+g.O.y),z:g.O.z}, Fp={y:side*(halfW+g.F.y),z:g.F.z};
+    ctx.strokeStyle=grid2;ctx.setLineDash([4,4]);ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(X(R.y),Z(bh/2));ctx.lineTo(X(R.y),Z(zg));ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle=link;ctx.lineWidth=6;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(X(R.y),Z(R.z));ctx.lineTo(X(Op.y),Z(Op.z));ctx.stroke();
+    ctx.strokeStyle=steel;ctx.lineWidth=5;
+    ctx.beginPath();ctx.moveTo(X(Op.y),Z(Op.z));ctx.lineTo(X(Fp.y),Z(Fp.z));ctx.stroke();
+    for(const[pt,r,c] of [[R,5,accent],[Op,4,ink2],[Fp,4,ink]]){
+      ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(pt.y),Z(pt.z),r,0,7);ctx.fill();}
+    if(side>0){
+      ctx.strokeStyle=accent;ctx.lineWidth=1.5;
+      const zd=Z(Fp.z)+16;
+      ctx.beginPath();ctx.moveTo(X(R.y),zd);ctx.lineTo(X(Fp.y),zd);ctx.stroke();
+      ctx.fillStyle=accent;ctx.textAlign='center';ctx.font='12px ui-monospace,monospace';
+      ctx.fillText('d = '+g.F.y.toFixed(1)+' mm',(X(R.y)+X(Fp.y))/2,zd+16);}
+  }
+  ctx.fillStyle=ink3;ctx.textAlign='center';ctx.font='11px ui-monospace,monospace';
+  ctx.fillText('スタンス幅 '+g.stance.toFixed(0)+' mm / 外転角 '+P.t3.toFixed(0)+'°',w/2,h-8);
+}
+
+function drawChart(){
+  const{w,h,d}=sizeCanvas(chart),ctx=cctx;
+  ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  const ink2=css('--ink2'),ink3=css('--ink3'),accent=css('--accent'),steel=css('--steel'),
+        link=css('--link'),grid2=css('--grid2'),crit=css('--crit');
+  const N=81, span=45, pts=[];
+  for(let i=0;i<N;i++){
+    const x=-span+2*span*i/(N-1);
+    const s=statics(P,x,P.fy);
+    pts.push({x, a:s.ok?Math.abs(s.tau1):null, b:s.ok?Math.abs(s.tau2):null});
+  }
+  const stall=P.stall*KGCM;
+  let ymax=stall*1.15;
+  pts.forEach(p=>{if(p.a)ymax=Math.max(ymax,p.a*1.1);if(p.b)ymax=Math.max(ymax,p.b*1.1);});
+  const m={l:46,r:12,t:10,b:24}, pw=w-m.l-m.r, ph=h-m.t-m.b;
+  const X=x=>m.l+(x+span)/(2*span)*pw, Y=y=>m.t+ph-(y/ymax)*ph;
+  ctx.strokeStyle=grid2;ctx.lineWidth=1;ctx.font='10.5px ui-monospace,monospace';ctx.fillStyle=ink3;
+  for(let i=0;i<=4;i++){const y=ymax*i/4;
+    ctx.beginPath();ctx.moveTo(m.l,Y(y));ctx.lineTo(w-m.r,Y(y));ctx.stroke();
+    ctx.textAlign='right';ctx.fillText(y.toFixed(2),m.l-5,Y(y)+3);}
+  for(let x=-span;x<=span;x+=15){
+    ctx.textAlign='center';ctx.fillText(x,X(x),h-7);}
+  // ストール線
+  ctx.strokeStyle=crit;ctx.setLineDash([5,4]);ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(m.l,Y(stall));ctx.lineTo(w-m.r,Y(stall));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=crit;ctx.textAlign='left';ctx.fillText('ストール',m.l+4,Y(stall)-4);
+  // 連続定格（ストールの 1/3）
+  ctx.strokeStyle=ink3;ctx.setLineDash([2,4]);
+  ctx.beginPath();ctx.moveTo(m.l,Y(stall/3));ctx.lineTo(w-m.r,Y(stall/3));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=ink3;ctx.fillText('連続定格',m.l+4,Y(stall/3)-4);
+  const plot=(key,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();let first=true;
+    pts.forEach(p=>{const v=p[key];if(v==null){first=true;return;}
+      const px=X(p.x),py=Y(v);first?(ctx.moveTo(px,py),first=false):ctx.lineTo(px,py);});
+    ctx.stroke();};
+  plot('a',link); plot('b',steel);
+  // 現在位置
+  ctx.strokeStyle=accent;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(X(P.fx),m.t);ctx.lineTo(X(P.fx),m.t+ph);ctx.stroke();
+  document.getElementById('chartSub').textContent='高さ '+P.fy.toFixed(0)+' mm / 緑=サーボ① 青=サーボ②';
+}
+
+// ---------- 出力 ----------
+const $=id=>document.getElementById(id);
+const fmt=(v,n=2)=>Number(v).toFixed(n);
+const cls=r=>r>1?'crit':r>0.7?'warn':'';
+const rowsHTML=a=>a.map(([k,v,c])=>`<div><dt>${k}</dt><dd class="${c||''}">${v}</dd></div>`).join('');
+
+function update(){
+  save();
+  const s=statics(P,P.fx,P.fy);
+  const g=rollGeom(P,s);
+  drawMech(s);drawFront(s,g);drawChart();
+  const stall=P.stall*KGCM, cont=stall/3;
+  if(!s.ok){
+    $('pill').className='pill na';$('pill').textContent='足先が到達範囲の外';
+    ['tau1','tau2','tau3'].forEach(k=>$(k).textContent='–');
+    ['tau1b','tau2b','tau3b'].forEach(k=>$(k).textContent='');
+    ['bar1','bar2','bar3'].forEach(k=>$(k).style.width='0');
+    $('mechList').innerHTML=rowsHTML([['到達範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
+                                      ['現在の股からの距離',fmt(Math.hypot(P.fx,P.fy),1)+' mm','crit']]);
+    $('loadList').innerHTML='';$('rollList').innerHTML='';return;}
+  const r1=Math.abs(s.tau1)/stall, r2=Math.abs(s.tau2)/stall, r3=Math.abs(g.tau3)/stall;
+  const rmax=Math.max(r1,r2,r3), lvl=cls(rmax);
+  $('pill').className='pill '+lvl;
+  $('pill').textContent=(lvl===''?'余裕あり':lvl==='warn'?'余裕薄':'ストール超過')+' ─ 最大負荷 '+(rmax*100).toFixed(0)+'%';
+  const setBar=(i,t,r)=>{$('tau'+i).textContent=fmt(Math.abs(t)/KGCM)+' kg·cm';
+    $('tau'+i+'b').textContent=fmt(Math.abs(t),3)+' N·m'+(i<3?'  '+(t>=0?'CCW':'CW'):'');
+    $('bar'+i).style.width=Math.min(100,r*100)+'%';$('bar'+i).className=cls(r);};
+  setBar(1,s.tau1,r1);setBar(2,s.tau2,r2);setBar(3,g.tau3,r3);
+  const innerCls=s.inner<20?'crit':s.inner<35?'warn':'good';
+  $('mechList').innerHTML=rowsHTML([
+    ['クランク角 θ1 / θ2',fmt(s.t1*R2D,1)+'° / '+fmt(s.t2*R2D,1)+'°'],
+    ['内角（下腿どうし）',fmt(s.inner,1)+'°',innerCls],
+    ['股からの距離',fmt(s.reach,1)+' mm（範囲 '+fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+'）'],
+    ['ヤコビアン行列式',fmt(s.det,0)+' mm²/rad²',Math.abs(s.det)<P.l1*P.l2*0.15?'warn':''],
+    ['サーボ',SERVOS[P.servo]?SERVOS[P.servo].name:'カスタム'],
+  ]);
+  $('loadList').innerHTML=rowsHTML([
+    ['1脚あたり垂直力',fmt(s.Fy,1)+' N（'+fmt(s.Fy/G,2)+' kgf）'],
+    ['水平力',fmt(s.Fx,1)+' N'],
+    ['連続定格 = ストール/3',fmt(cont,3)+' N·m'],
+    ['連続定格に対する比',fmt(Math.max(Math.abs(s.tau1),Math.abs(s.tau2))/cont*100,0)+' %',
+      Math.max(Math.abs(s.tau1),Math.abs(s.tau2))>cont?'warn':'good'],
+    ['この姿勢で支えられる総質量',fmt(P.mass/rmax,2)+' kg',cls(rmax)],
+  ]);
+  $('rollList').innerHTML=rowsHTML([
+    ['ロール軸→足先 水平距離 d',fmt(g.F.y,1)+' mm',Math.abs(g.F.y)>40?'crit':Math.abs(g.F.y)>30?'warn':'good'],
+    ['外転トルク τ3',fmt(Math.abs(g.tau3),3)+' N·m',Math.abs(g.tau3)>cont?(Math.abs(g.tau3)>stall?'crit':'warn'):'good'],
+    ['τ3 が 0 になる外転角',fmt(g.phi0,1)+'°（現在 '+fmt(P.t3,0)+'°）'],
+    ['スタンス幅',fmt(g.stance,0)+' mm'],
+    ['胴体 長 × 幅',fmt(P.bodyL,0)+' × '+fmt(P.bodyW,0)+' mm'],
+  ]);
+}
+
+// 足先ドラッグ
+let drag=false;
+const pick=e=>{const r=mech.getBoundingClientRect();return S2W(e.clientX-r.left,e.clientY-r.top);};
+mech.addEventListener('pointerdown',e=>{
+  const s=statics(P,P.fx,P.fy);if(!s.ok)return;
+  const q=pick(e);
+  if(Math.hypot(q.x-s.F.x,q.y-s.F.y)<12){drag=true;mech.setPointerCapture(e.pointerId);}});
+mech.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const q=pick(e);
+  P.fx=Math.round(q.x);P.fy=Math.round(Math.min(-5,q.y));
+  sync();update();});
+const endDrag=()=>{drag=false;};
+mech.addEventListener('pointerup',endDrag);mech.addEventListener('pointercancel',endDrag);
+
+applyServo();bind();sync();update();
+window.addEventListener('resize',update);
+if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',update);
+new MutationObserver(update).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script></body></html>
