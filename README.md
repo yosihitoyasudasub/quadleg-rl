@@ -9,7 +9,9 @@ quadleg-rl/
 ├─ notebooks/
 │   └─ 01_go1_playground.ipynb   Colab: テスト機 Go1 で歩行学習を体験
 ├─ tools/
-│   ├─ webapp/quad-leg-linkage.html     リンク機構トルク計算 Web アプリ（ブラウザで開くだけ）
+│   ├─ webapp/quad-leg-5bar.html        5 節リンク脚のトルク計算 Web アプリ（ブラウザで開くだけ）
+│   ├─ webapp/hopper-2d.html            一本脚ホッパー 2D シミュレーター（派生テーマ）
+│   ├─ webapp/quad-leg-linkage.html     旧四節リンク版（参考）
 │   └─ fusion/QuadLegLinkage/           Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
 └─ pyproject.toml
 ```

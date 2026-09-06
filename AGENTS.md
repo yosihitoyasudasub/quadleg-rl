@@ -12,7 +12,7 @@ MuJoCo Playground（MJX / Brax PPO）で学習する。
 - `quadleg_rl/` — 学習ロジック。ノートブックにロジックを書かない
 - `notebooks/` — Colab 用の薄いラッパー（clone → install → train → 動画）
 - `tools/fusion/QuadLegLinkage/` — Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
-- `tools/webapp/` — 脚機構トルク計算 Web アプリ（`quad-leg-5bar.html` が現行、`quad-leg-linkage.html` は旧四節版）
+- `tools/webapp/` — 脚機構トルク計算 Web アプリ（`quad-leg-5bar.html` が現行、`quad-leg-linkage.html` は旧四節版）、`hopper-2d.html` は一本脚ホッパーの 2D シミュレーター（HANDOFF §8）
 - `tools/leg_torque.py` — 設計値検証用の静的トルク計算
 - `docs/` — 引き継ぎ・設計メモ
 
