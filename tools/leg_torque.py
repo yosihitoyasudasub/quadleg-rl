@@ -118,33 +118,37 @@ def roll_torque(mass, legs, sf, d_mm):
 
 # =====================================================================
 # 5 節リンク（2026-09-06 に採用）
-# 股関節 O に 2 本のクランク（長さ l1）が同軸で付き、それぞれの先から
-# 下腿（長さ l2）が伸びて足先 F で合流する。膝は受動関節。
+# 2 個のサーボを距離 d0 だけ離して並べ、それぞれのクランク（長さ l1）の先から
+# 下腿（長さ l2）が伸びて足先 F で合流する。膝は受動関節。d0=0 が同軸配置。
 # 四節リンクと違い 2 個のサーボが荷重を分担し、脚にサーボが載らない。
+# 軸を離すほど可動域全体のトルクが下がり、特異点からも遠ざかる。
 # =====================================================================
 
-def ik5(l1, l2, fx, fy):
+def ik5(d0, l1, l2, fx, fy):
     """足先 (fx, fy) から 2 本のクランク角（rad）を解析的に求める。
 
-    円 O-l1 と円 F-l2 の交点が各クランクの先端。返り値は (後側, 前側)。
+    サーボ軸は P1=(-d0/2, 0)、P2=(+d0/2, 0)。各軸まわりの角度を返す（後側, 前側）。
     """
-    d = math.hypot(fx, fy)
-    if d > l1 + l2 or d < abs(l1 - l2) or d < 1e-9:
-        return None                     # 到達範囲の外
-    a = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
-    h2 = l1 * l1 - a * a
-    if h2 < 0:
-        return None
-    h = math.sqrt(h2)
-    mx, my = a * fx / d, a * fy / d
-    return (math.atan2(my - h * fx / d, mx + h * fy / d),
-            math.atan2(my + h * fx / d, mx - h * fy / d))
+    out = []
+    for px, sgn in ((-d0 / 2, -1), (d0 / 2, +1)):
+        dx, dy = fx - px, fy
+        d = math.hypot(dx, dy)
+        if d > l1 + l2 or d < abs(l1 - l2) or d < 1e-9:
+            return None                 # 到達範囲の外
+        a = (l1 * l1 - l2 * l2 + d * d) / (2 * d)
+        h2 = l1 * l1 - a * a
+        if h2 < 0:
+            return None
+        h = math.sqrt(h2)
+        mx, my = px + a * dx / d, a * dy / d
+        out.append(math.atan2(my + sgn * h * dx / d, mx - sgn * h * dy / d - px))
+    return out[0], out[1]
 
 
-def fk5(l1, l2, t1, t2):
+def fk5(d0, l1, l2, t1, t2):
     """クランク角から足先を求める（下側の交点を選ぶ）。"""
-    A = (l1 * math.cos(t1), l1 * math.sin(t1))
-    B = (l1 * math.cos(t2), l1 * math.sin(t2))
+    A = (-d0 / 2 + l1 * math.cos(t1), l1 * math.sin(t1))
+    B = (d0 / 2 + l1 * math.cos(t2), l1 * math.sin(t2))
     dx, dy = B[0] - A[0], B[1] - A[1]
     d = math.hypot(dx, dy)
     if d < 1e-9 or d > 2 * l2:
@@ -154,17 +158,17 @@ def fk5(l1, l2, t1, t2):
     return dict(A=A, B=B, F=(mx + h * dy / d, my - h * dx / d))
 
 
-def stat5(l1, l2, fx, fy, mass, legs, sf, fxr=0.0):
+def stat5(d0, l1, l2, fx, fy, mass, legs, sf, fxr=0.0):
     """5 節リンクの静的トルク。内角は 2 本の下腿が足先でなす角（特異点の指標）。"""
-    r = ik5(l1, l2, fx, fy)
+    r = ik5(d0, l1, l2, fx, fy)
     if not r:
         return None
     t1, t2 = r
-    s = fk5(l1, l2, t1, t2)
+    s = fk5(d0, l1, l2, t1, t2)
     if not s or math.hypot(s["F"][0] - fx, s["F"][1] - fy) > 0.5:
         return None                     # 別の分岐に落ちた
     h = 1e-5
-    a, b = fk5(l1, l2, t1 + h, t2), fk5(l1, l2, t1, t2 + h)
+    a, b = fk5(d0, l1, l2, t1 + h, t2), fk5(d0, l1, l2, t1, t2 + h)
     if not a or not b:
         return None
     J = [[(a["F"][0] - s["F"][0]) / h, (b["F"][0] - s["F"][0]) / h],

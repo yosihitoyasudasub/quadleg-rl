@@ -81,7 +81,8 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
   <section class="panel controls">
     <fieldset>
       <legend>リンク寸法</legend>
-      <p class="hint">股関節 O に2本のクランク（長さ l1）が同軸で付き、それぞれの先から下腿（長さ l2）が伸びて足先で合流する。足先の到達範囲は |l1−l2| 〜 l1+l2。</p>
+      <p class="hint">2 個のサーボを距離 d0 だけ離して並べ、それぞれのクランク（長さ l1）の先から下腿（長さ l2）が伸びて足先で合流する。d0=0 が同軸配置。<b>軸を離すほど可動域全体のトルクが下がり、特異点からも遠ざかる</b>。</p>
+      <div class="row" data-k="d0"><label><b>サーボ軸間</b><span class="sym">d0 mm</span></label><input type="number" step="1"><input class="l" type="range" min="0" max="60" step="1"></div>
       <div class="row" data-k="l1"><label><b>クランク</b><span class="sym">l1 mm</span></label><input type="number" step="1"><input class="l" type="range" min="15" max="60" step="1"></div>
       <div class="row" data-k="l2"><label><b>下腿</b><span class="sym">l2 mm</span></label><input type="number" step="1"><input class="l" type="range" min="30" max="100" step="1"></div>
     </fieldset>
@@ -166,7 +167,7 @@ const SERVOS=[
   {name:"XL330-M288 5V",stall:5.3,  sW:20,   sH:34,   sOff:9.5},
   {name:"XL430-W250",   stall:14.8, sW:28.5, sH:46.5, sOff:12},
 ];
-const DEF={l1:30,l2:65,fx:0,fy:-67,mass:1.0,legs:2,sf:1.5,fxr:0,
+const DEF={d0:30,l1:25,l2:70,fx:0,fy:-67,mass:1.0,legs:2,sf:1.5,fxr:0,
            servo:0,stall:4.0,sW:24,sH:36,sOff:9,sA:90,
            oy:0,oz:0,t3:0,bodyW:110,bodyL:140};
 let P=Object.assign({},DEF);
@@ -175,17 +176,21 @@ function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.
 // ---------- 運動学 ----------
 // 足先 F から2本のクランク角を解析的に求める（円 O-l1 と円 F-l2 の交点）
 function ik(p,fx,fy){
-  const d=Math.hypot(fx,fy);
-  if(d>p.l1+p.l2||d<Math.abs(p.l1-p.l2)||d<1e-9)return null;
-  const a=(p.l1*p.l1-p.l2*p.l2+d*d)/(2*d), h2=p.l1*p.l1-a*a;
-  if(h2<0)return null;
-  const h=Math.sqrt(h2), mx=a*fx/d, my=a*fy/d;
-  return {t1:Math.atan2(my-h*fx/d, mx+h*fy/d),      // 後側
-          t2:Math.atan2(my+h*fx/d, mx-h*fy/d)};     // 前側
+  const out=[];
+  for(const [px,sgn] of [[-p.d0/2,-1],[p.d0/2,1]]){
+    const dx=fx-px, dy=fy, d=Math.hypot(dx,dy);
+    if(d>p.l1+p.l2||d<Math.abs(p.l1-p.l2)||d<1e-9)return null;
+    const a=(p.l1*p.l1-p.l2*p.l2+d*d)/(2*d), h2=p.l1*p.l1-a*a;
+    if(h2<0)return null;
+    const h=Math.sqrt(h2), mx=px+a*dx/d, my=a*dy/d;
+    out.push(Math.atan2(my+sgn*h*dx/d, mx-sgn*h*dy/d-px));   // 角度は各サーボ軸まわり
+  }
+  return {t1:out[0], t2:out[1]};   // t1=後側（左の軸）, t2=前側（右の軸）
 }
 // クランク角から足先を求める（下側の交点を選ぶ）
 function fk(p,t1,t2){
-  const A={x:p.l1*Math.cos(t1),y:p.l1*Math.sin(t1)}, B={x:p.l1*Math.cos(t2),y:p.l1*Math.sin(t2)};
+  const A={x:-p.d0/2+p.l1*Math.cos(t1), y:p.l1*Math.sin(t1)},
+        B={x: p.d0/2+p.l1*Math.cos(t2), y:p.l1*Math.sin(t2)};
   const dx=B.x-A.x, dy=B.y-A.y, d=Math.hypot(dx,dy);
   if(d<1e-9||d>2*p.l2)return null;
   const h=Math.sqrt(Math.max(0,p.l2*p.l2-d*d/4));
@@ -277,7 +282,7 @@ function drawMech(s){
   ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
   const ink=css('--ink'),ink2=css('--ink2'),ink3=css('--ink3'),steel=css('--steel'),link=css('--link'),
         accent=css('--accent'),grid=css('--grid'),grid2=css('--grid2');
-  const R=P.l1+P.l2+15, top=Math.max(P.l1+P.sH,40)+15;
+  const R=P.l1+P.l2+P.d0/2+15, top=Math.max(P.l1+P.sH,40)+15;
   view.s=Math.min((w-40)/(2*R),(h-40)/(R+top)); view.cx=w/2; view.cy=25+top*view.s;
   // グリッド
   ctx.strokeStyle=grid;ctx.lineWidth=1;
@@ -285,33 +290,34 @@ function drawMech(s){
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
   for(let y=-200;y<=200;y+=10){const a=W2S({x:-200,y}),b=W2S({x:200,y});
     ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
-  // 到達範囲（ドーナツ）
-  const O=W2S({x:0,y:0});
+  // 到達範囲（各軸まわりのドーナツ。両方に入る領域が実際の可動域）
+  const P1=W2S({x:-P.d0/2,y:0}), P2=W2S({x:P.d0/2,y:0}), O=W2S({x:0,y:0});
   ctx.strokeStyle=grid2;ctx.setLineDash([5,5]);ctx.lineWidth=1.5;
-  for(const r of [Math.abs(P.l1-P.l2), P.l1+P.l2]){
-    ctx.beginPath();ctx.arc(O.x,O.y,r*view.s,0,7);ctx.stroke();}
+  for(const c of [P1,P2]) for(const r of [Math.abs(P.l1-P.l2), P.l1+P.l2]){
+    ctx.beginPath();ctx.arc(c.x,c.y,r*view.s,0,7);ctx.stroke();}
   ctx.setLineDash([]);
   if(!s.ok){
     ctx.fillStyle=ink3;ctx.font='13px system-ui';ctx.textAlign='center';
-    ctx.fillText('足先が到達範囲の外です（'+Math.abs(P.l1-P.l2).toFixed(0)+'〜'+(P.l1+P.l2).toFixed(0)+' mm）',w/2,h/2);
+    ctx.fillText('足先が到達範囲の外です（各軸から '+Math.abs(P.l1-P.l2).toFixed(0)+'〜'+(P.l1+P.l2).toFixed(0)+' mm）',w/2,h/2);
     return;}
   const A=W2S(s.A), B=W2S(s.B), F=W2S(s.F);
-  // サーボ本体（2個が同軸・背中合わせ。正面からは重なるので1つ描く）
-  const a=P.sA*D2R, ca=Math.cos(a), sa=Math.sin(a);
-  ctx.save();ctx.translate(O.x,O.y);ctx.rotate(-a);
-  ctx.strokeStyle=ink3;ctx.setLineDash([3,3]);ctx.lineWidth=1;
-  ctx.strokeRect(-P.sW/2*view.s, -P.sOff*view.s, P.sW*view.s, P.sH*view.s);
-  ctx.setLineDash([]);ctx.restore();
+  // サーボ本体（軸ごとに1個ずつ。d0=0 なら背中合わせで重なる）
+  const a=P.sA*D2R;
+  for(const c of [P1,P2]){
+    ctx.save();ctx.translate(c.x,c.y);ctx.rotate(-a);
+    ctx.strokeStyle=ink3;ctx.setLineDash([3,3]);ctx.lineWidth=1;
+    ctx.strokeRect(-P.sW/2*view.s, -P.sOff*view.s, P.sW*view.s, P.sH*view.s);
+    ctx.setLineDash([]);ctx.restore();}
   // 下腿
   ctx.strokeStyle=steel;ctx.lineWidth=6;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(F.x,F.y);ctx.stroke();
   ctx.beginPath();ctx.moveTo(B.x,B.y);ctx.lineTo(F.x,F.y);ctx.stroke();
   // クランク
   ctx.strokeStyle=link;ctx.lineWidth=7;
-  ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(A.x,A.y);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(O.x,O.y);ctx.lineTo(B.x,B.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(P1.x,P1.y);ctx.lineTo(A.x,A.y);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(P2.x,P2.y);ctx.lineTo(B.x,B.y);ctx.stroke();
   // 関節
-  for(const[p,r,c] of [[O,6,accent],[A,4.5,ink2],[B,4.5,ink2],[F,5,ink]]){
+  for(const[p,r,c] of [[P1,6,accent],[P2,6,accent],[A,4.5,ink2],[B,4.5,ink2],[F,5,ink]]){
     ctx.fillStyle=c;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();}
   // 地面と反力
   ctx.strokeStyle=grid2;ctx.lineWidth=1;
@@ -322,7 +328,7 @@ function drawMech(s){
   ctx.beginPath();ctx.moveTo(F.x-5,F.y+13);ctx.lineTo(F.x,F.y+5);ctx.lineTo(F.x+5,F.y+13);ctx.stroke();
   // ラベル
   ctx.fillStyle=ink2;ctx.font='11.5px ui-monospace,monospace';ctx.textAlign='left';
-  ctx.fillText('O 股関節（サーボ①②同軸）',O.x+10,O.y-8);
+  ctx.fillText('股関節（サーボ軸 2 本、間隔 '+P.d0.toFixed(0)+' mm）',O.x+12,O.y-14);
   ctx.fillText('θ1 '+(s.t1*R2D).toFixed(1)+'°',A.x+8,A.y-6);
   ctx.fillText('θ2 '+(s.t2*R2D).toFixed(1)+'°',B.x+8,B.y-6);
   ctx.fillStyle=accent;
@@ -429,8 +435,8 @@ function update(){
     ['tau1','tau2','tau3'].forEach(k=>$(k).textContent='–');
     ['tau1b','tau2b','tau3b'].forEach(k=>$(k).textContent='');
     ['bar1','bar2','bar3'].forEach(k=>$(k).style.width='0');
-    $('mechList').innerHTML=rowsHTML([['到達範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
-                                      ['現在の股からの距離',fmt(Math.hypot(P.fx,P.fy),1)+' mm','crit']]);
+    $('mechList').innerHTML=rowsHTML([['各軸からの距離範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
+                                      ['サーボ軸間 d0',fmt(P.d0,0)+' mm']]);
     $('loadList').innerHTML='';$('rollList').innerHTML='';return;}
   const r1=Math.abs(s.tau1)/stall, r2=Math.abs(s.tau2)/stall, r3=Math.abs(g.tau3)/stall;
   const rmax=Math.max(r1,r2,r3), lvl=cls(rmax);
@@ -444,7 +450,9 @@ function update(){
   $('mechList').innerHTML=rowsHTML([
     ['クランク角 θ1 / θ2',fmt(s.t1*R2D,1)+'° / '+fmt(s.t2*R2D,1)+'°'],
     ['内角（下腿どうし）',fmt(s.inner,1)+'°',innerCls],
-    ['股からの距離',fmt(s.reach,1)+' mm（範囲 '+fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+'）'],
+    ['サーボ軸間 d0',fmt(P.d0,0)+' mm'+(P.d0<P.sW?'（本体が干渉：'+fmt(P.sW,0)+' mm 以上必要）':'')
+      ,P.d0<P.sW?'warn':'good'],
+    ['各軸からの距離範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
     ['ヤコビアン行列式',fmt(s.det,0)+' mm²/rad²',Math.abs(s.det)<P.l1*P.l2*0.15?'warn':''],
     ['サーボ',SERVOS[P.servo]?SERVOS[P.servo].name:'カスタム'],
   ]);
