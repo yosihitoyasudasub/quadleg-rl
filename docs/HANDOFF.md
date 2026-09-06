@@ -61,10 +61,13 @@ XL-320 での余裕: 質量 1 kg で股 58%、膝 30%。**質量 0.7 kg 目標**
   - `rollout()` で `state.info["command"]` を直接書き換えて指令を固定している。Joystick 環境が `info["command"]` を持つ前提
   - `env.render()` は `State` のリストを受け取る（`.data` ではない）
   - チェックポイント再開: `restore_checkpoint_path` に run の `checkpoints/` を渡すと最新の数字ディレクトリを選ぶ
-- **バージョンの組み合わせ（2026-09 時点で Colab 実行して確定）**: `jax[cuda12]==0.10.*` ＋ `flax>=0.12`。
-  JAX 0.11 は `jax.device_put_replicated` を削除しており brax 0.14.2 が動かない（brax の依存は `jax>=0.4.6` で上限なし）。
-  古い flax（Colab プリインストール）は `jax.core.get_opaque_trace_state` を直接呼ぶため JAX 0.10 以降で落ちる。
-  brax が 0.11 対応したらこの固定を外す
+- **バージョンの組み合わせ（2026-09 時点、Colab で切り分け済み）**: `jax[cuda12]`（最新）＋ `flax>=0.12` ＋ **brax は GitHub main**。
+  - PyPI の brax 0.14.2（2026-03-15）は `jax.device_put_replicated` を使うが、この API は JAX **0.10** で削除済み
+    （`_deprecations` の関数が `None` ＝ 警告ではなく `AttributeError`）。JAX を 0.10 に下げても直らない
+  - brax は main の 2026-03-25 コミットで `jax.device_put` に修正済み。ただし未リリースなので
+    `pip install "brax @ git+https://github.com/google/brax.git@main"` で入れる。main の版番号は 0.14.2 のままで
+    playground の `brax>=0.14.2` を満たす。新しい brax がリリースされたら PyPI 版に戻してよい
+  - 古い flax（Colab プリインストール）は `jax.core.get_opaque_trace_state` を直接呼ぶため要更新
 - ノートブック: セル 2 で `sys.path.insert(0, os.getcwd())` してリポジトリ直下から `quadleg_rl` を import。GitHub URL 未設定ならファイル欄に `quadleg_rl/` をアップロード
 - Colab の pip: `jax[cuda12]`, `playground`, `mediapy`。Menagerie アセットは初回ロード時に自動ダウンロード
 - Fusion アドイン: as-built 回転ジョイントを円エッジ中心から作る方式。同軸配置ではサーボ②を +Z 側に置き、クランク層を +3s に移す。ユーザーパラメータ `qll_*` は記録のみで寸法は未拘束（「パラメータを変更」で追従させる拘束版は未実装）

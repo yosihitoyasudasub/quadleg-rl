@@ -5,14 +5,15 @@ description = "Quadruped leg design + RL locomotion (MuJoCo Playground)"
 requires-python = ">=3.10"
 dependencies = [
     "playground",
-    "jax<0.11",            # brax 0.14 は JAX 0.11 で削除された jax.device_put_replicated を使う
-    "flax>=0.12",          # 古い flax は JAX 0.10 で移動した jax.core.get_opaque_trace_state を呼ぶ
+    # brax 0.14.2（PyPI 最新）は JAX 0.10 で削除された jax.device_put_replicated を使う。main で修正済み
+    "brax @ git+https://github.com/google/brax.git@main",
+    "flax>=0.12",          # 古い flax は jax.core.get_opaque_trace_state を直接呼ぶ
     "mediapy",
     "matplotlib",
 ]
 
 [project.optional-dependencies]
-cuda = ["jax[cuda12]==0.10.*"]   # brax 0.14 は JAX 0.11 で削除された device_put_replicated を使う
+cuda = ["jax[cuda12]"]
 
 [build-system]
 requires = ["setuptools>=68"]
