@@ -100,8 +100,8 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     </fieldset>
     <fieldset>
       <legend>サーボ</legend>
-      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250</option><option value="9">カスタム</option></select></div>
-      <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">kg·cm</span></label><input type="number" step="0.1"><input class="l" type="range" min="1" max="30" step="0.1"></div>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">kg·cm</span></label><input type="number" step="0.1"><input class="l" type="range" min="1" max="120" step="0.1"></div>
       <div class="row" data-k="sW"><label><b>本体幅</b><span class="sym">W mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="60" step="0.5"></div>
       <div class="row" data-k="sH"><label><b>本体長さ</b><span class="sym">H mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="80" step="0.5"></div>
       <div class="row" data-k="sOff"><label><b>ホーン軸〜本体端</b><span class="sym">off mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="0" max="30" step="0.5"></div>
@@ -164,10 +164,14 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
 (()=>{
 const D2R=Math.PI/180, R2D=180/Math.PI, G=9.80665, KGCM=0.0980665;
 // サーボプリセット: stall[kg·cm], 本体 W×H, ホーン軸〜本体端
+// 仕様は ROBOTIS e-Manual（2026-09 確認）。stall は kg·cm、寸法は mm。
+// sOff（ホーン軸〜本体端）は図面由来。XL430 のみ未確認の推定値。
+// mass[g] と speed[rpm] は表示用（計算には使わない）。
 const SERVOS=[
-  {name:"XL-320 7.4V",  stall:4.0,  sW:24,   sH:36,   sOff:9},
-  {name:"XL330-M288 5V",stall:5.3,  sW:20,   sH:34,   sOff:9.5},
-  {name:"XL430-W250",   stall:14.8, sW:28.5, sH:46.5, sOff:12},
+  {name:"XL-320 7.4V",     stall:4.0,   sW:24,   sH:36,   sOff:9,     mass:16.7, speed:114},
+  {name:"XL330-M288 5V",   stall:5.3,   sW:20,   sH:34,   sOff:9.5,   mass:18,   speed:103},
+  {name:"XL430-W250 12V",  stall:15.3,  sW:28.5, sH:46.5, sOff:12,    mass:57.2, speed:61},
+  {name:"XM540-W270 12V",  stall:108.1, sW:33.5, sH:58.5, sOff:13.75, mass:165,  speed:30},
 ];
 const DEF={d0:30,l1:25,l2:70,fx:0,fy:-67,mass:1.0,legs:2,sf:1.5,fxr:0,
            servo:0,stall:4.0,sW:24,sH:36,sOff:9,sA1:90,sA2:90,
@@ -478,6 +482,9 @@ function update(){
     ['各軸からの距離範囲',fmt(Math.abs(P.l1-P.l2),0)+'〜'+fmt(P.l1+P.l2,0)+' mm'],
     ['ヤコビアン行列式',fmt(s.det,0)+' mm²/rad²',Math.abs(s.det)<P.l1*P.l2*0.15?'warn':''],
     ['サーボ',SERVOS[P.servo]?SERVOS[P.servo].name:'カスタム'],
+    ['ストール / 連続目安',fmt(P.stall,1)+' / '+fmt(P.stall/3,1)+' kg·cm'],
+    ['サーボ 12 個の質量',SERVOS[P.servo]?fmt(SERVOS[P.servo].mass*12,0)+' g（1個 '+SERVOS[P.servo].mass+' g）':'—'],
+    ['無負荷速度',SERVOS[P.servo]?SERVOS[P.servo].speed+' rpm = '+fmt(SERVOS[P.servo].speed*6,0)+' °/s':'—'],
   ]);
   $('loadList').innerHTML=rowsHTML([
     ['1脚あたり垂直力',fmt(s.Fy,1)+' N（'+fmt(s.Fy/G,2)+' kgf）'],
