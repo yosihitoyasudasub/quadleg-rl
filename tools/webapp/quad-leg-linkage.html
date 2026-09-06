@@ -1,0 +1,541 @@
+<title>Quad Leg Linkage Lab</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EEF0EE; --surface:#FAFBFA; --surface2:#E3E6E4; --line:#CDD2CF; --line2:#B3BAB6;
+  --ink:#1A2028; --ink2:#4E5760; --ink3:#7C8690;
+  --steel:#3A5F8F; --steel2:#5C7FAB; --link:#6F7E8C; --accent:#D8541C; --accent-soft:rgba(216,84,28,.14);
+  --spring:#2E9E6B; --ok:#2E9E6B; --warn:#C9A227; --crit:#C3392B;
+  --grid:rgba(26,32,40,.07); --grid2:rgba(26,32,40,.16);
+  --shadow:0 1px 2px rgba(20,30,40,.08), 0 6px 18px rgba(20,30,40,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171B20; --surface:#1F252C; --surface2:#262D35; --line:#333B45; --line2:#46505B;
+    --ink:#E4E8EC; --ink2:#AEB6BE; --ink3:#7E8891;
+    --steel:#7FA5D3; --steel2:#5C7FAB; --link:#8E9BA8; --accent:#F0733A; --accent-soft:rgba(240,115,58,.18);
+    --spring:#4CC38A; --ok:#4CC38A; --warn:#E0B93D; --crit:#E2574A;
+    --grid:rgba(228,232,236,.06); --grid2:rgba(228,232,236,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171B20; --surface:#1F252C; --surface2:#262D35; --line:#333B45; --line2:#46505B;
+  --ink:#E4E8EC; --ink2:#AEB6BE; --ink3:#7E8891;
+  --steel:#7FA5D3; --steel2:#5C7FAB; --link:#8E9BA8; --accent:#F0733A; --accent-soft:rgba(240,115,58,.18);
+  --spring:#4CC38A; --ok:#4CC38A; --warn:#E0B93D; --crit:#E2574A;
+  --grid:rgba(228,232,236,.06); --grid2:rgba(228,232,236,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "IBM Plex Sans JP",system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:baseline;gap:16px;padding:14px 20px 10px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:17px;font-weight:600;letter-spacing:.01em}
+header .sub{color:var(--ink3);font-size:12.5px}
+header .sp{flex:1}
+.btn{font:inherit;font-size:12.5px;padding:5px 11px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:4px;cursor:pointer}
+.btn:hover{border-color:var(--ink3)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+main{display:grid;grid-template-columns:300px minmax(0,1fr) 300px;gap:14px;padding:14px 20px 24px;align-items:start}
+@media (max-width:1100px){main{grid-template-columns:280px minmax(0,1fr)} .results{grid-column:1/-1}}
+@media (max-width:760px){main{grid-template-columns:1fr} .results{grid-column:auto}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.controls{display:flex;flex-direction:column}
+fieldset{border:0;margin:0;padding:10px 14px 12px;border-bottom:1px solid var(--line)}
+fieldset:last-child{border-bottom:0}
+legend{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:0;margin-bottom:6px}
+.row{display:grid;grid-template-columns:1fr 62px;gap:8px;align-items:center;margin-top:5px}
+.row label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2)}
+.row label b{font-weight:500;color:var(--ink)}
+.row label span.sym{font-family:"IBM Plex Mono",monospace;color:var(--ink3);font-size:11.5px}
+.row input[type=range]{width:100%;margin:2px 0 0;accent-color:var(--steel);height:18px}
+.row input[type=number],.row select{font:inherit;font-family:"IBM Plex Mono",monospace;font-size:12.5px;padding:4px 5px;width:100%;border:1px solid var(--line2);border-radius:4px;background:var(--surface);color:var(--ink);text-align:right}
+.row select{text-align:left}
+.row .l{grid-column:1}
+.hint{font-size:11.5px;color:var(--ink3);margin:6px 0 0;line-height:1.45}
+.stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.canvasWrap{position:relative;padding:0;overflow:hidden}
+canvas{display:block;width:100%;touch-action:none}
+#mech{height:520px;cursor:crosshair}
+.legendBar{display:flex;flex-wrap:wrap;gap:12px 18px;padding:8px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
+.legendBar i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.chartHead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px 0}
+.chartHead h2{margin:0;font-size:13px;font-weight:600}
+.chartHead span{font-size:11.5px;color:var(--ink3)}
+#chart{height:210px}
+.results{display:flex;flex-direction:column}
+.status{padding:12px 14px;border-bottom:1px solid var(--line)}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 8px;border-radius:999px;font-size:12px;font-weight:500;background:var(--surface2)}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok)}
+.pill.warn::before{background:var(--warn)} .pill.crit::before{background:var(--crit)} .pill.na::before{background:var(--ink3)}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.big > div{padding:12px 14px;border-bottom:1px solid var(--line)}
+.big > div:first-child{border-right:1px solid var(--line)}
+.big .k{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.big .v{font-size:26px;line-height:1.1;margin-top:3px;color:var(--accent);font-weight:500}
+.big .u{font-size:12px;color:var(--ink2);margin-top:2px}
+.bar{height:5px;background:var(--surface2);border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .12s}
+.bar i.warn{background:var(--warn)} .bar i.crit{background:var(--crit)}
+dl{margin:0;padding:6px 14px 10px;display:grid;grid-template-columns:auto auto;column-gap:12px;row-gap:0}
+dl div{display:contents}
+dt{font-size:12.5px;color:var(--ink2);padding:4px 0;border-bottom:1px dashed var(--line)}
+dd{margin:0;text-align:right;padding:4px 0;border-bottom:1px dashed var(--line);font-size:12.5px;color:var(--ink)}
+dl div:last-child dt,dl div:last-child dd{border-bottom:0}
+dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
+.sectionTitle{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:10px 14px 0}
+.note{font-size:11.5px;color:var(--ink3);padding:0 14px 12px;line-height:1.5}
+.note code{font-family:"IBM Plex Mono",monospace;font-size:11px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<header>
+  <h1>Quad Leg Linkage Lab</h1>
+  <span class="sub">四脚ロボット 脚リンク機構 ─ 股関節2サーボ＋四節リンク の静的トルク計算</span>
+  <span class="sp"></span>
+  <button class="btn" id="presetVideo" type="button">動画の条件を読込</button>
+  <button class="btn" id="reset" type="button">初期値</button>
+  <button class="btn" id="copyCfg" type="button">設定と結果をコピー</button>
+  <button class="btn" id="pasteCfg" type="button">貼り付けて読込</button>
+</header>
+
+<main>
+  <section class="panel controls" id="controls">
+    <fieldset>
+      <legend>動力の位置</legend>
+      <p class="hint" style="margin:0 0 4px">股関節サーボ①は原点 O。膝駆動サーボ②の軸 B を O からのオフセットで指定（同軸なら 0,0）。</p>
+      <div class="row" data-k="bx"><label><b>サーボ② X 位置</b><span class="sym">Bx mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="by"><label><b>サーボ② Y 位置</b><span class="sym">By mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+    </fieldset>
+    <fieldset>
+      <legend>リンク長さ</legend>
+      <div class="row" data-k="L1"><label><b>大腿（上脚）</b><span class="sym">L1 mm</span></label><input type="number" step="1"><input class="l" type="range" min="30" max="200" step="1"></div>
+      <div class="row" data-k="L2"><label><b>下腿（膝下）</b><span class="sym">L2 mm</span></label><input type="number" step="1"><input class="l" type="range" min="30" max="200" step="1"></div>
+      <div class="row" data-k="Lc"><label><b>サーボ②クランク</b><span class="sym">Lc mm</span></label><input type="number" step="1"><input class="l" type="range" min="5" max="100" step="1"></div>
+      <div class="row" data-k="Lr"><label><b>連結ロッド</b><span class="sym">Lr mm</span></label><input type="number" step="1"><input class="l" type="range" min="20" max="250" step="1"></div>
+      <div class="row" data-k="Le"><label><b>下腿レバー（膝上の延長）</b><span class="sym">Le mm</span></label><input type="number" step="1"><input class="l" type="range" min="5" max="100" step="1"></div>
+      <div class="row" data-k="delta"><label><b>下腿の曲げ角</b><span class="sym">δ °</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
+      <div class="row" data-k="cfg"><label><b>リンク組立の向き</b><span class="sym">cfg</span></label><select><option value="1">A</option><option value="-1">B（反転）</option></select></div>
+    </fieldset>
+    <fieldset>
+      <legend>姿勢（サーボ角）</legend>
+      <div class="row" data-k="t1"><label><b>サーボ① 大腿角</b><span class="sym">θ1 °</span></label><input type="number" step="1"><input class="l" type="range" min="-180" max="0" step="1"></div>
+      <div class="row" data-k="t2"><label><b>サーボ② クランク角</b><span class="sym">θ2 °</span></label><input type="number" step="1"><input class="l" type="range" min="-180" max="180" step="1"></div>
+      <p class="hint">角度は +X 軸（前方）から反時計回り。図中の足先・膝・クランク先端はドラッグで動かせます（足先は逆運動学）。</p>
+    </fieldset>
+    <fieldset>
+      <legend>荷重</legend>
+      <div class="row" data-k="mass"><label><b>機体総質量</b><span class="sym">m kg</span></label><input type="number" step="0.1"><input class="l" type="range" min="0.2" max="15" step="0.1"></div>
+      <div class="row" data-k="legs"><label><b>接地脚数</b><span class="sym">n</span></label><select><option value="1">1</option><option value="2">2（小走り）</option><option value="3">3</option><option value="4">4（静止）</option></select></div>
+      <div class="row" data-k="sf"><label><b>動的係数</b><span class="sym">×</span></label><input type="number" step="0.1"><input class="l" type="range" min="1" max="3" step="0.1"></div>
+      <div class="row" data-k="fxr"><label><b>水平力（垂直力比）</b><span class="sym">Fx/Fy %</span></label><input type="number" step="5"><input class="l" type="range" min="-100" max="100" step="5"></div>
+    </fieldset>
+    <fieldset>
+      <legend>サーボ</legend>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XM540-W270 12V</option><option value="1">XM540-W270 11.1V</option><option value="2">XL430-W250</option><option value="3">動画のRCサーボ</option><option value="4">XL330-M288 5V</option><option value="5">XL-320 7.4V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">kg·cm</span></label><input type="number" step="0.5"><input class="l" type="range" min="1" max="150" step="0.5"></div>
+      <div class="row" data-k="sW"><label><b>本体幅（ホーン面）</b><span class="sym">W mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="80" step="0.5"></div>
+      <div class="row" data-k="sH"><label><b>本体長さ</b><span class="sym">H mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="10" max="120" step="0.5"></div>
+      <div class="row" data-k="sOff"><label><b>ホーン軸〜本体端</b><span class="sym">off mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="0" max="60" step="0.5"></div>
+      <div class="row" data-k="sPCD"><label><b>ホーン穴 PCD</b><span class="sym">mm</span></label><input type="number" step="0.5"><input class="l" type="range" min="0" max="40" step="0.5"></div>
+      <div class="row" data-k="sA1"><label><b>サーボ① 本体向き</b><span class="sym">°</span></label><input type="number" step="5"><input class="l" type="range" min="-180" max="180" step="5"></div>
+      <div class="row" data-k="sA2"><label><b>サーボ② 本体向き</b><span class="sym">°</span></label><input type="number" step="5"><input class="l" type="range" min="-180" max="180" step="5"></div>
+      <p class="hint">本体向きはホーン軸を中心に本体の長手方向が伸びる向き（+X から反時計回り）。2台を同一面に並べる場合の干渉を図でチェックできます。同軸・背中合わせ配置なら干渉は無視して構いません。</p>
+    </fieldset>
+  </section>
+
+  <section class="stage">
+    <div class="panel canvasWrap">
+      <canvas id="mech"></canvas>
+      <div class="legendBar">
+        <span><i style="background:var(--steel)"></i>大腿 L1・下腿 L2</span>
+        <span><i style="background:var(--link)"></i>クランク Lc・レバー Le</span>
+        <span><i style="background:var(--spring)"></i>連結ロッド Lr</span>
+        <span><i style="background:var(--accent)"></i>接地反力・必要トルク</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chartHead"><h2>トルク掃引 ─ 足先を現在の高さで前後に動かした場合</h2><span id="chartSub" class="mono"></span></div>
+      <canvas id="chart"></canvas>
+    </div>
+  </section>
+
+  <aside class="panel results">
+    <div class="status"><span class="pill" id="pill">計算中</span></div>
+    <div class="big">
+      <div><div class="k">サーボ① 股関節</div><div class="v mono" id="tau1">–</div><div class="u mono" id="tau1b">–</div><div class="bar"><i id="bar1"></i></div></div>
+      <div><div class="k">サーボ② 膝駆動</div><div class="v mono" id="tau2">–</div><div class="u mono" id="tau2b">–</div><div class="bar"><i id="bar2"></i></div></div>
+    </div>
+    <div class="sectionTitle">荷重条件</div>
+    <dl id="loadList"></dl>
+    <div class="sectionTitle">リンク機構</div>
+    <dl id="linkList"></dl>
+    <div class="sectionTitle">重量予算</div>
+    <dl id="budgetList"></dl>
+    <p class="note">静的釣合い（仮想仕事）で計算：<code>τ = −Jᵀ·F</code>。リンク自重・摩擦・慣性は含みません。伝達角は連結ロッドとレバー Le のなす角で、90° に近いほど効率良く、30° を下回ると突っ張り・座屈のリスクが高まります。</p>
+  </aside>
+</main>
+
+<script>
+(function(){
+const D2R=Math.PI/180, R2D=180/Math.PI, G=9.80665, KGCM=0.0980665;
+// サーボプリセット: stall kg·cm, 本体 W×H (ホーン面幅×長さ), ホーン軸〜本体端 off, ホーン穴 PCD
+const SERVOS={
+  // XM540: ROBOTIS 図面より 33.5×58.5×44、ホーン軸は本体上端から 13.75、ホーン Ø26 / 8-M2.5 P.C.D 22
+  0:{name:'XM540-W270 12V',stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22},
+  1:{name:'XM540-W270 11.1V',stall:102.0,sW:33.5,sH:58.5,sOff:13.75,sPCD:22},
+  2:{name:'XL430-W250',stall:14.3,sW:28.5,sH:46.5,sOff:19,sPCD:16},
+  3:{name:'動画のRCサーボ',stall:11,sW:20,sH:40,sOff:10,sPCD:0},
+  // XL330: 0.52 N·m @5V, 18 g。図面 X330 より 20×34×23、ホーン軸は上端から 9.5、ホーン Ø16 / 4-Ø1.6 P.C.D 12
+  4:{name:'XL330-M288 5V',stall:5.3,sW:20,sH:34,sOff:9.5,sPCD:12,sN:4},
+  // XL-320: 0.39 N·m @7.4V, 16.7 g。図面 2019/05/23 より 24×36×27、ホーン軸は上端から 9、ホーン Ø17.8、
+  //   4-Ø4（リベット）＋4-Ø1.6（BTS2.6 タッピング）いずれも P.C.D 12
+  5:{name:'XL-320 7.4V',stall:4.0,sW:24,sH:36,sOff:9,sPCD:12,sN:8},
+};
+const DEF={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.5,fxr:0,servo:0,stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22,sN:8,sA1:90,sA2:90};
+const VIDEO={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.0,fxr:0,servo:3,stall:11,sW:20,sH:40,sOff:10,sPCD:0,sA1:90,sA2:90};
+let P=Object.assign({},DEF);
+function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.sH=s.sH;P.sOff=s.sOff;P.sPCD=s.sPCD;P.sN=s.sN||8;}}
+function servoRect(c,ang){ // 4 corners (mm) of servo footprint, horn axis at c, body long axis at ang
+  const a=ang*D2R,ca=Math.cos(a),sa=Math.sin(a),w=P.sW/2,top=P.sOff,bot=-(P.sH-P.sOff);
+  return[[-w,top],[w,top],[w,bot],[-w,bot]].map(([x,y])=>({x:c.x+y*ca-x*sa,y:c.y+y*sa+x*ca}));
+}
+function polysOverlap(A,B){ // separating axis test for convex polygons
+  for(const poly of[A,B])for(let i=0;i<poly.length;i++){
+    const p=poly[i],q=poly[(i+1)%poly.length],nx=-(q.y-p.y),ny=q.x-p.x;
+    let a0=1e9,a1=-1e9,b0=1e9,b1=-1e9;
+    A.forEach(v=>{const d=v.x*nx+v.y*ny;a0=Math.min(a0,d);a1=Math.max(a1,d);});
+    B.forEach(v=>{const d=v.x*nx+v.y*ny;b0=Math.min(b0,d);b1=Math.max(b1,d);});
+    if(a1<b0||b1<a0)return false;
+  }
+  return true;
+}
+try{const s=localStorage.getItem('qll-params');if(s){const o=JSON.parse(s);for(const k in DEF)if(typeof o[k]==='number')P[k]=o[k];if(P.servo!==9)applyServo();}}catch(e){}
+function save(){try{localStorage.setItem('qll-params',JSON.stringify(P));}catch(e){}}
+
+/* ---------- kinematics ---------- */
+function fk(p,t1,t2){
+  const O={x:0,y:0},B={x:p.bx,y:p.by};
+  const a1=t1*D2R,a2=t2*D2R;
+  const K={x:p.L1*Math.cos(a1),y:p.L1*Math.sin(a1)};
+  const C={x:B.x+p.Lc*Math.cos(a2),y:B.y+p.Lc*Math.sin(a2)};
+  const dx=C.x-K.x,dy=C.y-K.y,d=Math.hypot(dx,dy);
+  if(d<1e-9||d>p.Le+p.Lr||d<Math.abs(p.Le-p.Lr))return{ok:false,O,B,K,C};
+  const a=(p.Le*p.Le-p.Lr*p.Lr+d*d)/(2*d),h=Math.sqrt(Math.max(0,p.Le*p.Le-a*a));
+  const px=K.x+a*dx/d,py=K.y+a*dy/d;
+  const D={x:px-p.cfg*h*dy/d,y:py+p.cfg*h*dx/d};
+  let ux=-(D.x-K.x)/p.Le,uy=-(D.y-K.y)/p.Le;
+  const dl=p.delta*D2R,rx=ux*Math.cos(dl)-uy*Math.sin(dl),ry=ux*Math.sin(dl)+uy*Math.cos(dl);
+  const F={x:K.x+p.L2*rx,y:K.y+p.L2*ry};
+  return{ok:true,O,B,K,C,D,F};
+}
+function jac(p,t1,t2,s){
+  const h=1e-4;
+  const a=fk(p,t1+h*R2D,t2),b=fk(p,t1,t2+h*R2D);
+  if(!a.ok||!b.ok)return null;
+  return[[(a.F.x-s.F.x)/h,(b.F.x-s.F.x)/h],[(a.F.y-s.F.y)/h,(b.F.y-s.F.y)/h]];
+}
+function loads(p){const Fy=p.mass*G/p.legs*p.sf;return{Fx:Fy*p.fxr/100,Fy};}
+function statics(p,t1,t2){
+  const s=fk(p,t1,t2);if(!s.ok)return s;
+  const J=jac(p,t1,t2,s);if(!J){s.ok=false;return s;}
+  const{Fx,Fy}=loads(p);
+  s.tau1=-(J[0][0]*Fx+J[1][0]*Fy)/1000;
+  s.tau2=-(J[0][1]*Fx+J[1][1]*Fy)/1000;
+  s.J=J;s.Fx=Fx;s.Fy=Fy;
+  const cx=s.C.x-s.B.x,cy=s.C.y-s.B.y,ux=(s.D.x-s.C.x)/p.Lr,uy=(s.D.y-s.C.y)/p.Lr;
+  const cross=cx*uy-cy*ux;
+  s.rodF=Math.abs(cross)>1e-9?-s.tau2*1000/cross:NaN;
+  const vx=s.D.x-s.K.x,vy=s.D.y-s.K.y,wx=s.D.x-s.C.x,wy=s.D.y-s.C.y;
+  let mu=Math.acos(Math.max(-1,Math.min(1,(vx*wx+vy*wy)/(p.Le*p.Lr))))*R2D;
+  s.mu=Math.min(mu,180-mu);
+  const tx=s.K.x,ty=s.K.y,sx=s.F.x-s.K.x,sy=s.F.y-s.K.y;
+  s.knee=180-Math.acos(Math.max(-1,Math.min(1,(tx*sx+ty*sy)/(p.L1*p.L2))))*R2D;
+  s.det=J[0][0]*J[1][1]-J[0][1]*J[1][0];
+  return s;
+}
+function ik(p,tx,ty,t1,t2){
+  for(let i=0;i<40;i++){
+    const s=fk(p,t1,t2);if(!s.ok)return null;
+    const ex=tx-s.F.x,ey=ty-s.F.y;
+    if(Math.hypot(ex,ey)<1e-3)break;
+    const J=jac(p,t1,t2,s);if(!J)return null;
+    const det=J[0][0]*J[1][1]-J[0][1]*J[1][0];if(Math.abs(det)<1e-6)return null;
+    let d1=(J[1][1]*ex-J[0][1]*ey)/det,d2=(-J[1][0]*ex+J[0][0]*ey)/det;
+    const m=Math.max(Math.abs(d1),Math.abs(d2));if(m>0.25){d1*=0.25/m;d2*=0.25/m;}
+    t1+=d1*R2D;t2+=d2*R2D;
+  }
+  const s=fk(p,t1,t2);if(!s.ok||Math.hypot(tx-s.F.x,ty-s.F.y)>0.5)return null;
+  const wrap=a=>((a+180)%360+360)%360-180;
+  return{t1:wrap(t1),t2:wrap(t2)};
+}
+
+/* ---------- controls ---------- */
+const rows=[...document.querySelectorAll('.row[data-k]')];
+function bind(){
+  rows.forEach(r=>{
+    const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
+    const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
+      if(k==='servo')applyServo();else if(['stall','sW','sH','sOff','sPCD'].includes(k))P.servo=9;
+      sync();update();};
+    if(num)num.addEventListener('input',e=>set(e.target.value));
+    if(rng)rng.addEventListener('input',e=>set(e.target.value));
+    if(sel)sel.addEventListener('change',e=>set(e.target.value));
+  });
+}
+function sync(){
+  rows.forEach(r=>{const k=r.dataset.k,v=P[k];
+    r.querySelectorAll('input').forEach(i=>{if(document.activeElement!==i||i.type==='range')i.value=v;});
+    const sel=r.querySelector('select');if(sel)sel.value=String(v);
+  });
+}
+document.getElementById('reset').onclick=()=>{P=Object.assign({},DEF);sync();update();};
+document.getElementById('presetVideo').onclick=()=>{P=Object.assign({},VIDEO);sync();update();};
+function exportText(){
+  const s=statics(P,P.t1,P.t2),{Fx,Fy}=loads(P),sv=SERVOS[P.servo];
+  const lines=['# Quad Leg Linkage Lab 設定','params: '+JSON.stringify(P),'servo: '+(sv?sv.name:'カスタム')+' stall '+P.stall+' kg·cm'];
+  if(s.ok){const st=P.stall*KGCM;
+    lines.push('foot: ('+s.F.x.toFixed(1)+', '+s.F.y.toFixed(1)+') mm  knee: ('+s.K.x.toFixed(1)+', '+s.K.y.toFixed(1)+')  kneeAngle: '+s.knee.toFixed(1)+'°');
+    lines.push('load: Fy '+Fy.toFixed(1)+' N, Fx '+Fx.toFixed(1)+' N');
+    lines.push('tau1: '+(Math.abs(s.tau1)/KGCM).toFixed(2)+' kg·cm ('+(Math.abs(s.tau1)/st*100).toFixed(0)+'% stall)  tau2: '+(Math.abs(s.tau2)/KGCM).toFixed(2)+' kg·cm ('+(Math.abs(s.tau2)/st*100).toFixed(0)+'% stall)');
+    lines.push('rodForce: '+s.rodF.toFixed(1)+' N  transmissionAngle: '+s.mu.toFixed(1)+'°  jacobianDet: '+s.det.toFixed(0));
+    const coax=Math.hypot(P.bx,P.by)<1e-6,clash=!coax&&polysOverlap(servoRect(s.O,P.sA1),servoRect(s.B,P.sA2));
+    lines.push('servoClash: '+(coax?'coaxial':clash?'YES':'no'));
+  }else lines.push('linkage: NOT closed');
+  return lines.join('\n');
+}
+document.getElementById('copyCfg').onclick=async()=>{const t=exportText();const b=document.getElementById('copyCfg');
+  try{await navigator.clipboard.writeText(t);b.textContent='コピーしました';}catch(e){window.prompt('コピーしてください',t);}
+  setTimeout(()=>b.textContent='設定と結果をコピー',1500);};
+document.getElementById('pasteCfg').onclick=()=>{const t=window.prompt('params: {...} を含むテキストを貼り付け');if(!t)return;
+  const m=t.match(/\{[^}]*\}/);if(!m)return;try{const o=JSON.parse(m[0]);for(const k in DEF)if(typeof o[k]==='number')P[k]=o[k];if(typeof o.sN==='number')P.sN=o.sN;sync();update();}catch(e){alert('読み込めませんでした');}};
+
+/* ---------- canvas ---------- */
+const mech=document.getElementById('mech'),mctx=mech.getContext('2d');
+const chart=document.getElementById('chart'),cctx=chart.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let view={s:1,cx:0,cy:0};
+function fit(w,h){
+  const R=P.L1+P.L2+10,top=Math.max(P.Lc+Math.abs(P.by),P.Le,P.sH+Math.abs(P.by),30)+25;
+  const s=Math.min((w-40)/(2*R),(h-40)/(R+top));
+  view={s,cx:w/2,cy:20+top*s};
+}
+const W2S=p=>({x:view.cx+p.x*view.s,y:view.cy-p.y*view.s});
+const S2W=(x,y)=>({x:(x-view.cx)/view.s,y:(view.cy-y)/view.s});
+function sizeCanvas(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;
+  if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);}
+  return{w:r.width,h:r.height,d};}
+
+function drawMech(s){
+  const{w,h,d}=sizeCanvas(mech),ctx=mctx;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  fit(w,h);
+  const ink=css('--ink'),ink2=css('--ink2'),ink3=css('--ink3'),steel=css('--steel'),link=css('--link'),accent=css('--accent'),spring=css('--spring'),grid=css('--grid'),grid2=css('--grid2'),surf=css('--surface');
+  ctx.font='11px "IBM Plex Mono", monospace';
+  // grid (10 mm)
+  const step=10*view.s;
+  ctx.lineWidth=1;
+  for(let x=view.cx%step;x<w;x+=step){const major=Math.abs(Math.round((x-view.cx)/step))%5===0;ctx.strokeStyle=major?grid2:grid;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=view.cy%step;y<h;y+=step){const major=Math.abs(Math.round((y-view.cy)/step))%5===0;ctx.strokeStyle=major?grid2:grid;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  ctx.fillStyle=ink3;ctx.fillText('グリッド 10 mm（太線 50 mm）',10,h-10);ctx.fillText('+X 前方 →',w-80,view.cy-6);
+  const O=W2S(s.O),B=W2S(s.B),K=W2S(s.K),C=W2S(s.C);
+  // body block
+  ctx.fillStyle=css('--surface2');ctx.strokeStyle=css('--line2');
+  const bw=Math.max(70,Math.abs(s.B.x)*view.s+60),bh=Math.max(40,Math.abs(s.B.y)*view.s+45);
+  const bx0=Math.min(O.x,B.x)-30,by0=Math.min(O.y,B.y)-25;
+  ctx.beginPath();ctx.rect(bx0-30,by0-10,Math.max(O.x,B.x)-bx0+60,Math.max(O.y,B.y)-by0+30);ctx.fill();ctx.stroke();
+  ctx.fillStyle=ink3;ctx.fillText('胴体（固定）',bx0-24,by0+2);
+  // servo footprints (XM540 etc.) with horn circle and PCD
+  const drawServo=(c,ang,tag,clash)=>{
+    const r=servoRect(c,ang).map(W2S);
+    ctx.save();ctx.setLineDash([4,3]);ctx.lineWidth=1.5;ctx.strokeStyle=clash?css('--crit'):ink3;ctx.fillStyle=clash?'rgba(195,57,43,.10)':'rgba(120,130,140,.10)';
+    ctx.beginPath();r.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.setLineDash([]);
+    if(P.sPCD>0){const cc=W2S(c),rp=P.sPCD/2*view.s;ctx.strokeStyle=ink3;ctx.lineWidth=1;ctx.beginPath();ctx.arc(cc.x,cc.y,rp,0,7);ctx.stroke();
+      const nH=P.sN||8;for(let i=0;i<nH;i++){const a=i*2*Math.PI/nH;ctx.beginPath();ctx.arc(cc.x+rp*Math.cos(a),cc.y+rp*Math.sin(a),1.3*Math.max(1,view.s),0,7);ctx.stroke();}}
+    const far=r[2],far2=r[3];ctx.fillStyle=clash?css('--crit'):ink3;ctx.fillText(tag,(far.x+far2.x)/2-28,(far.y+far2.y)/2+(far.y>c.y?14:-6));
+    ctx.restore();
+  };
+  const coax=Math.hypot(s.B.x,s.B.y)<1e-6;
+  const clash=!coax&&polysOverlap(servoRect(s.O,P.sA1),servoRect(s.B,P.sA2));
+  drawServo(s.O,P.sA1,'サーボ①',clash);drawServo(s.B,P.sA2,'サーボ②',clash);
+  s.clash=clash;s.coax=coax;
+  const line=(a,b,col,wd)=>{ctx.strokeStyle=col;ctx.lineWidth=wd;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();};
+  const pin=(p,r,col)=>{ctx.fillStyle=surf;ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();ctx.stroke();};
+  const label=(p,t,dx,dy,col)=>{ctx.fillStyle=col||ink2;ctx.fillText(t,p.x+dx,p.y+dy);};
+  if(!s.ok){
+    line(O,K,steel,8);pin(O,7,steel);pin(K,5,steel);line(B,C,link,6);pin(B,6,link);pin(C,4,link);
+    ctx.fillStyle=css('--crit');ctx.font='13px "IBM Plex Sans JP", sans-serif';ctx.fillText('リンクが閉じません：Lr・Le・θ2 または B 位置を見直してください',20,30);
+    return;
+  }
+  const D=W2S(s.D),F=W2S(s.F);
+  // thigh, shank
+  line(O,K,steel,9);line(K,F,steel,8);
+  // lever Le (shank extension beyond knee)
+  line(K,D,link,6);
+  // crank
+  line(B,C,link,6);
+  // connecting rod
+  line(C,D,spring,5);
+  // foot pad
+  ctx.strokeStyle=steel;ctx.lineWidth=3;ctx.beginPath();ctx.arc(F.x,F.y,7,0,7);ctx.stroke();
+  // ground reaction force arrow
+  const fs=Math.hypot(s.Fx,s.Fy),alen=Math.min(120,40+fs*2.2),ax=s.Fx/fs,ay=s.Fy/fs;
+  const tail={x:F.x-ax*alen,y:F.y+ay*alen};
+  arrow(ctx,tail,{x:F.x-ax*10,y:F.y+ay*10},accent,2.5);
+  ctx.fillStyle=accent;ctx.fillText(fs.toFixed(1)+' N',tail.x+8,tail.y+4);
+  // pins
+  pin(O,8,steel);pin(K,5,steel);pin(B,7,link);pin(C,4,link);pin(D,4,link);
+  ctx.fillStyle=steel;ctx.beginPath();ctx.arc(O.x,O.y,2.5,0,7);ctx.fill();ctx.fillStyle=link;ctx.beginPath();ctx.arc(B.x,B.y,2.5,0,7);ctx.fill();
+  // torque arcs
+  torqueArc(ctx,O,26,s.tau1,accent);torqueArc(ctx,B,20,s.tau2,accent);
+  // labels
+  ctx.font='11px "IBM Plex Mono", monospace';
+  label(O,'O サーボ①',-32,-14,ink);label(B,'B サーボ②',10,20,ink);
+  label(K,'K 膝',8,4);label(C,'C',6,-6);label(D,'D',6,-6);label(F,'足先',12,4);
+  const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+  label(mid(O,K),'L1',10,-4,steel);label(mid(K,F),'L2',10,-4,steel);label(mid(C,D),'Lr',10,-2,spring);label(mid(B,C),'Lc',-24,-4,link);label(mid(K,D),'Le',8,10,link);
+  const abs=v=>Math.abs(v/KGCM).toFixed(2)+' kg·cm';
+  ctx.fillStyle=accent;ctx.font='12px "IBM Plex Mono", monospace';
+  ctx.fillText('τ1 '+abs(s.tau1),O.x+30,O.y+30);ctx.fillText('τ2 '+abs(s.tau2),B.x-70,B.y-24);
+  ctx.fillStyle=ink3;ctx.font='11px "IBM Plex Mono", monospace';
+  ctx.fillText('足先 ('+s.F.x.toFixed(1)+', '+s.F.y.toFixed(1)+') mm',F.x+12,F.y+18);
+  ctx.fillText('膝角 '+s.knee.toFixed(1)+'°',K.x+8,K.y+18);
+}
+function arrow(ctx,a,b,col,wd){
+  ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=wd;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+  const ang=Math.atan2(b.y-a.y,b.x-a.x);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-9*Math.cos(ang-0.4),b.y-9*Math.sin(ang-0.4));ctx.lineTo(b.x-9*Math.cos(ang+0.4),b.y-9*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
+}
+function torqueArc(ctx,c,r,tau,col){
+  if(!isFinite(tau)||Math.abs(tau)<1e-6)return;
+  // canvas y is flipped: CCW in world = decreasing canvas angle (anticlockwise=true)
+  const scr=tau>0;ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();
+  const span=Math.PI*1.1,a0=scr?Math.PI*0.35+span:Math.PI*0.35-span,a1=Math.PI*0.35;
+  ctx.arc(c.x,c.y,r,a0,a1,scr);ctx.stroke();
+  const dir=scr?-1:1;
+  const tip={x:c.x+r*Math.cos(a1),y:c.y+r*Math.sin(a1)};
+  const tang=a1+dir*Math.PI/2;
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(tip.x+7*Math.cos(tang),tip.y+7*Math.sin(tang));
+  ctx.lineTo(tip.x+6*Math.cos(tang+2.4),tip.y+6*Math.sin(tang+2.4));ctx.lineTo(tip.x+6*Math.cos(tang-2.4),tip.y+6*Math.sin(tang-2.4));ctx.closePath();ctx.fill();
+}
+
+/* ---------- sweep chart ---------- */
+function drawChart(s){
+  const{w,h,d}=sizeCanvas(chart),ctx=cctx;ctx.setTransform(d,0,0,d,0,0);ctx.clearRect(0,0,w,h);
+  const ink2=css('--ink2'),ink3=css('--ink3'),accent=css('--accent'),steel=css('--steel'),grid2=css('--grid2'),crit=css('--crit');
+  ctx.font='11px "IBM Plex Mono", monospace';
+  if(!s.ok){ctx.fillStyle=ink3;ctx.fillText('現在の姿勢が成立していないため掃引できません',16,30);document.getElementById('chartSub').textContent='';return;}
+  const range=Math.min(120,(P.L1+P.L2)*0.6),N=48,pts=[];
+  const walk=(dir)=>{let t1=P.t1,t2=P.t2;for(let i=1;i<=N;i++){const x=s.F.x+dir*range*i/N;const r=ik(P,x,s.F.y,t1,t2);if(!r)break;t1=r.t1;t2=r.t2;const st=statics(P,t1,t2);if(!st.ok)break;pts.push({x,a:Math.abs(st.tau1)/KGCM,b:Math.abs(st.tau2)/KGCM,dir,i});}};
+  walk(-1);walk(1);
+  pts.push({x:s.F.x,a:Math.abs(s.tau1)/KGCM,b:Math.abs(s.tau2)/KGCM,cur:true});
+  pts.sort((p,q)=>p.x-q.x);
+  const stall=P.stall;
+  let ymax=stall*1.15;pts.forEach(p=>{ymax=Math.max(ymax,p.a*1.1,p.b*1.1);});ymax=Math.min(ymax,stall*4);
+  const m={l:46,r:16,t:14,b:28},pw=w-m.l-m.r,ph=h-m.t-m.b;
+  const xmin=s.F.x-range,xmax=s.F.x+range;
+  const X=x=>m.l+(x-xmin)/(xmax-xmin)*pw,Y=y=>m.t+ph-Math.min(y,ymax)/ymax*ph;
+  // grid & axes
+  ctx.strokeStyle=grid2;ctx.lineWidth=1;ctx.fillStyle=ink3;ctx.textAlign='right';
+  const ystep=niceStep(ymax/4);
+  for(let y=0;y<=ymax+1e-9;y+=ystep){ctx.beginPath();ctx.moveTo(m.l,Y(y));ctx.lineTo(w-m.r,Y(y));ctx.stroke();ctx.fillText(y.toFixed(ystep<1?1:0),m.l-6,Y(y)+4);}
+  ctx.textAlign='center';
+  const xstep=niceStep(range/2.5);
+  for(let x=Math.ceil(xmin/xstep)*xstep;x<=xmax;x+=xstep){ctx.beginPath();ctx.moveTo(X(x),m.t);ctx.lineTo(X(x),m.t+ph);ctx.stroke();ctx.fillText(x.toFixed(0),X(x),h-10);}
+  ctx.textAlign='left';ctx.fillText('kg·cm',m.l+4,m.t+2);ctx.textAlign='right';ctx.fillText('足先 X mm',w-m.r,h-10);ctx.textAlign='left';
+  // stall line
+  ctx.strokeStyle=crit;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(m.l,Y(stall));ctx.lineTo(w-m.r,Y(stall));ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=crit;ctx.fillText('ストール '+stall+' kg·cm',m.l+6,Y(stall)-4);
+  const plot=(key,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();let first=true;
+    pts.forEach(p=>{const y=p[key];if(y>ymax){first=true;return;}if(first){ctx.moveTo(X(p.x),Y(y));first=false;}else ctx.lineTo(X(p.x),Y(y));});ctx.stroke();};
+  plot('a',steel);plot('b',accent);
+  // current marker
+  ctx.strokeStyle=ink2;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(X(s.F.x),m.t);ctx.lineTo(X(s.F.x),m.t+ph);ctx.stroke();ctx.setLineDash([]);
+  [['a',steel],['b',accent]].forEach(([k,c])=>{const cur=pts.find(p=>p.cur);ctx.fillStyle=c;ctx.beginPath();ctx.arc(X(cur.x),Y(cur[k]),4,0,7);ctx.fill();});
+  // legend
+  ctx.fillStyle=steel;ctx.fillRect(w-m.r-150,m.t+2,14,3);ctx.fillStyle=ink2;ctx.fillText('τ1 股関節',w-m.r-132,m.t+7);
+  ctx.fillStyle=accent;ctx.fillRect(w-m.r-70,m.t+2,14,3);ctx.fillStyle=ink2;ctx.fillText('τ2 膝駆動',w-m.r-52,m.t+7);
+  const reach=pts.filter(p=>!p.cur);
+  const peak=Math.max(0,...reach.map(p=>Math.max(p.a,p.b)));
+  document.getElementById('chartSub').textContent='高さ '+s.F.y.toFixed(0)+' mm ／ 到達 '+reach.length+' 点 ／ 掃引内ピーク '+peak.toFixed(2)+' kg·cm';
+}
+function niceStep(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const f=v/p;return(f<1.5?1:f<3.5?2:f<7.5?5:10)*p;}
+
+/* ---------- results ---------- */
+const $=id=>document.getElementById(id);
+const fmt=(v,n=2)=>isFinite(v)?v.toFixed(n):'–';
+function cls(r){return r<0.6?'':r<1?'warn':'crit';}
+function rowsHTML(items){return items.map(([k,v,c])=>'<div><dt>'+k+'</dt><dd class="mono '+(c||'')+'">'+v+'</dd></div>').join('');}
+function update(){
+  save();
+  const s=statics(P,P.t1,P.t2);
+  drawMech(s);drawChart(s);
+  const{Fx,Fy}=loads(P);
+  const pill=$('pill');
+  if(!s.ok){pill.className='pill na';pill.textContent='リンクが成立しません';
+    $('tau1').textContent=$('tau2').textContent='–';$('tau1b').textContent=$('tau2b').textContent='';$('bar1').style.width=$('bar2').style.width='0';
+    $('loadList').innerHTML=rowsHTML([['接地反力 垂直',fmt(Fy,1)+' N'],['接地反力 水平',fmt(Fx,1)+' N']]);
+    $('linkList').innerHTML='';$('budgetList').innerHTML='';return;}
+  const stallNm=P.stall*KGCM,r1=Math.abs(s.tau1)/stallNm,r2=Math.abs(s.tau2)/stallNm,rmax=Math.max(r1,r2);
+  const lvl=cls(rmax);
+  pill.className='pill '+lvl;
+  pill.textContent=lvl===''?'余裕あり ─ 最大負荷 '+(rmax*100).toFixed(0)+'% of ストール':lvl==='warn'?'余裕薄 ─ 最大負荷 '+(rmax*100).toFixed(0)+'% of ストール':'ストール超過 ─ '+(rmax*100).toFixed(0)+'%';
+  $('tau1').textContent=fmt(Math.abs(s.tau1)/KGCM)+' kg·cm';$('tau1b').textContent=fmt(Math.abs(s.tau1),3)+' N·m  '+(s.tau1>=0?'CCW':'CW');
+  $('tau2').textContent=fmt(Math.abs(s.tau2)/KGCM)+' kg·cm';$('tau2b').textContent=fmt(Math.abs(s.tau2),3)+' N·m  '+(s.tau2>=0?'CCW':'CW');
+  $('bar1').style.width=Math.min(100,r1*100)+'%';$('bar1').className=cls(r1);
+  $('bar2').style.width=Math.min(100,r2*100)+'%';$('bar2').className=cls(r2);
+  $('loadList').innerHTML=rowsHTML([
+    ['1脚あたり垂直力',fmt(Fy,1)+' N（'+fmt(Fy/G,2)+' kgf）'],
+    ['水平力',fmt(Fx,1)+' N'],
+    ['足先位置 (X, Y)',fmt(s.F.x,1)+', '+fmt(s.F.y,1)+' mm'],
+    ['股関節からの足先距離',fmt(Math.hypot(s.F.x,s.F.y),1)+' mm'],
+  ]);
+  const rodKind=s.rodF>0?'引張':'圧縮';
+  const muCls=s.mu<30?'crit':s.mu<45?'warn':'good';
+  $('linkList').innerHTML=rowsHTML([
+    ['膝角（大腿-下腿）',fmt(s.knee,1)+'°'],
+    ['伝達角 μ（ロッド↔レバー）',fmt(s.mu,1)+'°',muCls],
+    ['ロッド軸力',fmt(Math.abs(s.rodF),1)+' N '+rodKind,Math.abs(s.rodF)>200?'warn':''],
+    ['サーボ②→足先 速度比',fmt(Math.hypot(s.J[0][1],s.J[1][1])/P.L2,2)+' (足先 mm/rad ÷ L2)'],
+    ['ヤコビアン行列式',fmt(s.det,0)+' mm²/rad²',Math.abs(s.det)<P.L1*P.L2*0.15?'warn':''],
+  ]);
+  const mMax=P.mass/rmax;
+  const sv=SERVOS[P.servo],svName=sv?sv.name:'カスタム';
+  $('budgetList').innerHTML=rowsHTML([
+    ['この姿勢で支えられる総質量',fmt(mMax,2)+' kg',cls(rmax)],
+    ['安全率 60% での上限',fmt(mMax*0.6,2)+' kg'],
+    ['サーボ',svName],
+    ['ストールトルク',P.stall+' kg·cm ＝ '+fmt(stallNm,3)+' N·m'],
+    ['サーボ本体の干渉',s.coax?'同軸配置（背中合わせ）':s.clash?'同一面で干渉':'なし',s.clash?'crit':'good'],
+    ['クランク Lc とホーン PCD/2',fmt(P.Lc,0)+' / '+fmt(P.sPCD/2,1)+' mm'+(P.Lc<P.sPCD/2?'（ホーン穴の内側）':''),P.Lc<P.sPCD/2?'warn':''],
+  ]);
+}
+
+/* ---------- drag ---------- */
+let drag=null;
+mech.addEventListener('pointerdown',e=>{
+  const r=mech.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  const s=fk(P,P.t1,P.t2);
+  const cands=[['F',s.F],['K',s.K],['C',s.C]].filter(c=>c[1]);
+  let best=null,bd=18;
+  cands.forEach(([n,p])=>{const q=W2S(p),d=Math.hypot(q.x-x,q.y-y);if(d<bd){bd=d;best=n;}});
+  if(best){drag=best;mech.setPointerCapture(e.pointerId);mech.style.cursor='grabbing';}
+});
+mech.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const r=mech.getBoundingClientRect(),w=S2W(e.clientX-r.left,e.clientY-r.top);
+  if(drag==='F'){const res=ik(P,w.x,w.y,P.t1,P.t2);if(res){P.t1=Math.round(res.t1*10)/10;P.t2=Math.round(res.t2*10)/10;}}
+  else if(drag==='K'){P.t1=Math.round(Math.atan2(w.y,w.x)*R2D*10)/10;}
+  else if(drag==='C'){P.t2=Math.round(Math.atan2(w.y-P.by,w.x-P.bx)*R2D*10)/10;}
+  sync();update();
+});
+const endDrag=()=>{drag=null;mech.style.cursor='crosshair';};
+mech.addEventListener('pointerup',endDrag);mech.addEventListener('pointercancel',endDrag);
+
+bind();sync();update();
+window.addEventListener('resize',update);
+if(window.matchMedia){window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',update);}
+new MutationObserver(update).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+document.fonts&&document.fonts.ready.then(update);
+})();
+</script>

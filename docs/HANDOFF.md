@@ -15,7 +15,7 @@ XL-320 が 14 個以上あることが判明したため、**4 脚 × 3 自由�
 
 | 項目 | 状態 |
 | --- | --- |
-| 脚リンク設計ツール（Web） | 完成・公開済み（Claude アーティファクト）。`tools/webapp/quad-leg-linkage.html` に置く予定だが**未コピー** → 出力フォルダから手動配置 |
+| 脚リンク設計ツール（Web） | `tools/webapp/quad-leg-linkage.html` に配置済み（単一 HTML、ブラウザで開くだけ）。**平面 2 自由度のみ**。3 自由度化に伴い外転軸・胴体・スタンス幅の追加が必要 |
 | Fusion 360 アドイン | `tools/fusion/QuadLegLinkage/` に配置済み。リボンボタン・ダイアログ・前回値記憶まで実装。Fusion 上での実行テストは**未実施** |
 | 学習コード | `quadleg_rl/train.py`。**Colab で動作確認済み**。`train()` / `rollout()` / `summarize()` / `probe()` / `render_video()` / `plot_history()` |
 | Colab ノートブック | `notebooks/01_go1_playground.ipynb`。**通しで実行し歩行を確認済み**（結果は §4.1）。トラブルシュート表つき |
