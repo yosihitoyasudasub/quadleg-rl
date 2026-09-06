@@ -3,7 +3,8 @@
 まず `docs/HANDOFF.md` を読むこと。目的・決定済み設計値・未検証箇所・TODO はそこにある。
 
 ## プロジェクト概要
-四脚ロボット（XL-320 × 8、4 脚 × 2 自由度の平面リンク脚）の歩行を MuJoCo Playground（MJX / Brax PPO）で学習する。
+四脚ロボット（XL-320 × 12、**4 脚 × 3 自由度**＝股外転・股ピッチ・膝）の歩行を MuJoCo Playground（MJX / Brax PPO）で学習する。
+膝は四節リンク駆動。2026-09-06 にサーボ数が判明し、2 自由度案から 3 自由度（Go1 と同じ構成）に変更した。
 学習は Google Colab の GPU で実行。ローカル（Windows）は編集と軽い検証のみ。
 
 ## 構成
@@ -22,6 +23,7 @@
 - 大きなバイナリ（動画・チェックポイント）はコミットしない（`.gitignore` 済み）
 
 ## 次の実装対象（順に）
-1. 01 ノートブックを Colab で通す（`train.py` の修正）
-2. `quadleg_rl/envs/go1_2dof.py` — Go1 の外転関節を固定した 8 アクチュエータ環境
-3. `quadleg_rl/mjcf/` — 自作四脚 MJCF 生成（Web アプリ params → XML）と `02_custom_quadruped.ipynb`
+1. ~~01 ノートブックを Colab で通す~~ **完了**（累計 1 億ステップで歩行を確認、HANDOFF §4.1）
+2. ~~`go1_2dof.py`~~ **廃止**（3 自由度採用により不要）
+3. `quadleg_rl/mjcf/` — 自作四脚 MJCF 生成（Web アプリ params → XML）と `02_custom_quadruped.ipynb`。
+   Go1 と同じ関節構成・命名にして Playground の Go1 環境をそのまま流用する
