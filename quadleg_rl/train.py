@@ -208,6 +208,14 @@ def summarize(env, states) -> dict:
         "speed_mps": round((dx**2 + dy**2) ** 0.5 / duration, 3) if duration else 0.0,
         "z_end_m": round(float(qpos1[2]), 3),
     }
+    # 機体座標系での平均速度。指令は機体前方基準なので、こちらが指令と直接比較できる
+    q = np.asarray(qpos1)
+    if q.size > 6:
+        w, x, y, z = q[3:7]
+        yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
+        c, s_ = np.cos(-yaw), np.sin(-yaw)
+        info["vx_body_mps"] = round((c * dx - s_ * dy) / duration, 3) if duration else 0.0
+        info["vy_body_mps"] = round((s_ * dx + c * dy) / duration, 3) if duration else 0.0
     if "command" in states[-1].info:
         info["command_end"] = np.asarray(states[-1].info["command"]).round(3).tolist()
     print("[rollout]", info)
@@ -225,14 +233,16 @@ def probe(result: TrainResult, commands=((0.5, 0.0, 0.0), (1.0, 0.0, 0.0),
     for cmd in commands:
         env, states = rollout(result, episode_length=episode_length, seed=seed, command=tuple(cmd))
         info = summarize(env, states)
+        # ヨーは 1 周を超えることがあるので、全ステップの系列を unwrap してから積算する
+        # （始点と終点だけで計算すると ±π で巻き戻り、旋回していないように見える）
         yaw_rate = None
-        q0, q1 = np.asarray(states[0].data.qpos), np.asarray(states[-1].data.qpos)
-        if len(q1) > 6:   # free joint のクォータニオンから yaw 変化を出す
+        dt = float(env.dt) * (len(states) - 1)
+        if np.asarray(states[0].data.qpos).size > 6 and dt:
             def yaw(q):
-                w, x, y, z = q[3:7]
+                w, x, y, z = np.asarray(q)[3:7]
                 return np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
-            dt = float(env.dt) * (len(states) - 1)
-            yaw_rate = round(float(np.unwrap([yaw(q0), yaw(q1)])[1] - yaw(q0)) / dt, 3) if dt else 0.0
+            yaws = np.unwrap(np.array([yaw(s_.data.qpos) for s_ in states]))
+            yaw_rate = round(float(yaws[-1] - yaws[0]) / dt, 3)
         rew = {k: float(np.mean([np.asarray(s.metrics[k]) for s in states[1:]]))
                for k in states[-1].metrics if "tracking" in k}
         rows.append(dict(command=tuple(cmd), dx=info["dx_m"], dy=info["dy_m"],
