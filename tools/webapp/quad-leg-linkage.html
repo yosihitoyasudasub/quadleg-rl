@@ -127,7 +127,7 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     </fieldset>
     <fieldset>
       <legend>外転軸（ロール）と胴体</legend>
-      <p class="hint" style="margin:0 0 4px">正面図の座標。ロール軸を原点とし、股ピッチ軸（サーボ①のホーン軸）までのオフセットで脚モジュールの取り付けを表す。ロールトルクは「1脚あたり垂直力 × ロール軸から足先までの水平距離」で決まる。</p>
+      <p class="hint" style="margin:0 0 4px">正面図の座標。ロール軸（前後方向）を原点とし、股ピッチ軸までのオフセットで脚モジュールの取り付けを表す。<b>oy = 0 がロール軸をピッチ軸に貫通させた配置</b>で、立ち姿勢の外転トルクが原理的にゼロになる。oy は「ロール軸から<b>脚平面</b>（リンクと足先が乗る面）までの横距離」であることに注意。</p>
       <div class="row" data-k="oy"><label><b>ロール軸→股軸 横</b><span class="sym">oy mm</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
       <div class="row" data-k="oz"><label><b>ロール軸→股軸 下</b><span class="sym">oz mm</span></label><input type="number" step="1"><input class="l" type="range" min="-40" max="80" step="1"></div>
       <div class="row" data-k="t3"><label><b>外転角</b><span class="sym">φ °</span></label><input type="number" step="1"><input class="l" type="range" min="-60" max="60" step="1"></div>
@@ -171,6 +171,7 @@ dd.good{color:var(--ok)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
         <span><i style="background:var(--steel)"></i>正面図：胴体とロール軸</span>
         <span><i style="background:var(--link)"></i>ロール軸→股軸ブラケット</span>
         <span><i style="background:var(--accent)"></i>ロール軸から足先までの水平距離 d</span>
+        <span><i style="background:var(--ink3)"></i>外転サーボ本体（前後にオフセット）</span>
       </div>
     </div>
     <div class="panel">
@@ -214,8 +215,8 @@ const SERVOS={
   //   4-Ø4（リベット）＋4-Ø1.6（BTS2.6 タッピング）いずれも P.C.D 12
   5:{name:'XL-320 7.4V',stall:4.0,sW:24,sH:36,sOff:9,sPCD:12,sN:8},
 };
-const DEF={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.5,fxr:0,servo:0,stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22,sN:8,sA1:90,sA2:90,oy:27,oz:0,t3:0,bodyW:80,bodyL:140};
-const VIDEO={oy:27,oz:0,t3:0,bodyW:80,bodyL:140,bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.0,fxr:0,servo:3,stall:11,sW:20,sH:40,sOff:10,sPCD:0,sA1:90,sA2:90};
+const DEF={bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.5,fxr:0,servo:0,stall:108.1,sW:33.5,sH:58.5,sOff:13.75,sPCD:22,sN:8,sA1:90,sA2:90,oy:0,oz:0,t3:0,bodyW:80,bodyL:140};
+const VIDEO={oy:0,oz:0,t3:0,bodyW:80,bodyL:140,bx:0,by:0,L1:100,L2:100,Lc:30,Lr:100,Le:30,delta:0,cfg:1,t1:-110,t2:130,mass:2.2,legs:2,sf:1.0,fxr:0,servo:3,stall:11,sW:20,sH:40,sOff:10,sPCD:0,sA1:90,sA2:90};
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.sW=s.sW;P.sH=s.sH;P.sOff=s.sOff;P.sPCD=s.sPCD;P.sN=s.sN||8;}}
 function servoRect(c,ang){ // 4 corners (mm) of servo footprint, horn axis at c, body long axis at ang
@@ -536,6 +537,10 @@ function drawFront(s,g){
     for(const[pt,r,col]of[[R,5,accent],[O,4,ink2],[F,4,ink]]){
       ctx.fillStyle=col;ctx.beginPath();ctx.arc(X(pt.y),Z(pt.z),r,0,7);ctx.fill();
     }
+    // 外転サーボ本体の外形（前後方向にオフセットして配置するため破線）
+    ctx.strokeStyle=ink3;ctx.setLineDash([3,3]);ctx.lineWidth=1;
+    ctx.strokeRect(X(R.y-P.sW/2),Z(R.z+P.sOff),P.sW*sc,P.sH*sc);
+    ctx.setLineDash([]);
     if(side>0){
       // 水平距離 d の寸法線
       ctx.strokeStyle=accent;ctx.lineWidth=1.5;
@@ -590,6 +595,10 @@ function update(){
     ['スタンス幅（左右の足先間）',fmt(g.stance,0)+' mm'],
     ['足先の接地高さ（ロール軸から）',fmt(-g.F.z,1)+' mm'],
     ['胴体 長 × 幅',fmt(P.bodyL,0)+' × '+fmt(P.bodyW,0)+' mm'],
+    ['外転サーボ本体と脚平面',Math.abs(P.oy)<P.sW/2
+      ?'重なる → 本体を前後（X）にずらす必要あり（幅 '+fmt(P.sW,0)+' mm）'
+      :'横方向に回避（|oy| '+fmt(Math.abs(P.oy),0)+' ≧ W/2 '+fmt(P.sW/2,0)+'）',
+      Math.abs(P.oy)<P.sW/2?'warn':'good'],
   ]);
   $('loadList').innerHTML=rowsHTML([
     ['1脚あたり垂直力',fmt(Fy,1)+' N（'+fmt(Fy/G,2)+' kgf）'],
