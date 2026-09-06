@@ -20,7 +20,7 @@ quadleg-rl/
 2. **GitHub に push** — `git push`
 3. **Colab で学習** — `notebooks/01_go1_playground.ipynb` を Colab で開く
    （GitHub 上のファイルを `https://colab.research.google.com/github/yosihitoyasudasub/quadleg-rl/blob/main/notebooks/01_go1_playground.ipynb` で直接開ける）。
-   セル 2 で `git clone`/`pull`、セル 5 で学習、セル 6-7 で動画。
+   セル 2 で `git clone`/`pull`、セル 5 で学習、セル 6 で継続学習（チェックポイント再開）、セル 7 で指令追従の診断、セル 8-9 で動画。
 4. チェックポイントと動画は Google Drive `MyDrive/quadleg-rl/logs/` に残る。
 
 ## ローカルで動作確認（CPU、任意）
