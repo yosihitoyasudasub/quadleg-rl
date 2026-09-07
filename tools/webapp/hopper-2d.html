@@ -107,6 +107,14 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="kd"><label><b>速度ゲイン</b><span class="sym">Kd N·m·s</span></label><input type="number" step="0.01"><input type="range" min="0" max="5" step="0.01"></div>
       <p class="hint">内部 PD は物理ステップ毎に動作（Dynamixel の内蔵ループ相当）。ホストからの目標更新（位置目標またはトルク指令）だけが制御周期で制限される。</p>
     </fieldset>
+    <fieldset><legend>蓄勢方式</legend>
+      <div class="row" data-k="chgMode"><label><b>バネを縮める方法</b><span class="sym">mode</span></label><select><option value="0">A 着地エネルギー（SLIP・現行）</option><option value="1">C 飛行中蓄勢＋ラッチ（Bow Leg）</option></select></div>
+      <div class="row" data-k="chgPre"><label><b>目標蓄勢量</b><span class="sym">δpre mm</span></label><input type="number" step="5"><input type="range" min="0" max="120" step="5"></div>
+      <div class="row" data-k="chgR"><label><b>巻取り腕（蓄勢の減速比）</b><span class="sym">rc mm/rad</span></label><input type="number" step="0.5"><input type="range" min="0.5" max="120" step="0.5"></div>
+      <div class="row" data-k="chgSv"><label><b>蓄勢モータ</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option></select></div>
+      <div class="row" data-k="chgRel"><label><b>ラッチ解放</b><span class="sym">release</span></label><select><option value="0">最大圧縮で解放（Bow Leg）</option><option value="1">接地と同時に解放</option></select></div>
+      <p class="hint">C は飛行中にウインチでバネを縮め、ラッチが保持する。接地中に解放して着地エネルギーと一緒に放出する。蓄勢の力ループは脚の内部（弦）で閉じるので、脚サーボには乗らない。<b>飛行時間内に巻き切れるか</b>が成立条件。</p>
+    </fieldset>
     <fieldset><legend>制御（Raibert）</legend>
       <div class="row" data-k="rate"><label><b>制御周期</b><span class="sym">Hz</span></label><select><option value="50">50</option><option value="100">100</option><option value="200">200</option><option value="500">500</option><option value="1000">1000</option></select></div>
       <div class="row" data-k="hdes"><label><b>目標ホップ高</b><span class="sym">cm</span></label><input type="number" step="0.5"><input type="range" min="0" max="20" step="0.5"></div>
@@ -141,6 +149,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
         <span><i style="background:var(--link)"></i>下腿</span>
         <span><i style="background:var(--spring)"></i>直列バネ</span>
         <span><i style="background:var(--accent)"></i>接地力</span>
+        <span><i style="background:var(--good)"></i>ラッチの弦（蓄勢中）</span>
         <span><i style="background:var(--ink3)"></i>重心軌跡</span>
         <span>× 飛行中の足先目標</span>
       </div>
@@ -161,9 +170,12 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     </div>
     <div class="sectionTitle">前回サイクル</div>
     <dl id="cycList"></dl>
+    <div class="sectionTitle">蓄勢（モード C）</div>
+    <dl id="chgList"></dl>
     <div class="sectionTitle">現在</div>
     <dl id="nowList"></dl>
-    <p class="note">胴体は剛体、リンクは質量なし（下腿相当は足質量に含める）。サーボはギヤ比²×ロータ慣性の反射慣性を持ち、トルク─速度直線（<code>τ = stall·(1−|ω|/ω₀)</code>）で飽和。飛行中は位置 PD、接地中は「電流制御」なら脚長インピーダンス＋股トルク（<code>τ = Jᵀ F</code>）を制御周期ごとに送る。直列バネは足先方向のみ（自然長で底付き）、横方向は剛。接地はバネダンパ＋クーロン摩擦。物理は固定 0.25 ms。速度・接地・姿勢は真値（推定誤差なし）。成立可否の判断用で、学習用ではない。</p>
+    <p class="note">胴体は剛体、リンクは質量なし（下腿相当は足質量に含める）。サーボはギヤ比²×ロータ慣性の反射慣性を持ち、トルク─速度直線（<code>τ = stall·(1−|ω|/ω₀)</code>）で飽和。飛行中は位置 PD、接地中は「電流制御」なら脚長インピーダンス＋股トルク（<code>τ = Jᵀ F</code>）を制御周期ごとに送る。直列バネは足先方向のみ（自然長で底付き）、横方向は剛。接地はバネダンパ＋クーロン摩擦。物理は固定 0.25 ms。速度・接地・姿勢は真値（推定誤差なし）。成立可否の判断用で、学習用ではない。<br>
+<b>蓄勢モード C</b> は Bow Leg Hopper（Zeglin &amp; Brown, CMU 1998）方式。飛行中に専用の巻取りモータがバネを δpre まで縮め、ラッチ（弦）が保持する。巻取りトルクは <code>τ = ks·δ·rc</code>、巻取り速度はそのモータのトルク─速度直線から決まる。力ループは足と脚先端の間で閉じるので胴体にも脚サーボにも反力は出ない。接地中は弦がたるみ、最大圧縮でラッチが外れて<b>蓄勢ぶん＋着地ぶんが一緒に</b>放出される。成立条件は「飛行時間内に巻き切れること」で、必要な平均パワーは <code>½·ks·δpre² / 飛行時間</code>。</p>
   </aside>
 </main>
 
@@ -181,7 +193,8 @@ const SERVOS=[
 const DEF={mb:2.0,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:60,l2:160,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:120,kd:2.2,
-           rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.02,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300};
+           rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.02,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
+           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0};
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -218,14 +231,16 @@ function resetSim(){
   const Ln=P.L0/1000-g.ls0-P.retract/1000;
   let r=null, sc=1; for(let i=0;i<10&&!r;i++){r=ik(g,0,-Ln*sc);sc*=0.95;}
   if(!r)r={t1:-Math.PI/2,t2:-Math.PI/2};
-  S={t:0,x:0,y:standH()+dropCm/100,th:0,vx:0,vy:0,om:0,
+  const pre=P.chgMode===1?P.chgPre/1000:0;      // モード C は蓄勢済みの姿勢で落とす
+  S={t:0,x:0,y:(P.hb+P.L0-P.retract)/1000-pre+dropCm/100,th:0,vx:0,vy:0,om:0,
      t1:r.t1,w1:0,t2:r.t2,w2:0,tg1:r.t1,tg2:r.t2,tmode:false,tc1:0,tc2:0,
      fx:0,fy:0,vfx:0,vfy:0,anchor:null,contact:false,delta:0,Fn:0,Ft:0,tau1:0,tau2:0,
-     broken:false,fallen:false,lastFk:null,lastJ:null};
+     broken:false,fallen:false,lastFk:null,lastJ:null,
+     dLatch:pre,latched:P.chgMode===1,chgTau:0,chgW:0,chgTime:0,chgStall:false};
   const k=kin();
-  S.fx=k.rest.x; S.fy=k.rest.y;
-  C={phase:'FLIGHT',Ts:0.12,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tick:-1,hops:0,
-     pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,tip:null,vApex:0};
+  S.fx=k.rest.x-pre*k.u.x; S.fy=k.rest.y-pre*k.u.y;   // 足はラッチ位置（バネを δpre 縮めた長さ）
+  C={phase:'FLIGHT',Ts:0.12,Tf:0.2,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tTO:0,tick:-1,hops:0,
+     pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0};
   log=[]; trail=[]; logT=0; trailT=0;
 }
 function kin(){
@@ -256,6 +271,20 @@ function motor(tg,t,w,tc){
   const avail=(tau*w>0)?P.stall*Math.max(0,1-Math.abs(w)/wnl):P.stall;
   return clamp(tau,-avail,avail);
 }
+// 蓄勢ドライブ（モード C）。飛行中だけウインチがバネを巻き、ラッチが保持する。
+// 巻取りに要るトルク τ = ks·δ·rc を蓄勢モータのトルク─速度直線に載せて巻取り速度を決める。
+// 力ループは脚の内部で閉じる（弦）ので、胴体にも脚サーボにも反力は出ない。
+function chargeStep(dt){
+  if(P.chgMode!==1||!S.latched){S.chgW=0;S.chgTau=0;S.chgStall=false;return;}
+  const pre=P.chgPre/1000, rc=P.chgR/1000, sv=SERVOS[P.chgSv]||SERVOS[0];
+  S.chgTau=P.ks*S.dLatch*rc;
+  if(S.contact||S.dLatch>=pre){S.chgW=0;S.chgStall=false;return;}   // 接地中は巻かない（弦はたるむ）
+  if(S.chgTau>=sv.stall){S.chgW=0;S.chgStall=true;return;}          // ストール: これ以上巻けない
+  S.chgStall=false;
+  S.chgW=sv.nl*2*Math.PI/60*(1-S.chgTau/sv.stall);
+  S.dLatch=Math.min(pre,S.dLatch+rc*S.chgW*dt);
+  S.chgTime+=dt;
+}
 function physStep(dt){
   const k=kin();
   // 直列バネ（足先方向）＋横方向擬似拘束
@@ -264,8 +293,12 @@ function physStep(dt){
   const cs=2*P.zs*Math.sqrt(P.ks*P.mf), cl=2*Math.sqrt(KLAT*P.mf);
   let fu=-(P.ks*du+cs*dvu); const fn=-(KLAT*dn+cl*dvn);
   if(-du>k.g.ls0)fu+=KLAT*(-du-k.g.ls0);                     // バネ底付き（自然長まで縮んだら剛）
-  const Fs={x:fu*k.u.x+fn*k.n.x, y:fu*k.u.y+fn*k.n.y};     // バネが足に及ぼす力
+  // ラッチ（Bow Leg の弦）: 蓄勢量 dLatch より伸びるのを止める一方向ストッパ。圧縮方向は自由。
+  // 足と脚先端の間で閉じる内力なので、脚サーボ側は既存の −Fs でそのまま釣り合う。
+  if(S.latched&&S.dLatch>0&&-du<S.dLatch)fu-=KLAT*(S.dLatch+du)+cl*dvu;
+  const Fs={x:fu*k.u.x+fn*k.n.x, y:fu*k.u.y+fn*k.n.y};     // バネ＋ラッチが足に及ぼす力
   S.delta=-du;
+  chargeStep(dt);
   // 接地
   let Fn=0,Ft=0;
   if(S.fy<0){
@@ -313,12 +346,21 @@ function control(){
       C.last={apex:C.apex,v:S.vx,Ts:C.Ts,dL:C.dL,...C.pk};
       C.pk={Fn:0,tau:0,w:0,delta:0,pow:0};
     }
-    if(loaded){C.phase='COMP';C.tTD=now;}
+    if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);}
   }else{
     if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002)C.phase='THRUST';
-    if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';}
+    if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';C.tTO=now;}
   }
   C.vyPrev=S.vy; C.deltaPrev=S.delta;
+  // ラッチの係合／解放（モード C）
+  if(P.chgMode===1){
+    if(!S.latched&&!S.contact){S.latched=true;S.dLatch=0;S.chgTime=0;}   // 離陸したら巻き直す
+    else if(S.latched&&S.contact&&(P.chgRel===1||C.phase==='THRUST')){
+      C.lastChg={pre:S.dLatch,E:0.5*P.ks*S.dLatch*S.dLatch,t:S.chgTime,Tf:C.Tf,
+                 tau:P.ks*S.dLatch*P.chgR/1000,stalled:S.chgStall,full:S.dLatch>=P.chgPre/1000-1e-6};
+      S.latched=false;S.dLatch=0;                                        // 解放: 蓄勢＋着地ぶんが一気に出る
+    }
+  }else if(S.latched){S.latched=false;S.dLatch=0;}
   const Lr=P.L0/1000-P.retract/1000-g.ls0;         // 引込み時のリンク先端長（股→先端）
   let tip;
   S.tmode=false;
@@ -353,7 +395,9 @@ function control(){
   if(r){S.tg1=unwrap(r.t1,S.t1);S.tg2=unwrap(r.t2,S.t2);C.tip={x:tip.x*sc,y:tip.y*sc};}
 }
 function unwrap(target,ref){let d=target-ref;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return ref+d;}   // ±180° の折返し対策
-function standH(){return (P.hb+P.L0-P.retract)/1000;}   // 飛行姿勢で足先が接地する胴体高さ
+// 飛行姿勢で足先が接地する胴体高さ。モード C は実際に巻けた蓄勢量ぶん脚が短くなる
+// （目標 δpre ではなく実測 dLatch を使う。巻き切れていないと脚が伸びたままなので）
+function standH(){return (P.hb+P.L0-P.retract)/1000-(S&&S.dLatch>0?S.dLatch:0);}
 let logT=0, trailT=0;
 function advance(simDt){
   const ctrlDt=1/P.rate;
@@ -379,7 +423,8 @@ function bind(){
     const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
     const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
       if(k==='servo')applyServo();else if(['stall','nl','jr','kp','kd'].includes(k))P.servo=9;
-      if(k==='rate'||k==='hipMode')P[k]=Math.round(v);
+      if(['rate','hipMode','chgMode','chgSv','chgRel'].includes(k))P[k]=Math.round(v);
+      if(k==='chgMode'||k==='chgPre')resetSim();
       sync();save();updateResults();draw();};
     if(num)num.addEventListener('input',e=>set(e.target.value));
     if(rng)rng.addEventListener('input',e=>set(e.target.value));
@@ -403,6 +448,9 @@ function exportText(){
   const L=['# Hopper 2D Sim 設定','params: '+JSON.stringify(P)];
   const c=C.last;
   if(c)L.push(`last cycle: apex ${(c.apex*100).toFixed(1)} cm (target ${P.hdes})  v ${c.v.toFixed(2)} m/s (target ${P.vdes})  Ts ${(c.Ts*1000).toFixed(0)} ms  dL ${(c.dL*1000).toFixed(1)} mm  Fn ${c.Fn.toFixed(0)} N  tau ${c.tau.toFixed(2)} Nm (${(c.tau/P.stall*100).toFixed(0)}%)  w ${(c.w*60/2/Math.PI).toFixed(0)} rpm (${(c.w/(P.nl*2*Math.PI/60)*100).toFixed(0)}%)  delta ${(c.delta*1000).toFixed(1)} mm  P ${c.pow.toFixed(1)} W`);
+  const g=C.lastChg, csv=SERVOS[P.chgSv]||SERVOS[0];
+  L.push('charge mode: '+(P.chgMode===1?`C 飛行中蓄勢＋ラッチ (δpre ${P.chgPre} mm, rc ${P.chgR} mm/rad, ${csv.name}, ${P.chgRel===1?'接地で解放':'最大圧縮で解放'})`:'A 着地エネルギー'));
+  if(P.chgMode===1&&g)L.push(`last charge: ${(g.pre*1000).toFixed(1)}/${P.chgPre} mm  E ${g.E.toFixed(2)} J  wind ${(g.t*1000).toFixed(0)}/${(g.Tf*1000).toFixed(0)} ms  tau ${g.tau.toFixed(3)} Nm (${(g.tau/csv.stall*100).toFixed(0)}%)  ${g.full?'OK':(g.stalled?'STALLED':'TIME-SHORT')}`);
   L.push(`t ${S.t.toFixed(2)} s  hops ${C.hops}  ${S.fallen?'FALLEN':C.phase}`);
   return L.join('\n');
 }
@@ -437,7 +485,20 @@ function updateResults(){
       ['サーボ出力 ピーク',c.pow.toFixed(1)+' W（2個合計）'],
       ['ホップ回数',String(C.hops)],
     ]);
+  }
+  const g=C.lastChg, csv=SERVOS[P.chgSv]||SERVOS[0];
+  if(P.chgMode===1&&g){
+    dlist('chgList',[
+      ['蓄勢量（解放時）',(g.pre*1000).toFixed(1)+' / '+P.chgPre.toFixed(0)+' mm',g.full?'good':'crit'],
+      ['蓄勢エネルギー',g.E.toFixed(2)+' J'],
+      ['巻取り時間 / 飛行時間',(g.t*1000).toFixed(0)+' / '+(g.Tf*1000).toFixed(0)+' ms',g.t>g.Tf*0.95?'warn':'good'],
+      ['巻取りトルク（解放時）',g.tau.toFixed(3)+' N·m（'+(g.tau/csv.stall*100).toFixed(0)+'% of '+csv.name+'）',g.tau>csv.stall?'crit':g.tau>csv.stall*0.8?'warn':'good'],
+      ['判定',g.full?'飛行中に巻き切れた':(g.stalled?'ストール: 巻取り腕 rc を小さく':'時間不足: rc を大きくするか飛行時間を伸ばす'),g.full?'good':'crit'],
+    ]);
   }else{
+    dlist('chgList',[[P.chgMode===1?'（1 ホップ後に表示）':'モード A（着地エネルギーで縮める）','']]);
+  }
+  if(!c){
     ['apex','vel','tauP','wP'].forEach(i=>$(i).textContent='–');['apexb','velb','tauPb','wPb'].forEach(i=>$(i).textContent='–');
     setBar('barA',0);setBar('barT',0);setBar('barW',0);
     dlist('cycList',[['（1 ホップ後に表示）','']]);
@@ -450,6 +511,8 @@ function updateResults(){
     ['ピッチ',(S.th*R2D).toFixed(1)+'°',Math.abs(S.th)>0.5?'crit':Math.abs(S.th)>0.25?'warn':''],
     ['クランク角',(S.t1*R2D).toFixed(0)+'° / '+(S.t2*R2D).toFixed(0)+'°'],
     ['バネ圧縮',(S.delta*1000).toFixed(1)+' mm'],
+    ['ラッチ',P.chgMode!==1?'なし（モード A）':(S.latched?'係合 '+(S.dLatch*1000).toFixed(1)+' mm'+(S.chgStall?'（ストール）':S.chgW>0?'（巻取り中）':'（保持）'):'解放'),
+      P.chgMode!==1?'':(S.chgStall?'crit':S.latched?'warn':'good')],
     ['接地力',S.Fn.toFixed(0)+' N'],
     ['バネ固有振動',fn.toFixed(2)+' Hz（静的沈み '+((P.mb+P.mf)*G/P.ks*1000).toFixed(1)+' mm）'],
     ['リンク',S.broken?'到達不能（伸び切り）':'OK',S.broken?'crit':'good'],
@@ -506,6 +569,14 @@ function drawMech(){
   const nz=8, ex=fx-tip.x, ey=fy-tip.y, nx=-ey, ny=ex, nl=Math.hypot(nx,ny)||1;
   for(let i=1;i<nz;i++){const f=i/nz, s=(i%2?1:-1)*5;ctx.lineTo(tip.x+ex*f+nx/nl*s,tip.y+ey*f+ny/nl*s);}
   ctx.lineTo(fx,fy); ctx.stroke();
+  // ラッチ（係合中は弦を描き、蓄勢量を表示）
+  if(S.latched&&S.dLatch>0){
+    ctx.strokeStyle=css('--good'); ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+    ctx.beginPath(); ctx.moveTo(tip.x,tip.y); ctx.lineTo(fx,fy); ctx.stroke(); ctx.setLineDash([]);
+    const mx=(tip.x+fx)/2, my=(tip.y+fy)/2;
+    ctx.fillStyle=css('--good'); ctx.font='11px ui-monospace,monospace'; ctx.textAlign='left';
+    ctx.fillText('弦 '+(S.dLatch*1000).toFixed(0)+' mm'+(S.chgStall?' STALL':''),mx+8,my);
+  }
   ctx.fillStyle=css('--spring'); ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
   // 接地力
   if(S.Fn>0){const sc=0.15/((P.mb+P.mf)*G)*ppm; ctx.strokeStyle=css('--accent'); ctx.lineWidth=2.5;
