@@ -125,7 +125,8 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="kh"><label><b>高さゲイン</b><span class="sym">Kh</span></label><input type="number" step="0.05"><input type="range" min="0" max="2" step="0.05"></div>
       <div class="row" data-k="cn"><label><b>中立点係数（×Ts/2）</b><span class="sym">cn</span></label><input type="number" step="0.05"><input type="range" min="0" max="1.5" step="0.05"></div>
       <div class="row" data-k="kv"><label><b>速度ゲイン</b><span class="sym">Kv s</span></label><input type="number" step="0.005"><input type="range" min="0" max="0.1" step="0.005"></div>
-      <p class="hint">前進速度ループ 1・2 は実験用（HANDOFF §8.7）。a・b は標準設定の定常ホップで強制実験して測った値で、構成を変えたら測り直す。</p>
+      <p class="hint">中立点係数 cn は接地写像から <code>(a−1)/|b| ÷ (Ts/2)</code> で決める（標準設定は 0.5。5 cm 専用なら 0.4 で追従 95 %、HANDOFF §8.7）。a・b は定常ホップで強制実験して測った値で、構成を変えたら測り直す。</p>
+      <div class="row" data-k="vRamp"><label><b>目標速度の変化上限（0=なし）</b><span class="sym">m/s / hop</span></label><input type="number" step="0.01"><input type="range" min="0" max="0.2" step="0.01"></div>
       <div class="row" data-k="vLoop"><label><b>前進速度ループ</b><span class="sym">mode</span></label><select><option value="0">Raibert（前回 Ts）</option><option value="1">予測中立点（Ts を飛行中に予測）</option><option value="2">デッドビート（接地写像を同定）</option></select></div>
       <div class="row" data-k="vA"><label><b>速度増幅率 a（設計値）</b><span class="sym">v_out/v_in</span></label><input type="number" step="0.1"><input type="range" min="0.5" max="6" step="0.1"></div>
       <div class="row" data-k="vB"><label><b>足先感度 b（設計値）</b><span class="sym">(m/s)/m</span></label><input type="number" step="5"><input type="range" min="-100" max="-5" step="5"></div>
@@ -201,8 +202,8 @@ const SERVOS=[
 const DEF={mb:1.5,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:90,l2:130,ls0:80,ks:900,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:30,kd:1.0,
-           rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.01,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
-           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0,vLoop:0,vLam:0.3,vA:3.1,vB:-50};
+           rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.03,cn:0.5,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
+           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0,vLoop:1,vLam:0.3,vA:3.1,vB:-43,vRamp:0.02};
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -274,7 +275,7 @@ function resetSim(){
      pk:{Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
      tauF1:0,tauF2:0,wF1:0,wF2:0,
      rTD:0,rTH:0,tTH:0,lastR:null,
-     vin:0,xfTD:0,tsPred:0,tsAtTD:0,tsCorr:1,hist:[],map:null,xfPrev:0,xfCmd:0};
+     vin:0,xfTD:0,tsPred:0,tsAtTD:0,tsCorr:1,hist:[],map:null,xfPrev:0,xfCmd:0,vdesEff:0};
   log=[]; trail=[]; logT=0; trailT=0;
 }
 function kin(){
@@ -381,6 +382,7 @@ function control(){
   if(C.phase==='FLIGHT'){
     if(C.vyPrev>0&&S.vy<=0){
       C.apex=S.y-standH(); C.vApex=S.vx; C.hops++;
+      C.vdesEff=P.vRamp>0?clamp(P.vdes,C.vdesEff-P.vRamp,C.vdesEff+P.vRamp):P.vdes;   // 目標速度のランプ（ホップ単位）
       C.dL=clamp(C.dL+P.kh*(P.hdes/100-C.apex),0,P.dlmax/1000);
       C.last={apex:C.apex,v:S.vx,Ts:C.Ts,dL:C.dL,...C.pk};
       C.pk={Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0};
@@ -413,9 +415,10 @@ function control(){
     const om=Math.sqrt(P.ks/(P.mb+P.mf)), v0=Math.sqrt(Math.max(0,S.vy*S.vy+2*G*Math.max(0,S.y-standH())));
     C.tsPred=clamp((2/om)*(Math.PI-Math.atan(v0*om/G))*C.tsCorr,0.03,0.6);
     const TsUse=P.vLoop===0?C.Ts:C.tsPred;
-    let xf=P.cn*S.vx*TsUse/2+P.kv*(S.vx-P.vdes);
+    const vd=P.vRamp>0?C.vdesEff:P.vdes;
+    let xf=P.cn*S.vx*TsUse/2+P.kv*(S.vx-vd);
     if(P.vLoop===2){                                 // デッドビート: v_out = a·v_in + b·xf + c を vdes に合わせる
-      const cc=C.map?C.map.c:0, xdb=(P.vdes-P.vA*S.vx-cc)/P.vB;
+      const cc=C.map?C.map.c:0, xdb=(vd-P.vA*S.vx-cc)/P.vB;
       xf=xf+P.vLam*(xdb-xf);
       xf=clamp(xf,C.xfPrev-0.02,C.xfPrev+0.02);      // 1 ホップあたりの変化を ±20 mm に制限
     }
@@ -607,7 +610,7 @@ function updateResults(){
     ['リンク',S.broken?'到達不能（伸び切り）':'OK',S.broken?'crit':'good'],
     ['接地時間 予測 / 実測',(C.tsPred*1000).toFixed(0)+' / '+(C.Ts*1000).toFixed(0)+' ms（補正 ×'+C.tsCorr.toFixed(2)+'）'],
     ['接地写像 a / b / c',C.map?C.map.a.toFixed(2)+' / '+C.map.b.toFixed(0)+' / '+C.map.c.toFixed(3)+'（'+C.map.n+' hop）':'未同定'],
-    ['足先配置 指令',(C.xfCmd*1000).toFixed(1)+' mm'],
+    ['足先配置 指令',(C.xfCmd*1000).toFixed(1)+' mm（目標速度 '+(P.vRamp>0?C.vdesEff:P.vdes).toFixed(2)+' m/s）'],
   ]);
   $('clock').textContent='t = '+S.t.toFixed(3)+' s';
 }
