@@ -19,7 +19,7 @@ const HTML = path.join(__dirname, 'webapp', 'hopper-2d.html');
 
 function build(htmlPath = HTML) {
   const html = fs.readFileSync(htmlPath, 'utf8');
-  const m = html.match(/<script>\n([\s\S]*)<\/script>/);
+  const m = html.match(/<script>\r?\n([\s\S]*)<\/script>/);   // CRLF チェックアウトでも動くように
   if (!m) throw new Error('hopper-2d.html から <script> を取り出せませんでした');
 
   // IIFE の殻を外し、内部の状態と関数を返させる
