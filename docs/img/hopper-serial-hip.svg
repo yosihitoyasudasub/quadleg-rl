@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" font-family="Segoe UI, Meiryo, sans-serif" font-size="14">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+  </defs>
+  <rect width="960" height="640" fill="#fff"/>
+  <text x="20" y="30" font-size="18" font-weight="bold">案 B: 直列の股ピッチ ＋ 1 自由度の脚長リンク ＋ ロール（サーボ 3 個）</text>
+
+  <!-- ===== 側面図 ===== -->
+  <text x="40" y="70" font-size="15" font-weight="bold">側面図（ピッチ面）</text>
+
+  <!-- 地面 -->
+  <line x1="40" y1="560" x2="600" y2="560" stroke="#555" stroke-width="2"/>
+  <path d="M40,560 l-8,10 M80,560 l-8,10 M120,560 l-8,10 M160,560 l-8,10 M200,560 l-8,10 M240,560 l-8,10 M280,560 l-8,10 M320,560 l-8,10 M360,560 l-8,10 M400,560 l-8,10 M440,560 l-8,10 M480,560 l-8,10 M520,560 l-8,10 M560,560 l-8,10 M600,560 l-8,10" stroke="#999"/>
+
+  <!-- 胴体 -->
+  <rect x="150" y="100" width="300" height="150" rx="8" fill="#eef2f7" stroke="#4a6fa5" stroke-width="2.5"/>
+  <text x="300" y="125" text-anchor="middle" fill="#4a6fa5">胴体 2.0 kg（バッテリー・制御基板）</text>
+  <circle cx="300" cy="175" r="4" fill="#4a6fa5"/>
+  <text x="314" y="168" fill="#4a6fa5" font-size="12">重心＝股ピボット</text>
+
+  <!-- 股ピッチサーボ①（胴体に固定、出力軸＝股ピボット） -->
+  <rect x="200" y="158" width="60" height="34" rx="3" fill="#ffe3c2" stroke="#c9762b" stroke-width="2"/>
+  <text x="230" y="180" text-anchor="middle" font-size="12" fill="#8a4b10">XM540 ①</text>
+  <line x1="260" y1="175" x2="291" y2="175" stroke="#c9762b" stroke-width="3"/>
+  <!-- 股ピボット -->
+  <circle cx="300" cy="175" r="9" fill="#fff" stroke="#c0392b" stroke-width="2.5"/>
+  <text x="314" y="196" fill="#c0392b" font-size="12">① の出力軸を直結</text>
+
+  <!-- 台座（脚フレーム）：股ピボットから下へ -->
+  <g id="carrier">
+    <rect x="286" y="175" width="28" height="150" rx="4" fill="#dfe8f3" stroke="#4a6fa5" stroke-width="2"/>
+    <!-- 脚長サーボ②（台座に固定） -->
+    <rect x="270" y="262" width="60" height="34" rx="3" fill="#ffe3c2" stroke="#c9762b" stroke-width="2"/>
+    <text x="300" y="284" text-anchor="middle" font-size="12" fill="#8a4b10">XM540 ②</text>
+    <!-- 同期歯車（左右のクランクを鏡像で連動） -->
+    <circle cx="280" cy="330" r="20" fill="#fff" stroke="#555" stroke-width="2" stroke-dasharray="3 2"/>
+    <circle cx="320" cy="330" r="20" fill="#fff" stroke="#555" stroke-width="2" stroke-dasharray="3 2"/>
+    <circle cx="280" cy="330" r="4" fill="#555"/><circle cx="320" cy="330" r="4" fill="#555"/>
+    <!-- クランク l1=80 -->
+    <line x1="280" y1="330" x2="205" y2="357" stroke="#4a6fa5" stroke-width="6" stroke-linecap="round"/>
+    <line x1="320" y1="330" x2="395" y2="357" stroke="#4a6fa5" stroke-width="6" stroke-linecap="round"/>
+    <!-- 下腿 l2=140 -->
+    <line x1="205" y1="357" x2="300" y2="460" stroke="#2f9e8f" stroke-width="5" stroke-linecap="round"/>
+    <line x1="395" y1="357" x2="300" y2="460" stroke="#2f9e8f" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="205" cy="357" r="4" fill="#fff" stroke="#333"/><circle cx="395" cy="357" r="4" fill="#fff" stroke="#333"/>
+    <circle cx="300" cy="460" r="5" fill="#fff" stroke="#333" stroke-width="1.5"/>
+    <!-- 直列バネ ls0=80 -->
+    <polyline points="300,460 300,470 288,478 312,486 288,494 312,502 288,510 312,518 288,526 312,534 300,542 300,552" fill="none" stroke="#c9762b" stroke-width="2.5"/>
+    <!-- 足 -->
+    <circle cx="300" cy="554" r="7" fill="#c9762b"/>
+  </g>
+
+  <!-- 寸法・注記 -->
+  <text x="150" y="330" font-size="12" fill="#444">台座（脚フレーム）</text>
+  <text x="345" y="336" font-size="12" fill="#444">同期歯車：左右クランクを鏡像で連動</text>
+  <text x="345" y="352" font-size="12" fill="#444">→ 5 節リンクは脚長だけの 1 自由度</text>
+  <text x="60" y="440" font-size="12" fill="#2f9e8f">l1 = 80 / l2 = 140 / d0 = 40 mm</text>
+  <text x="330" y="500" font-size="12" fill="#c9762b">直列バネ 1200 N/m</text>
+  <text x="330" y="515" font-size="12" fill="#c9762b">ストローク 80 mm</text>
+  <text x="330" y="545" font-size="12" fill="#c9762b">足（0.05 kg 以下）</text>
+
+  <!-- 動きの矢印：掃引（股回り）と脚長 -->
+  <path d="M215,290 A120,120 0 0 0 385,290" fill="none" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="40" y="262" fill="#c0392b" font-size="13">① 脚の向き</text>
+  <text x="40" y="278" fill="#c0392b" font-size="12">（足先配置・姿勢・掃引）</text>
+  <text x="40" y="294" fill="#c0392b" font-size="12">0.3 m/s の掃引 = 12 rpm</text>
+  <text x="40" y="310" fill="#c0392b" font-size="12">（XM540 の 40 %）</text>
+  <line x1="470" y1="330" x2="470" y2="440" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="470" y1="440" x2="470" y2="330" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="482" y="380" fill="#c0392b" font-size="13">② 脚長</text>
+  <text x="482" y="396" fill="#c0392b" font-size="12">（蹴り出し・引込み）</text>
+
+  <!-- ===== 正面図 ===== -->
+  <text x="660" y="70" font-size="15" font-weight="bold">正面図（ロール面）</text>
+  <line x1="640" y1="560" x2="930" y2="560" stroke="#555" stroke-width="2"/>
+  <rect x="705" y="100" width="160" height="150" rx="8" fill="#eef2f7" stroke="#4a6fa5" stroke-width="2.5"/>
+  <text x="785" y="125" text-anchor="middle" fill="#4a6fa5">胴体</text>
+  <!-- ロールサーボ③ 胴体下面、軸は前後方向（紙面垂直） -->
+  <rect x="755" y="236" width="60" height="34" rx="3" fill="#ffe3c2" stroke="#c9762b" stroke-width="2"/>
+  <text x="785" y="258" text-anchor="middle" font-size="12" fill="#8a4b10">③ ロール</text>
+  <circle cx="785" cy="253" r="7" fill="#fff" stroke="#c0392b" stroke-width="2"/>
+  <text x="825" y="258" font-size="12" fill="#c0392b">軸＝前後方向</text>
+  <!-- ロールブラケット → 股フレーム（①②はこの下に付く） -->
+  <rect x="770" y="270" width="30" height="40" fill="#dfe8f3" stroke="#4a6fa5" stroke-width="2"/>
+  <rect x="757" y="310" width="56" height="30" rx="3" fill="#ffe3c2" stroke="#c9762b" stroke-width="2"/>
+  <text x="785" y="330" text-anchor="middle" font-size="11" fill="#8a4b10">① ②（側面図）</text>
+  <!-- 脚（正面から見ると 1 本） -->
+  <line x1="785" y1="340" x2="785" y2="470" stroke="#2f9e8f" stroke-width="6" stroke-linecap="round"/>
+  <polyline points="785,470 785,478 775,484 795,490 775,496 795,502 775,508 795,514 775,520 795,526 785,532 785,552" fill="none" stroke="#c9762b" stroke-width="2.5"/>
+  <circle cx="785" cy="554" r="7" fill="#c9762b"/>
+  <path d="M735,420 A60,60 0 0 1 835,420" fill="none" stroke="#c0392b" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="640" y="395" fill="#c0392b" font-size="12">③ 横方向の足先配置（3D では左右バランス）</text>
+
+  <!-- ===== 現行との対比 ===== -->
+  <rect x="40" y="575" width="890" height="60" fill="#f6f7f9" stroke="#dfe3e8"/>
+  <text x="52" y="592" font-size="12" fill="#333">現行: 5 節リンクの 2 サーボで「脚長」と「向き」を同時に作る。掃引はクランク 2 本の同方向回転で、クランク 1 rad あたり足先 0.11 m。</text>
+  <text x="52" y="607" font-size="12" fill="#333">　　　0.3 m/s の掃引にクランク 26 rpm（無負荷の 87 %）が要り、姿勢トルクを出す余地がない。</text>
+  <text x="52" y="622" font-size="12" fill="#333">案 B: 「向き」は股ピボットに直結した ① が受け持ち、掃引 1.25 rad/s = 12 rpm（40 %）。② は左右対称に拘束した 5 節で脚長だけを動かす。サーボ数は 3 個のまま。</text>
+</svg>
