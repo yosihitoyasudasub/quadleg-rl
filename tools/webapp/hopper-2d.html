@@ -511,6 +511,10 @@ function updateResults(){
       ['接地力 ピーク',c.Fn.toFixed(0)+' N ('+(c.Fn/((P.mb+P.mf)*G)).toFixed(1)+'×mg)'],
       ['バネ圧縮 最大',(c.delta*1000).toFixed(1)+' mm'+(c.delta>=P.ls0/1000?'（底付き）':''),c.delta>=P.ls0/1000?'crit':''],
       ['サーボ出力 ピーク',c.pow.toFixed(1)+' W（2個合計）'],
+      // ω が無負荷速度を超える = バネの解放が脚サーボを押し戻している。
+      // 減速比 272:1 / 238:1 の DYNAMIXEL は逆駆動できないので、実機ではギヤが壊れる。設計上の失格条件。
+      ['逆駆動（ω > 無負荷速度）',c.w/wnl>1.05?'発生 '+(c.w/wnl*100).toFixed(0)+'%（ギヤ破損の危険）':'なし',
+        c.w/wnl>1.05?'crit':'good'],
       ['ホップ回数',String(C.hops)],
     ]);
   }
