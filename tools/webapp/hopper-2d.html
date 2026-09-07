@@ -125,6 +125,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="kh"><label><b>高さゲイン</b><span class="sym">Kh</span></label><input type="number" step="0.05"><input type="range" min="0" max="2" step="0.05"></div>
       <div class="row" data-k="cn"><label><b>中立点係数（×Ts/2）</b><span class="sym">cn</span></label><input type="number" step="0.05"><input type="range" min="0" max="1.5" step="0.05"></div>
       <div class="row" data-k="kv"><label><b>速度ゲイン</b><span class="sym">Kv s</span></label><input type="number" step="0.005"><input type="range" min="0" max="0.1" step="0.005"></div>
+      <div class="row" data-k="thrustMs"><label><b>蹴り出し時間の上限（0=無制限）</b><span class="sym">ms</span></label><input type="number" step="5"><input type="range" min="0" max="150" step="5"></div>
       <div class="row" data-k="hipMode"><label><b>接地中の制御方式</b><span class="sym">mode</span></label><select><option value="1">電流制御（トルク指令、XM540 等）</option><option value="0">位置指令のみ（XL-320 相当）</option></select></div>
       <div class="row" data-k="kr"><label><b>脚長インピーダンス 剛性</b><span class="sym">Kr N/m</span></label><input type="number" step="100"><input type="range" min="500" max="20000" step="100"></div>
       <div class="row" data-k="dr"><label><b>脚長インピーダンス 減衰</b><span class="sym">Dr N·s/m</span></label><input type="number" step="10"><input type="range" min="0" max="600" step="10"></div>
@@ -196,7 +197,7 @@ const DEF={mb:2.0,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:60,l2:160,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:120,kd:2.2,
            rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.02,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
-           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0};
+           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0};
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -266,7 +267,7 @@ function resetSim(){
   S.fx=k.rest.x-pre*k.u.x; S.fy=k.rest.y-pre*k.u.y;   // 足はラッチ位置（バネを δpre 縮めた長さ）
   C={phase:'FLIGHT',Ts:0.12,Tf:0.2,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tTO:0,tick:-1,hops:0,
      pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
-     rTD:0,rTH:0,lastR:null};
+     rTD:0,rTH:0,tTH:0,lastR:null};
   log=[]; trail=[]; logT=0; trailT=0;
 }
 function kin(){
@@ -374,7 +375,7 @@ function control(){
     }
     if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);C.rTD=Math.abs(ratioNow(k));}
   }else{
-    if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002){C.phase='THRUST';C.rTH=Math.abs(ratioNow(k));}
+    if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002){C.phase='THRUST';C.rTH=Math.abs(ratioNow(k));C.tTH=now;}
     if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';C.tTO=now;
       C.lastR={TD:C.rTD,TH:C.rTH,TO:Math.abs(ratioNow(k))};}
   }
@@ -404,7 +405,12 @@ function control(){
     if(P.hipMode===1){
       // 電流制御: 半径方向はインピーダンス（Kr, Dr）、接線方向は目標力 Ft=Mcmd/L。τ = Jᵀ F を制御周期ごとに送る
       const er=L-Ln, vr=(J[0][0]*S.w1+J[0][1]*S.w2)*u.x+(J[1][0]*S.w1+J[1][1]*S.w2)*u.y;
-      const Fr=P.kr*er-((C.phase==='THRUST'&&er>0.003)?0:P.dr*vr), Ft=Mcmd/Ln;   // 蹴り出し中（伸展未達）は減衰なしで飽和まで押す
+      // 蹴り出し中（伸展未達）は減衰なしで飽和まで押す。ただし thrustMs > 0 ならその時間で打ち切る。
+      // サーボが速度飽和していると ΔL に到達できず、押しが接地の後半ずっと続いて
+      // 傾いた脚に沿って前へ押してしまう（前進速度が入口の 3.2 倍に増幅、HANDOFF §8.1）。
+      const thrusting=C.phase==='THRUST'&&er>0.003&&(P.thrustMs<=0||(now-C.tTH)<P.thrustMs/1000);
+      S.thrusting=thrusting;
+      const Fr=P.kr*er-(thrusting?0:P.dr*vr), Ft=Mcmd/Ln;
       const F={x:Fr*u.x+Ft*nb.x, y:Fr*u.y+Ft*nb.y};
       S.tc1=J[0][0]*F.x+J[1][0]*F.y; S.tc2=J[0][1]*F.x+J[1][1]*F.y; S.tmode=true;
       S.tg1=S.t1; S.tg2=S.t2; C.tip={x:L*u.x,y:L*u.y}; C.dbg={er,Fr,Ft,vr}; return;
