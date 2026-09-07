@@ -18,6 +18,7 @@ XL-320 が 14 個以上あることが判明したため、**4 脚 × 3 自由�
 | 脚設計ツール（Web） | **`tools/webapp/quad-leg-5bar.html`（現行・5 節リンク）**。足先ドラッグ、到達範囲・内角・トルク掃引・正面図・外転トルクを表示。`quad-leg-linkage.html` は旧四節リンク版（参考用に保持） |
 | 一本脚ホッパー 2D シミュレーター | **`tools/webapp/hopper-2d.html`**（2026-09-07 作成、Node で検証済み）。蓄勢方式 A（着地エネルギー）/ C（飛行中蓄勢＋ラッチ）を切替比較できる。§8 参照 |
 | 設計計算スクリプト | `tools/leg_torque.py`。5 節（`ik5`/`fk5`/`stat5`）、四節（`fk`/`statics`）、伝達比（`ratio5`/`ratio_profile`）、並列バネ（`par_spring5`）|
+| ホッパーの検証ハーネス | `tools/hopper_harness.js`（`hopper-2d.html` をブラウザなしで実行）＋ `tools/hopper_sweeps.js`（§8.2 / §8.5 / §8.6 の数字を再現）。`node tools/hopper_sweeps.js` |
 | Fusion 360 アドイン | `tools/fusion/QuadLegLinkage/` に配置済み。リボンボタン・ダイアログ・前回値記憶まで実装。Fusion 上での実行テストは**未実施** |
 | 学習コード | `quadleg_rl/train.py`。**Colab で動作確認済み**。`train()` / `rollout()` / `summarize()` / `probe()` / `render_video()` / `plot_history()` |
 | Colab ノートブック | `notebooks/01_go1_playground.ipynb`。**通しで実行し歩行を確認済み**（結果は §4.1）。トラブルシュート表つき |
