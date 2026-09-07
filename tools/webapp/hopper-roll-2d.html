@@ -101,7 +101,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="mu"><label><b>摩擦係数</b><span class="sym">μ</span></label><input type="number" step="0.05"><input type="range" min="0.1" max="1.5" step="0.05"></div>
     </fieldset>
     <fieldset><legend>脚長サーボ ①②（2 個、対称駆動）</legend>
-      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="4">XH540-W150 12V</option><option value="9">カスタム</option></select></div>
       <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">N·m</span></label><input type="number" step="0.1"><input type="range" min="0.1" max="20" step="0.1"></div>
       <div class="row" data-k="nl"><label><b>無負荷回転数</b><span class="sym">rpm</span></label><input type="number" step="1"><input type="range" min="10" max="300" step="1"></div>
       <div class="row" data-k="jr"><label><b>反射慣性（推定）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0.0001" max="0.05" step="0.0001"></div>
@@ -109,7 +109,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="kd"><label><b>速度ゲイン</b><span class="sym">Kd N·m·s</span></label><input type="number" step="0.01"><input type="range" min="0" max="5" step="0.01"></div>
     </fieldset>
     <fieldset><legend>ロールサーボ ③（股に直結）</legend>
-      <div class="row" data-k="servo3"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="servo3"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="4">XH540-W150 12V</option><option value="9">カスタム</option></select></div>
       <div class="row" data-k="stall3"><label><b>ストールトルク</b><span class="sym">N·m</span></label><input type="number" step="0.1"><input type="range" min="0.1" max="20" step="0.1"></div>
       <div class="row" data-k="nl3"><label><b>無負荷回転数</b><span class="sym">rpm</span></label><input type="number" step="1"><input type="range" min="10" max="300" step="1"></div>
       <div class="row" data-k="jr3"><label><b>反射慣性（推定）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0.0001" max="0.05" step="0.0001"></div>
@@ -192,12 +192,13 @@ const SERVOS=[
   {name:"XL330-M288 5V", stall:0.52, nl:103, jr:0.0008, kp:6,    kd:0.10},
   {name:"XL430-W250 12V",stall:1.5,  nl:61,  jr:0.005,  kp:17,   kd:0.40},
   {name:"XM540-W270 12V",stall:10.6, nl:30,  jr:0.02,   kp:30,   kd:1.0},
+  {name:"XH540-W150 12V",stall:7.1,  nl:70,  jr:0.0063, kp:30,   kd:1.0},   // 減速比 152.3:1。反射慣性は XM540 × (152/272)²
 ];
 const DEF={mb:1.5,bwl:160,bh:180,hb:0,oy:0,mf:0.05,jleg:0.0003,
            d0:40,l1:90,l2:130,ls0:80,ks:900,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:30,kd:1.0,
-           servo3:3,stall3:10.6,nl3:30,jr3:0.02,kp3:30,kd3:1.0,
-           rate:200,hdes:5,vdes:0,vRamp:0.02,L0:240,dlmax:50,retract:15,kh:0.5,cn:0.8,kv:0.02,
+           servo3:4,stall3:7.1,nl3:70,jr3:0.0063,kp3:30,kd3:1.0,
+           rate:200,hdes:5,vdes:0,vRamp:0.02,L0:240,dlmax:50,retract:15,kh:0.5,cn:0.7,kv:0.02,
            kphi:40,kphid:1,hipMode:1,kr:20000,dr:300};
 const KLAT=20000;
 let P=Object.assign({},DEF);
