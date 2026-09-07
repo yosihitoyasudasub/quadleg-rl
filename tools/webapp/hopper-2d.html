@@ -194,9 +194,9 @@ const SERVOS=[
   {name:"XM540-W270 12V",stall:10.6, nl:30,  jr:0.02,   kp:120,  kd:2.2},
 ];
 const DEF={mb:2.0,bw:300,bh:180,hb:0,mf:0.05,
-           d0:40,l1:60,l2:160,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
+           d0:40,l1:80,l2:140,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:120,kd:2.2,
-           rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.02,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
+           rate:200,hdes:8,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.01,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
            chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0};
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
