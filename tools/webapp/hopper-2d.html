@@ -99,7 +99,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="mu"><label><b>摩擦係数</b><span class="sym">μ</span></label><input type="number" step="0.05"><input type="range" min="0.1" max="1.5" step="0.05"></div>
     </fieldset>
     <fieldset><legend>サーボ</legend>
-      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select data-servo-list="1"></select></div>
       <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">N·m</span></label><input type="number" step="0.1"><input type="range" min="0.1" max="20" step="0.1"></div>
       <div class="row" data-k="nl"><label><b>無負荷回転数</b><span class="sym">rpm</span></label><input type="number" step="1"><input type="range" min="10" max="300" step="1"></div>
       <div class="row" data-k="jr"><label><b>反射慣性（推定）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0.0001" max="0.05" step="0.0001"></div>
@@ -111,7 +111,7 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="chgMode"><label><b>バネを縮める方法</b><span class="sym">mode</span></label><select><option value="0">A 着地エネルギー（SLIP・現行）</option><option value="1">C 飛行中蓄勢＋ラッチ（Bow Leg）</option></select></div>
       <div class="row" data-k="chgPre"><label><b>目標蓄勢量</b><span class="sym">δpre mm</span></label><input type="number" step="5"><input type="range" min="0" max="120" step="5"></div>
       <div class="row" data-k="chgR"><label><b>巻取り腕（蓄勢の減速比）</b><span class="sym">rc mm/rad</span></label><input type="number" step="0.5"><input type="range" min="0.5" max="120" step="0.5"></div>
-      <div class="row" data-k="chgSv"><label><b>蓄勢モータ</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option></select></div>
+      <div class="row" data-k="chgSv"><label><b>蓄勢モータ</b><span class="sym">preset</span></label><select data-servo-list="0"></select></div>
       <div class="row" data-k="chgRel"><label><b>ラッチ解放</b><span class="sym">release</span></label><select><option value="0">最大圧縮で解放（Bow Leg）</option><option value="1">接地と同時に解放</option></select></div>
       <p class="hint">C は飛行中にウインチでバネを縮め、ラッチが保持する。接地中に解放して着地エネルギーと一緒に放出する。蓄勢の力ループは脚の内部（弦）で閉じるので、脚サーボには乗らない。<b>飛行時間内に巻き切れるか</b>が成立条件。</p>
     </fieldset>
@@ -187,17 +187,30 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
 const R2D=180/Math.PI, G=9.80665, PHYS_DT=1/4000;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 // stall[N·m], nl[rpm] は e-Manual。jr（反射慣性）と kp/kd は推定値（ギヤ比² × ロータ慣性のオーダー）。
+// stall[N·m] / nl[rpm] / 質量 g / 減速比は ROBOTIS の公表値だが、**e-Manual では未確認**
+//（仕様サイトが読めない環境で調べたため。採用前に図面で照合すること）。
+// jr（反射慣性）は同フレーム内で jr ∝ 減速比² としてスケールした**推定値**。
+//   330 系は XL330-M288（0.0008 @288:1）、430 系は XL430（0.005 @258:1）、540 系は XM540（0.02 @272:1）が基準。
+//   HANDOFF §8.1 のとおり、実機のロータ慣性を測って更新すること。結論を左右する値。
+// kp/kd は XM540 の 120 / 2.2 を stall に比例させた推定値。
 const SERVOS=[
-  {name:"XL-320 7.4V",   stall:0.39, nl:114, jr:0.0006, kp:4.5,  kd:0.07},
-  {name:"XL330-M288 5V", stall:0.52, nl:103, jr:0.0008, kp:6,    kd:0.10},
-  {name:"XL430-W250 12V",stall:1.5,  nl:61,  jr:0.005,  kp:17,   kd:0.40},
-  {name:"XM540-W270 12V",stall:10.6, nl:30,  jr:0.02,   kp:120,  kd:2.2},
+  {name:"XL-320 7.4V",    stall:0.39, nl:114, jr:0.0006,  kp:4.5,  kd:0.07, g:16.7, N:238, gear:"樹脂", cur:false},
+  {name:"XL330-M077 5V",  stall:0.215,nl:383, jr:0.000058,kp:2.4,  kd:0.05, g:18,   N:77.5,gear:"樹脂", cur:true},
+  {name:"XL330-M288 5V",  stall:0.52, nl:103, jr:0.0008,  kp:6,    kd:0.10, g:18,   N:288, gear:"樹脂", cur:true},
+  {name:"XC330-M181 5V",  stall:0.60, nl:129, jr:0.00032, kp:6.8,  kd:0.13, g:23,   N:181, gear:"金属", cur:true},
+  {name:"XC330-T181 11.1V",stall:0.76,nl:104, jr:0.00032, kp:8.6,  kd:0.16, g:23,   N:181, gear:"金属", cur:true},
+  {name:"XC330-T288 11.1V",stall:0.92,nl:65,  jr:0.0008,  kp:10.4, kd:0.19, g:23,   N:288, gear:"金属", cur:true},
+  {name:"XL430-W250 12V", stall:1.5,  nl:61,  jr:0.005,   kp:17,   kd:0.40, g:57.2, N:258, gear:"金属", cur:false},
+  {name:"XC430-W150 11.1V",stall:1.6, nl:106, jr:0.0019,  kp:18,   kd:0.34, g:65,   N:160, gear:"金属", cur:true},
+  {name:"XM430-W210 12V", stall:3.0,  nl:77,  jr:0.0034,  kp:34,   kd:0.63, g:82,   N:213, gear:"金属", cur:true},
+  {name:"XM540-W270 12V", stall:10.6, nl:30,  jr:0.02,    kp:120,  kd:2.2,  g:165,  N:272, gear:"金属", cur:true},
 ];
 const DEF={mb:2.0,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:60,l2:160,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
-           servo:3,stall:10.6,nl:30,jr:0.02,kp:120,kd:2.2,
+           servo:9,stall:10.6,nl:30,jr:0.02,kp:120,kd:2.2,
            rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.02,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
            chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0};
+const CUSTOM=99;                     // 「カスタム」の番号。機種の添字と衝突しないよう大きく取る
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -452,11 +465,18 @@ function advance(simDt){
 const rows=[...document.querySelectorAll('.row[data-k]')];
 function save(){try{localStorage.setItem('hop2d',JSON.stringify(P));}catch(e){}}
 try{const t=localStorage.getItem('hop2d');if(t)Object.assign(P,JSON.parse(t));}catch(e){}
+function fillServoLists(){
+  document.querySelectorAll('select[data-servo-list]').forEach(sel=>{
+    const withCustom=sel.dataset.servoList==='1';
+    sel.innerHTML=SERVOS.map((s,i)=>`<option value="${i}">${s.name}｜${s.g}g ${s.gear}${s.cur?'':' 電流制御なし'}</option>`).join('')
+      +(withCustom?`<option value="${CUSTOM}">カスタム</option>`:'');
+  });
+}
 function bind(){
   rows.forEach(r=>{
     const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
     const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
-      if(k==='servo')applyServo();else if(['stall','nl','jr','kp','kd'].includes(k))P.servo=9;
+      if(k==='servo')applyServo();else if(['stall','nl','jr','kp','kd'].includes(k))P.servo=CUSTOM;
       if(['rate','hipMode','chgMode','chgSv','chgRel'].includes(k))P[k]=Math.round(v);
       if(k==='chgMode'||k==='chgPre')resetSim();
       sync();save();updateResults();draw();};
@@ -689,7 +709,7 @@ function frame(ts){
   requestAnimationFrame(frame);
 }
 window.addEventListener('resize',draw);
-bind(); sync(); resetSim(); updateResults(); requestAnimationFrame(frame);
+fillServoLists(); bind(); sync(); resetSim(); updateResults(); requestAnimationFrame(frame);
 })();
 </script>
 </body></html>

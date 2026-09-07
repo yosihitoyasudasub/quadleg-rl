@@ -5,6 +5,7 @@
 //   node tools/hopper_sweeps.js charge     # §8.2 蓄勢方式 C
 //   node tools/hopper_sweeps.js ceiling    # §8.5 到達できるホップ上限（E + C）
 //   node tools/hopper_sweeps.js forward    # §8.6 前進速度ループ
+//   node tools/hopper_sweeps.js servo      # §9   サーボ選定（機体質量も一緒に振る）
 //
 // 数字が変わったら、シミュレーターの物理か制御を変えたということ。
 // HANDOFF の該当節も直すこと。
@@ -15,7 +16,7 @@ const A = require('./hopper_harness.js');
 const BASE = {
   mb: 2.0, bw: 300, bh: 180, hb: 0, mf: 0.05,
   d0: 40, l1: 60, l2: 160, ls0: 80, ks: 1200, zs: 0.2, kg: 20000, mu: 0.8,
-  servo: 3, stall: 10.6, nl: 30, jr: 0.02, kp: 120, kd: 2.2,
+  servo: 9, stall: 10.6, nl: 30, jr: 0.02, kp: 120, kd: 2.2,
   rate: 200, hdes: 5, vdes: 0, L0: 240, dlmax: 50, retract: 15,
   kh: 0.5, kv: 0.02, cn: 1.0, kth: 40, kthd: 1,
   hipMode: 1, kr: 20000, dr: 300,
@@ -91,8 +92,8 @@ function charge() {
   const rows = [
     ['A 現行（着地エネルギー）', {}],
     ['C XL-320 巻取り rc=10 δ40', {chgMode: 1, chgPre: 40, chgR: 10, chgSv: 0}],
-    ['C XM540 巻取り rc=40 δ40', {chgMode: 1, chgPre: 40, chgR: 40, chgSv: 3}],
-    ['C XM540 巻取り rc=60 δ40', {chgMode: 1, chgPre: 40, chgR: 60, chgSv: 3}],
+    ['C XM540 巻取り rc=40 δ40', {chgMode: 1, chgPre: 40, chgR: 40, chgSv: 9}],
+    ['C XM540 巻取り rc=60 δ40', {chgMode: 1, chgPre: 40, chgR: 60, chgSv: 9}],
   ];
   for (const [lab, ov] of rows) {
     const r = sim(ov, 14), g = r.chg;
@@ -114,9 +115,9 @@ function ceilings() {
   const rows = [
     ['A l1=60 l2=160（現行）', {}],
     ['A l1=80 l2=140（E のみ）', {l1: 80, l2: 140}],
-    ['C l1=60 + XM540 rc=60 δ40', {chgMode: 1, chgPre: 40, chgR: 60, chgSv: 3}],
-    ['C l1=80 + XM540 rc=60 δ40', {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 3}],
-    ['C l1=80 + XM540 rc=100 δ60', {l1: 80, l2: 140, chgMode: 1, chgPre: 60, chgR: 100, chgSv: 3}],
+    ['C l1=60 + XM540 rc=60 δ40', {chgMode: 1, chgPre: 40, chgR: 60, chgSv: 9}],
+    ['C l1=80 + XM540 rc=60 δ40', {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 9}],
+    ['C l1=80 + XM540 rc=100 δ60', {l1: 80, l2: 140, chgMode: 1, chgPre: 60, chgR: 100, chgSv: 9}],
     ['C l1=80 + XL-320 rc=15 δ20', {l1: 80, l2: 140, chgMode: 1, chgPre: 20, chgR: 15, chgSv: 0}],
   ];
   for (const [lab, ov] of rows) {
@@ -134,7 +135,7 @@ function forward() {
   const configs = [
     ['l1=60 現行 目標5cm', {hdes: 5}],
     ['l1=80 素 目標8cm', {l1: 80, l2: 140, hdes: 8}],
-    ['l1=80 +C 目標15cm', {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 3, hdes: 15}],
+    ['l1=80 +C 目標15cm', {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 9, hdes: 15}],
   ];
   for (const [lab, ov] of configs) {
     let best = null;
@@ -153,7 +154,7 @@ function forward() {
     console.log(`  ${pad('', 22)} 指令 0/0.1/0.2/0.3/0.4 → ${best.det}  転倒 ${best.fell}/${VL.length}`);
   }
   console.log('\n  蹴り出し打ち切り（thrustMs）は逆効果 — 1 接地あたりの速度増幅率:');
-  const OV = {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 3, hdes: 15, cn: 1.0, kv: 0.01, vdes: 0.2};
+  const OV = {l1: 80, l2: 140, chgMode: 1, chgPre: 40, chgR: 60, chgSv: 9, hdes: 15, cn: 1.0, kv: 0.01, vdes: 0.2};
   for (const thrustMs of [0, 40, 80]) {
     Object.assign(A.getP(), BASE, OV, {thrustMs});
     A.setDrop(3); A.resetSim();
@@ -172,9 +173,58 @@ function forward() {
   console.log('    期待値: 無制限 1.16 倍 / 打ち切ると 3.56 倍（周期 2 の発散）');
 }
 
+
+// ---------------------------------------------- §9 サーボ選定（一本脚ホッパー）
+// ホッパーはトルクではなく**パワー律速**で、しかも機体質量がサーボ選択で決まる。
+// そこで「サーボ × 機体質量 × クランク比」を同時に振り、到達できるホップ上限で比べる。
+//   機体質量 = 90 g（AtomS3R・電池・配線）＋ サーボ 3 個 × 4（構造材込み）
+//     → XM540 で 2.07 kg となり、§8.1 の標準設定 2.0 kg と一致するので係数はここで校正している
+//   寸法は機体質量の 1/3 乗でスケール（XM540 の L0=240 が基準）
+function servoPick() {
+  console.log('\n=== §9 サーボ選定（サーボ・機体質量・クランク比を同時最適化）===');
+  const mbOf = g => 0.09 + 4 * (3 * g / 1000);
+  const cfg = (s, mb, scale, cr, chg) => ({
+    bw: 300, bh: 180, hb: 0, zs: 0.2, kg: 20000, mu: 0.8, rate: 200, vdes: 0,
+    retract: 15, kh: 0.5, kv: 0.01, cn: 1.0, hipMode: 1, thrustMs: 0,
+    mb, mf: 0.05 * mb / 2.0, servo: 99, stall: s.stall, nl: s.nl, jr: s.jr,
+    kp: s.stall * 11.3, kd: s.stall * 0.21,
+    d0: 40 * scale, l1: 80 * scale * cr, l2: 220 * scale - 80 * scale * cr,
+    ls0: 80 * scale, L0: 240 * scale, dlmax: 50 * scale,
+    ks: 1200 * (mb / 2.0) / scale, kr: 20000 * (mb / 2.0) / scale, dr: 300 * (mb / 2.0) / scale,
+    kth: 40 * (mb / 2.0), kthd: 1 * (mb / 2.0),
+    chgMode: chg ? 1 : 0, chgPre: 40 * scale, chgR: 60 * scale, chgSv: 0, chgRel: 0,
+  });
+  const best = (s, mb, chg) => {
+    const scale = Math.cbrt(mb / 2.07);
+    let b = {cm: 0};
+    for (const cr of [0.4, 0.55, 0.7, 0.85, 1.0, 1.15]) {
+      for (const hdes of [1, 2, 3, 5, 8, 12, 16, 20, 25, 30]) {
+        const P0 = cfg(s, mb, scale, cr, chg);
+        const r = sim({...P0, hdes});
+        if (r.fallen || !(r.apex > hdes / 100 * 0.85) || r.wmax > 105) continue;
+        if (r.apex * 100 > b.cm) b = {cm: r.apex * 100, cr, L0: P0.L0, l1: P0.l1};
+      }
+    }
+    return b;
+  };
+  console.log(`  ${pad('型番', 22)}${'機体'.padStart(8)}${'L0'.padStart(7)}${'最適l1'.padStart(8)}${'2個出力'.padStart(9)}${'A 上限'.padStart(9)}${'体高比'.padStart(7)}${'C 併用'.padStart(9)}${'体高比'.padStart(7)}`);
+  for (const s of A.SERVOS) {
+    const mb = mbOf(s.g), a = best(s, mb, false), c = best(s, mb, true);
+    const Ppk = 2 * s.stall * (s.nl * 2 * Math.PI / 60) / 4;
+    const L0 = a.L0 || c.L0 || 240;
+    const col = v => (v.cm ? (v.cm.toFixed(1) + 'cm').padStart(9) + (v.cm * 10 / L0).toFixed(2).padStart(7)
+                           : '        —' + '      —');
+    console.log(`  ${pad(s.name, 22)}${(mb.toFixed(2) + 'kg').padStart(8)}${(L0.toFixed(0) + 'mm').padStart(7)}` +
+      `${((a.l1 || c.l1 || 0).toFixed(0) + 'mm').padStart(8)}${(Ppk.toFixed(1) + 'W').padStart(9)}${col(a)}${col(c)}`);
+  }
+  console.log('  体高比 = 頂点 / 脚長 L0。絶対高さより機体規模に対する俊敏さを表す');
+  console.log('  ※ jr（反射慣性）と機体質量の見積もりは推定。小型機に有利な側に振れている可能性あり（HANDOFF §9）');
+}
+
 const which = process.argv[2];
 const all = !which;
 if (all || which === 'regress') regress();
 if (all || which === 'charge') charge();
 if (all || which === 'ceiling') ceilings();
 if (all || which === 'forward') forward();
+if (all || which === 'servo') servoPick();
