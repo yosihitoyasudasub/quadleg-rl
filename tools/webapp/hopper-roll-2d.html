@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hopper Roll-Plane 2D Sim</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--line:#dfe3e8;--ink:#111418;--ink2:#5b6470;--ink3:#8b94a0;
+--steel:#4a6fa5;--link:#2f9e8f;--spring:#c9762b;--accent:#d94f4f;--grid:#eef1f4;--grid2:#dde3ea;--surf:#f0f2f5;
+--good:#2f8f4e;--warn:#c98a12;--crit:#c0392b;--roll:#8e5bd6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--panel:#1b1f26;--line:#2b313b;
+--ink:#e8ecf1;--ink2:#a7b0bd;--ink3:#727d8c;--steel:#7aa7e0;--link:#4fd0bd;--spring:#e8a05a;--accent:#ff6b6b;
+--grid:#1f242c;--grid2:#2b313b;--surf:#232832;--good:#4cc27a;--warn:#e0b14a;--crit:#ff7b6b;--roll:#b48cf0}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,"Segoe UI",sans-serif}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+header{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header h1{margin:0;font-size:16px;font-weight:650}
+header .sub{color:var(--ink2);font-size:12px}
+header .sp{flex:1}
+.btn{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:7px;padding:6px 11px;font-size:12px;cursor:pointer}
+.btn:hover{border-color:var(--ink3)}
+.btn.primary{background:var(--steel);color:#fff;border-color:var(--steel)}
+main{display:grid;grid-template-columns:290px minmax(0,1fr) 300px;gap:14px;padding:14px 20px 24px;align-items:start}
+@media (max-width:1100px){main{grid-template-columns:270px minmax(0,1fr)} .results{grid-column:1/-1}}
+@media (max-width:760px){main{grid-template-columns:1fr} .results{grid-column:auto}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px}
+.controls{padding:6px 14px 12px}
+fieldset{border:0;border-bottom:1px solid var(--line);margin:0;padding:10px 0}
+fieldset:last-child{border-bottom:0}
+legend{font-size:12px;font-weight:650;color:var(--ink2);padding:0}
+.row{display:grid;grid-template-columns:1fr 74px;gap:6px 8px;align-items:center;margin:6px 0}
+.row label{font-size:12.5px;display:flex;justify-content:space-between;gap:6px}
+.row label b{font-weight:500}
+.row label span.sym{color:var(--ink3);font-family:ui-monospace,monospace;font-size:11px}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--steel)}
+.row input[type=number],.row select{border:1px solid var(--line);background:var(--surf);color:var(--ink);
+border-radius:6px;padding:3px 6px;font:12px ui-monospace,monospace;width:100%}
+.hint{color:var(--ink3);font-size:11.5px;margin:4px 0 0}
+.stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.canvasWrap{position:relative;padding:0;overflow:hidden}
+canvas{display:block;width:100%}
+#mech{height:440px}
+#chart{height:330px}
+.toolbar{display:flex;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12px;flex-wrap:wrap}
+.toolbar select{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:6px;padding:4px 6px;font:12px ui-monospace,monospace}
+.toolbar .t{margin-left:auto;color:var(--ink3);font-family:ui-monospace,monospace}
+.legendBar{display:flex;flex-wrap:wrap;gap:10px 16px;padding:8px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
+.legendBar i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.chartHead{display:flex;justify-content:space-between;align-items:baseline;padding:10px 14px 0}
+.chartHead h2{margin:0;font-size:13px;font-weight:600}
+.chartHead span{font-size:11.5px;color:var(--ink3)}
+.results{padding:12px 14px}
+.status{margin-bottom:10px}
+.pill{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--surf);border:1px solid var(--line)}
+.pill::before{content:"● ";color:var(--good)}
+.pill.warn::before{color:var(--warn)} .pill.crit::before{color:var(--crit)} .pill.na::before{color:var(--ink3)}
+.big>div{padding:8px 0;border-bottom:1px solid var(--line)}
+.big .k{font-size:11.5px;color:var(--ink2)}
+.big .v{font-size:19px;font-weight:600}
+.big .u{font-size:11px;color:var(--ink3)}
+.bar{height:5px;background:var(--surf);border-radius:3px;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);transition:width .12s}
+.bar i.warn{background:var(--warn)} .bar i.crit{background:var(--crit)}
+dl{margin:0;font-size:12.5px}
+dl div{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed var(--line)}
+dt{color:var(--ink2)} dd{margin:0;font-family:ui-monospace,monospace;text-align:right}
+dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
+.sectionTitle{font-size:11.5px;font-weight:650;color:var(--ink2);margin:12px 0 4px}
+.note{color:var(--ink3);font-size:11.5px;margin:10px 0 0}
+.note code{background:var(--surf);padding:1px 4px;border-radius:4px}
+</style></head><body>
+
+<header>
+  <h1>Hopper Roll-Plane 2D Sim</h1>
+  <span class="sub">一本脚ホッパー ロール面（正面図）─ 股ロールサーボ直結＋左右対称 5 節（脚長 1 自由度）＋直列バネ。段階 1: ピッチ面と独立に扱う</span>
+  <span class="sp"></span>
+  <button class="btn" id="reset" type="button">パラメータ初期値</button>
+  <button class="btn" id="copyCfg" type="button">設定と結果をコピー</button>
+  <button class="btn" id="pasteCfg" type="button">貼り付けて読込</button>
+</header>
+
+<main>
+  <aside class="panel controls">
+    <fieldset><legend>機体</legend>
+      <div class="row" data-k="mb"><label><b>胴体質量</b><span class="sym">m kg</span></label><input type="number" step="0.1"><input type="range" min="0.3" max="5" step="0.1"></div>
+      <div class="row" data-k="bwl"><label><b>胴体幅（左右、慣性用）</b><span class="sym">mm</span></label><input type="number" step="5"><input type="range" min="40" max="300" step="5"></div>
+      <div class="row" data-k="bh"><label><b>胴体高</b><span class="sym">mm</span></label><input type="number" step="5"><input type="range" min="30" max="200" step="5"></div>
+      <div class="row" data-k="hb"><label><b>重心→ロール軸 下（負=軸が重心より上）</b><span class="sym">mm</span></label><input type="number" step="5"><input type="range" min="-80" max="150" step="5"></div>
+      <div class="row" data-k="oy"><label><b>ロール軸→脚面 横オフセット</b><span class="sym">oy mm</span></label><input type="number" step="1"><input type="range" min="-40" max="40" step="1"></div>
+      <div class="row" data-k="mf"><label><b>足質量（下腿含む）</b><span class="sym">kg</span></label><input type="number" step="0.01"><input type="range" min="0.02" max="0.5" step="0.01"></div>
+      <div class="row" data-k="jleg"><label><b>脚部の股まわり慣性（サーボ②含む）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0" max="0.005" step="0.0001"></div>
+    </fieldset>
+    <fieldset><legend>脚（左右対称 5 節、脚長 1 自由度）</legend>
+      <div class="row" data-k="d0"><label><b>サーボ軸間</b><span class="sym">d0 mm</span></label><input type="number" step="1"><input type="range" min="0" max="100" step="1"></div>
+      <div class="row" data-k="l1"><label><b>クランク</b><span class="sym">l1 mm</span></label><input type="number" step="1"><input type="range" min="15" max="120" step="1"></div>
+      <div class="row" data-k="l2"><label><b>下腿</b><span class="sym">l2 mm</span></label><input type="number" step="1"><input type="range" min="30" max="300" step="1"></div>
+      <div class="row" data-k="ls0"><label><b>バネ自然長（＝最大ストローク）</b><span class="sym">mm</span></label><input type="number" step="5"><input type="range" min="10" max="120" step="5"></div>
+      <div class="row" data-k="ks"><label><b>直列バネ定数</b><span class="sym">k N/m</span></label><input type="number" step="50"><input type="range" min="100" max="20000" step="50"></div>
+      <div class="row" data-k="zs"><label><b>バネ減衰比</b><span class="sym">ζ</span></label><input type="number" step="0.05"><input type="range" min="0" max="1" step="0.05"></div>
+    </fieldset>
+    <fieldset><legend>接地</legend>
+      <div class="row" data-k="kg"><label><b>地面剛性</b><span class="sym">N/m</span></label><input type="number" step="1000"><input type="range" min="2000" max="50000" step="1000"></div>
+      <div class="row" data-k="mu"><label><b>摩擦係数</b><span class="sym">μ</span></label><input type="number" step="0.05"><input type="range" min="0.1" max="1.5" step="0.05"></div>
+    </fieldset>
+    <fieldset><legend>脚長サーボ ①②（2 個、対称駆動）</legend>
+      <div class="row" data-k="servo"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="stall"><label><b>ストールトルク</b><span class="sym">N·m</span></label><input type="number" step="0.1"><input type="range" min="0.1" max="20" step="0.1"></div>
+      <div class="row" data-k="nl"><label><b>無負荷回転数</b><span class="sym">rpm</span></label><input type="number" step="1"><input type="range" min="10" max="300" step="1"></div>
+      <div class="row" data-k="jr"><label><b>反射慣性（推定）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0.0001" max="0.05" step="0.0001"></div>
+      <div class="row" data-k="kp"><label><b>位置ゲイン</b><span class="sym">Kp N·m/rad</span></label><input type="number" step="0.5"><input type="range" min="0.5" max="300" step="0.5"></div>
+      <div class="row" data-k="kd"><label><b>速度ゲイン</b><span class="sym">Kd N·m·s</span></label><input type="number" step="0.01"><input type="range" min="0" max="5" step="0.01"></div>
+    </fieldset>
+    <fieldset><legend>ロールサーボ ③（股に直結）</legend>
+      <div class="row" data-k="servo3"><label><b>機種</b><span class="sym">preset</span></label><select><option value="0">XL-320 7.4V</option><option value="1">XL330-M288 5V</option><option value="2">XL430-W250 12V</option><option value="3">XM540-W270 12V</option><option value="9">カスタム</option></select></div>
+      <div class="row" data-k="stall3"><label><b>ストールトルク</b><span class="sym">N·m</span></label><input type="number" step="0.1"><input type="range" min="0.1" max="20" step="0.1"></div>
+      <div class="row" data-k="nl3"><label><b>無負荷回転数</b><span class="sym">rpm</span></label><input type="number" step="1"><input type="range" min="10" max="300" step="1"></div>
+      <div class="row" data-k="jr3"><label><b>反射慣性（推定）</b><span class="sym">kg·m²</span></label><input type="number" step="0.0001"><input type="range" min="0.0001" max="0.05" step="0.0001"></div>
+      <div class="row" data-k="kp3"><label><b>位置ゲイン</b><span class="sym">Kp N·m/rad</span></label><input type="number" step="0.5"><input type="range" min="0.5" max="300" step="0.5"></div>
+      <div class="row" data-k="kd3"><label><b>速度ゲイン</b><span class="sym">Kd N·m·s</span></label><input type="number" step="0.01"><input type="range" min="0" max="5" step="0.01"></div>
+      <p class="hint">ロール軸が脚面を通る（oy=0）なら着地力はロールサーボに荷重トルクを生まない。残るのは姿勢トルクと横方向力×脚長。</p>
+    </fieldset>
+    <fieldset><legend>制御（Raibert、ロール面）</legend>
+      <div class="row" data-k="rate"><label><b>制御周期</b><span class="sym">Hz</span></label><select><option value="50">50</option><option value="100">100</option><option value="200">200</option><option value="500">500</option><option value="1000">1000</option></select></div>
+      <div class="row" data-k="hdes"><label><b>目標ホップ高</b><span class="sym">cm</span></label><input type="number" step="0.5"><input type="range" min="0" max="20" step="0.5"></div>
+      <div class="row" data-k="vdes"><label><b>目標横速度</b><span class="sym">m/s</span></label><input type="number" step="0.05"><input type="range" min="-1" max="1" step="0.05"></div>
+      <div class="row" data-k="vRamp"><label><b>目標速度の変化上限（0=なし）</b><span class="sym">m/s / hop</span></label><input type="number" step="0.01"><input type="range" min="0" max="0.2" step="0.01"></div>
+      <div class="row" data-k="L0"><label><b>基準脚長（股→足、伸展時）</b><span class="sym">L0 mm</span></label><input type="number" step="5"><input type="range" min="60" max="400" step="5"></div>
+      <div class="row" data-k="dlmax"><label><b>最大蹴り出し量（引込み位置から）</b><span class="sym">mm</span></label><input type="number" step="1"><input type="range" min="0" max="100" step="1"></div>
+      <div class="row" data-k="retract"><label><b>飛行中の脚引込み</b><span class="sym">mm</span></label><input type="number" step="1"><input type="range" min="0" max="60" step="1"></div>
+      <div class="row" data-k="kh"><label><b>高さゲイン</b><span class="sym">Kh</span></label><input type="number" step="0.05"><input type="range" min="0" max="2" step="0.05"></div>
+      <div class="row" data-k="cn"><label><b>中立点係数（×Ts/2）</b><span class="sym">cn</span></label><input type="number" step="0.05"><input type="range" min="0" max="1.5" step="0.05"></div>
+      <div class="row" data-k="kv"><label><b>速度ゲイン</b><span class="sym">Kv s</span></label><input type="number" step="0.005"><input type="range" min="0" max="0.1" step="0.005"></div>
+      <div class="row" data-k="kphi"><label><b>ロール姿勢ゲイン</b><span class="sym">Kφ N·m/rad</span></label><input type="number" step="0.5"><input type="range" min="0" max="50" step="0.5"></div>
+      <div class="row" data-k="kphid"><label><b>ロール姿勢速度ゲイン</b><span class="sym">Kφd N·m·s</span></label><input type="number" step="0.02"><input type="range" min="0" max="2" step="0.02"></div>
+      <div class="row" data-k="hipMode"><label><b>接地中の制御方式</b><span class="sym">mode</span></label><select><option value="1">電流制御（トルク指令）</option><option value="0">位置指令のみ</option></select></div>
+      <div class="row" data-k="kr"><label><b>脚長インピーダンス 剛性</b><span class="sym">Kr N/m</span></label><input type="number" step="100"><input type="range" min="500" max="20000" step="100"></div>
+      <div class="row" data-k="dr"><label><b>脚長インピーダンス 減衰</b><span class="sym">Dr N·s/m</span></label><input type="number" step="10"><input type="range" min="0" max="600" step="10"></div>
+    </fieldset>
+  </aside>
+
+  <section class="stage">
+    <div class="panel canvasWrap">
+      <div class="toolbar">
+        <button class="btn primary" id="play" type="button">再生</button>
+        <button class="btn" id="step" type="button">1制御周期</button>
+        <button class="btn" id="simReset" type="button">リセット</button>
+        <label>速度 <select id="speed"><option value="0.1">0.1×</option><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label>
+        <label>初期落下 <select id="drop"><option value="0">0 cm</option><option value="3" selected>3 cm</option><option value="8">8 cm</option></select></label>
+        <label>初期外乱 <select id="pert"><option value="0" selected>なし</option><option value="1">横 0.15 m/s・ロール 3°</option><option value="2">横 0.3 m/s・ロール 6°</option><option value="3">ロール 10°</option></select></label>
+        <span class="t" id="clock">t = 0.000 s</span>
+      </div>
+      <canvas id="mech"></canvas>
+      <div class="legendBar">
+        <span><i style="background:var(--steel)"></i>胴体</span>
+        <span><i style="background:var(--roll)"></i>ロールサーボ・脚面</span>
+        <span><i style="background:var(--link)"></i>脚（対称 5 節の脚長）</span>
+        <span><i style="background:var(--spring)"></i>直列バネ</span>
+        <span><i style="background:var(--accent)"></i>接地力</span>
+        <span>× 飛行中の足先目標</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="chartHead"><h2>時系列（直近 3 s）</h2><span>高さ / 横速度 / ロール角 / ロールサーボ τ・ω[%] / 脚長サーボ τ・ω[%]</span></div>
+      <canvas id="chart"></canvas>
+    </div>
+  </section>
+
+  <aside class="panel results">
+    <div class="status"><span class="pill na" id="pill">停止</span></div>
+    <div class="big">
+      <div><div class="k">頂点での足先地上高</div><div class="v mono" id="apex">–</div><div class="u mono" id="apexb">–</div><div class="bar"><i id="barA"></i></div></div>
+      <div><div class="k">横速度（頂点時）</div><div class="v mono" id="vel">–</div><div class="u mono" id="velb">–</div></div>
+      <div><div class="k">ロールサーボ ③ トルク 持続ピーク（5 ms 平均）</div><div class="v mono" id="tau3P">–</div><div class="u mono" id="tau3Pb">–</div><div class="bar"><i id="barT3"></i></div></div>
+      <div><div class="k">ロールサーボ ③ 速度 持続ピーク</div><div class="v mono" id="w3P">–</div><div class="u mono" id="w3Pb">–</div><div class="bar"><i id="barW3"></i></div></div>
+      <div><div class="k">脚長サーボ ①② トルク 持続ピーク（1 個あたり）</div><div class="v mono" id="tauP">–</div><div class="u mono" id="tauPb">–</div><div class="bar"><i id="barT"></i></div></div>
+      <div><div class="k">脚長サーボ ①② 速度 持続ピーク</div><div class="v mono" id="wP">–</div><div class="u mono" id="wPb">–</div><div class="bar"><i id="barW"></i></div></div>
+    </div>
+    <div class="sectionTitle">前回サイクル</div>
+    <dl id="cycList"></dl>
+    <div class="sectionTitle">現在</div>
+    <dl id="nowList"></dl>
+    <p class="note">ピッチ面版（<code>hopper-2d.html</code>）の正面図版。胴体は剛体（横位置・高さ・ロール角）、股のロール軸は前後方向。脚は左右対称に拘束した 5 節リンク（脚長 1 自由度、伝達比 <code>r = dL/dα</code> で 2 サーボを表現）を、ロールサーボが脚面ごと回す。
+    直列バネは脚方向のみ（自然長で底付き）、横方向は剛。接地はバネダンパ＋クーロン摩擦。物理は固定 0.25 ms。接地中はロールサーボに <code>τ₃ = Kφ·φ + Kφd·φ̇</code>、脚長サーボに脚長インピーダンス <code>τ = F·r/2</code> を電流指令。
+    速度・接地・姿勢は真値。<b>ピッチ面との連成（ヨー、脚面回転による前後配置の歪み）は扱わない</b>（段階 2）。</p>
+  </aside>
+</main>
+
+<script>
+(()=>{
+const R2D=180/Math.PI, D2R=Math.PI/180, G=9.80665, PHYS_DT=1/4000;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const SERVOS=[
+  {name:"XL-320 7.4V",   stall:0.39, nl:114, jr:0.0006, kp:4.5,  kd:0.07},
+  {name:"XL330-M288 5V", stall:0.52, nl:103, jr:0.0008, kp:6,    kd:0.10},
+  {name:"XL430-W250 12V",stall:1.5,  nl:61,  jr:0.005,  kp:17,   kd:0.40},
+  {name:"XM540-W270 12V",stall:10.6, nl:30,  jr:0.02,   kp:30,   kd:1.0},
+];
+const DEF={mb:1.5,bwl:160,bh:180,hb:0,oy:0,mf:0.05,jleg:0.0003,
+           d0:40,l1:90,l2:130,ls0:80,ks:900,zs:0.2,kg:20000,mu:0.8,
+           servo:3,stall:10.6,nl:30,jr:0.02,kp:30,kd:1.0,
+           servo3:3,stall3:10.6,nl3:30,jr3:0.02,kp3:30,kd3:1.0,
+           rate:200,hdes:5,vdes:0,vRamp:0.02,L0:240,dlmax:50,retract:15,kh:0.5,cn:0.8,kv:0.02,
+           kphi:40,kphid:1,hipMode:1,kr:20000,dr:300};
+const KLAT=20000;
+let P=Object.assign({},DEF);
+function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
+function applyServo3(){const s=SERVOS[P.servo3];if(s){P.stall3=s.stall;P.nl3=s.nl;P.jr3=s.jr;P.kp3=s.kp;P.kd3=s.kd;}}
+
+// ---------- 左右対称 5 節（脚長 1 自由度）: L(α), r = dL/dα ----------
+function geom(){return {d0:P.d0/1000,l1:P.l1/1000,l2:P.l2/1000,hb:P.hb/1000,oy:P.oy/1000,ls0:P.ls0/1000};}
+function LofA(g,a){const q=g.d0/2-g.l1*Math.cos(a);return Math.abs(q)>g.l2?null:Math.sqrt(g.l2*g.l2-q*q)-g.l1*Math.sin(a);}
+function dLdA(g,a,e=1e-5){const lo=LofA(g,a-e),hi=LofA(g,a+e);return(lo===null||hi===null)?0:(hi-lo)/(2*e);}
+function AofL(g,L){                              // α ∈ [-90°, 40°] で L は単調減少。二分法
+  let lo=-Math.PI/2, hi=40*D2R; const Llo=LofA(g,lo), Lhi=LofA(g,hi);
+  if(Llo===null||Lhi===null)return null; if(L>=Llo)return lo; if(L<=Lhi)return hi;
+  for(let i=0;i<40;i++){const m=(lo+hi)/2, Lm=LofA(g,m); if(Lm===null)return null; if(Lm>L)lo=m;else hi=m;}
+  return (lo+hi)/2;
+}
+function inertia(){const w=P.bwl/1000,h=P.bh/1000;return P.mb*(w*w+h*h)/12;}
+function standH(){return (P.hb+P.L0-P.retract)/1000;}
+
+// ---------- 状態 ----------
+let S={}, C={}, log=[], trail=[], running=false, simSpeed=1, dropCm=3, pertMode=0;
+function resetSim(){
+  const g=geom();
+  const Ln=P.L0/1000-g.ls0-P.retract/1000;
+  let a=AofL(g,Ln); if(a===null)a=-Math.PI/4;
+  const pert=[[0,0],[0.15,3*D2R],[0.3,6*D2R],[0,10*D2R]][pertMode]||[0,0];
+  S={t:0,y:0,z:standH()+dropCm/100,ph:pert[1],vy:pert[0],vz:0,om:0,
+     a:a,wa:0,ta:a,tca:0,           // 脚長クランク角（対称）、角速度、位置目標、トルク指令
+     psi:0,wpsi:0,tpsi:0,tc3:0,     // ロール角（脚面 vs 胴体）、角速度、位置目標、トルク指令
+     tmode:false,
+     fy:0,fz:0,vfy:0,vfz:0,anchor:null,contact:false,delta:0,Fn:0,Ft:0,tau:0,tau3:0,
+     fallen:false};
+  const k=kin(); S.fy=k.rest.y; S.fz=k.rest.z;
+  C={phase:'FLIGHT',Ts:0.12,dL:P.dlmax/2000,apex:null,vzPrev:0,deltaPrev:0,tTD:0,tick:-1,hops:0,
+     pk:{Fn:0,tau:0,w:0,tauS:0,wS:0,tau3:0,w3:0,tau3S:0,w3S:0,delta:0,pow:0},last:null,tip:null,
+     tauF:0,wF:0,tau3F:0,w3F:0,tsPred:0,tsAtTD:0,tsCorr:1,vdesEff:0,yfCmd:0,Mcmd:0,Mhip:0};
+  log=[]; trail=[]; logT=0; trailT=0;
+}
+// 運動学: 股（ロール軸）→ 脚面（横オフセット oy）→ 先端
+function kin(){
+  const g=geom(), c=Math.cos(S.ph), s=Math.sin(S.ph);
+  const R=v=>({y:c*v.y-s*v.z, z:s*v.y+c*v.z});          // 胴体→世界（ロール角 φ、y 右・z 上）
+  const hipB={y:0,z:-g.hb}, hipR=R(hipB), hip={y:S.y+hipR.y, z:S.z+hipR.z};
+  const b=S.ph+S.psi;                                    // 脚面の世界角（0 = 真下）
+  const u={y:Math.sin(b), z:-Math.cos(b)}, n={y:Math.cos(b), z:Math.sin(b)};   // 脚方向、接線（CCW）
+  const Ln=LofA(g,S.a); const L=Ln===null?0.05:Ln;
+  const base={y:hip.y+g.oy*n.y, z:hip.z+g.oy*n.z};       // 脚面の付け根（ロール軸から oy 横）
+  const tip={y:base.y+L*u.y, z:base.z+L*u.z};
+  const rest={y:tip.y+g.ls0*u.y, z:tip.z+g.ls0*u.z};
+  // 先端速度: 胴体並進 + 胴体回転 + ロール回転 + 脚長変化
+  const rx=tip.y-S.y, rz=tip.z-S.z, dL=dLdA(g,S.a)*S.wa;
+  const vTip={y:S.vy-S.om*rz, z:S.vz+S.om*rx};   // 胴体分（om は φ̇）
+  // ロール角速度 ψ̇ による接線速度（脚面はロール軸周りに回る）
+  const rl={y:tip.y-hip.y, z:tip.z-hip.z};
+  vTip.y+= -S.wpsi*rl.z + dL*u.y; vTip.z+= S.wpsi*rl.y + dL*u.z;
+  const vRest={y:vTip.y+g.ls0*(S.om+S.wpsi)*n.y, z:vTip.z+g.ls0*(S.om+S.wpsi)*n.z};
+  return {g,c,s,R,hip,hipR,b,u,n,L,base,tip,rest,vTip,vRest,Lspring:L+g.ls0};
+}
+function motor(tg,t,w,tc,stall,nl,kp,kd){
+  const wnl=nl*2*Math.PI/60;
+  const tau=S.tmode?tc:kp*(tg-t)-kd*w;
+  const avail=(tau*w>0)?stall*Math.max(0,1-Math.abs(w)/wnl):stall;
+  return clamp(tau,-avail,avail);
+}
+function physStep(dt){
+  const k=kin(), g=k.g;
+  // 直列バネ（脚方向）＋横方向擬似拘束
+  const dy=S.fy-k.rest.y, dz=S.fz-k.rest.z, dvy=S.vfy-k.vRest.y, dvz=S.vfz-k.vRest.z;
+  const du=dy*k.u.y+dz*k.u.z, dn=dy*k.n.y+dz*k.n.z, dvu=dvy*k.u.y+dvz*k.u.z, dvn=dvy*k.n.y+dvz*k.n.z;
+  const cs=2*P.zs*Math.sqrt(P.ks*P.mf), cl=2*Math.sqrt(KLAT*P.mf);
+  let fu=-(P.ks*du+cs*dvu); const fn=-(KLAT*dn+cl*dvn);
+  if(-du>g.ls0)fu+=KLAT*(-du-g.ls0);
+  const Fs={y:fu*k.u.y+fn*k.n.y, z:fu*k.u.z+fn*k.n.z};
+  S.delta=-du;
+  // 接地
+  let Fn=0,Ft=0;
+  if(S.fz<0){
+    const cg=2*Math.sqrt(P.kg*P.mf);
+    Fn=Math.max(0,P.kg*(-S.fz)-cg*S.vfz);
+    if(S.anchor===null)S.anchor=S.fy;
+    let ft=-P.kg*(S.fy-S.anchor)-cg*S.vfy; const lim=P.mu*Fn;
+    if(ft>lim){ft=lim;S.anchor=S.fy+(ft+cg*S.vfy)/P.kg;} else if(ft<-lim){ft=-lim;S.anchor=S.fy+(ft+cg*S.vfy)/P.kg;}
+    Ft=ft; S.contact=Fn>0.5;
+  }else{S.anchor=null;S.contact=false;}
+  S.Fn=Fn;S.Ft=Ft;
+  const afy=(Fs.y+Ft)/P.mf, afz=(Fs.z+Fn)/P.mf-G;
+  // 脚長クランク（2 サーボ対称）: 2·J_r·α̈ = 2τ − fu·L'(α) − b·α̇   （fu>0 = 圧縮 → 脚を縮める向き）
+  const Lp=dLdA(g,S.a);
+  const m=motor(S.ta,S.a,S.wa,S.tca,P.stall,P.nl,P.kp,P.kd);
+  const bfr=0.02*P.stall/(P.nl*2*Math.PI/60);
+  const aa=(2*m-fu*Lp-2*bfr*S.wa)/(2*P.jr);
+  // ロールサーボ: (J3 + Jleg + mf·L²は足に含む)·ψ̈ = τ3 − τload − b3·ψ̇。τload = 横力 fn × (ロール軸からの腕)
+  const rl={y:k.tip.y-k.hip.y, z:k.tip.z-k.hip.z};
+  const tl=(rl.y*Fs.z-rl.z*Fs.y);                 // 脚先の力 Fs（足に作用）が股まわりに作るモーメント。脚が受ける反力は −tl
+  const m3=motor(S.tpsi,S.psi,S.wpsi,S.tc3,P.stall3,P.nl3,P.kp3,P.kd3);
+  const b3=0.02*P.stall3/(P.nl3*2*Math.PI/60);
+  const a3=(m3-tl-b3*S.wpsi)/(P.jr3+P.jleg);
+  // 胴体: −Fs が足先点に作用（脚とロールサーボは質量なし扱い。J3 の反力は無視）
+  const rx=S.fy-S.y, rz=S.fz-S.z;
+  const Mb=-(rx*Fs.z-rz*Fs.y);
+  const aby=-Fs.y/P.mb, abz=-Fs.z/P.mb-G, al=Mb/inertia();
+  C.Mhip=-tl;
+  // 積分
+  S.vy+=aby*dt;S.vz+=abz*dt;S.om+=al*dt; S.y+=S.vy*dt;S.z+=S.vz*dt;S.ph+=S.om*dt;
+  S.wa+=aa*dt;S.a+=S.wa*dt; S.wpsi+=a3*dt;S.psi+=S.wpsi*dt;
+  S.vfy+=afy*dt;S.vfz+=afz*dt;S.fy+=S.vfy*dt;S.fz+=S.vfz*dt;
+  S.tau=m;S.tau3=m3;S.t+=dt;
+  // ピーク
+  const pk=C.pk, af=dt/0.005;
+  pk.Fn=Math.max(pk.Fn,Fn); pk.tau=Math.max(pk.tau,Math.abs(m)); pk.w=Math.max(pk.w,Math.abs(S.wa));
+  pk.tau3=Math.max(pk.tau3,Math.abs(m3)); pk.w3=Math.max(pk.w3,Math.abs(S.wpsi)); pk.delta=Math.max(pk.delta,S.delta);
+  pk.pow=Math.max(pk.pow,2*Math.abs(m*S.wa)+Math.abs(m3*S.wpsi));
+  C.tauF+=(Math.abs(m)-C.tauF)*af; C.wF+=(Math.abs(S.wa)-C.wF)*af; C.tau3F+=(Math.abs(m3)-C.tau3F)*af; C.w3F+=(Math.abs(S.wpsi)-C.w3F)*af;
+  pk.tauS=Math.max(pk.tauS,C.tauF); pk.wS=Math.max(pk.wS,C.wF); pk.tau3S=Math.max(pk.tau3S,C.tau3F); pk.w3S=Math.max(pk.w3S,C.w3F);
+  if(Math.abs(S.ph)>1.2||S.z<0.3*standH()||!isFinite(S.z))S.fallen=true;
+}
+// ---------- 制御 ----------
+function control(){
+  const k=kin(), g=k.g, now=S.t;
+  const loaded=S.contact&&S.delta>0.001;
+  if(C.phase==='FLIGHT'){
+    if(C.vzPrev>0&&S.vz<=0){
+      C.apex=S.z-standH(); C.hops++;
+      C.vdesEff=P.vRamp>0?clamp(P.vdes,C.vdesEff-P.vRamp,C.vdesEff+P.vRamp):P.vdes;
+      C.dL=clamp(C.dL+P.kh*(P.hdes/100-C.apex),0,P.dlmax/1000);
+      C.last={apex:C.apex,v:S.vy,Ts:C.Ts,dL:C.dL,ph:S.ph,...C.pk};
+      C.pk={Fn:0,tau:0,w:0,tauS:0,wS:0,tau3:0,w3:0,tau3S:0,w3S:0,delta:0,pow:0};
+    }
+    if(loaded){C.phase='COMP';C.tTD=now;C.tsAtTD=C.tsPred;}
+  }else{
+    if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002)C.phase='THRUST';
+    if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';
+      if(C.tsAtTD>0)C.tsCorr=clamp(C.tsCorr+0.5*(C.Ts/C.tsAtTD-C.tsCorr),0.5,2);}
+  }
+  C.vzPrev=S.vz; C.deltaPrev=S.delta;
+  const Lr=P.L0/1000-P.retract/1000-g.ls0;
+  S.tmode=false;
+  if(C.phase==='FLIGHT'){
+    // 接地時間の予測（バネ質量系の着地）
+    const om=Math.sqrt(P.ks/(P.mb+P.mf)), v0=Math.sqrt(Math.max(0,S.vz*S.vz+2*G*Math.max(0,S.z-standH())));
+    C.tsPred=clamp((2/om)*(Math.PI-Math.atan(v0*om/G))*C.tsCorr,0.03,0.6);
+    const vd=P.vRamp>0?C.vdesEff:P.vdes;
+    let yf=P.cn*S.vy*C.tsPred/2+P.kv*(S.vy-vd); if(C.yfOverride!==undefined)yf=C.yfOverride;
+    yf=clamp(yf,-0.6*Lr,0.6*Lr); C.yfCmd=yf;
+    // 世界座標の脚角 → 脚面のロール角 ψ（胴体基準）。脚面の付け根は oy だけ横にずれる
+    const bw=Math.asin(clamp((yf-g.oy)/Lr,-1,1));
+    S.tpsi=bw-S.ph;
+    const a=AofL(g,Lr); if(a!==null)S.ta=a;
+    C.tip={y:k.hip.y+g.oy*Math.cos(bw)+Lr*Math.sin(bw), z:k.hip.z+g.oy*Math.sin(bw)-Lr*Math.cos(bw)};
+  }else{
+    const L=C.phase==='THRUST'?Lr+C.dL:Lr;
+    const Mcmd=P.kphi*S.ph+P.kphid*S.om; C.Mcmd=Mcmd;    // 胴体に −Mcmd を与える
+    if(P.hipMode===1){
+      // 脚長: インピーダンス F_r（伸展正）→ 2τ·δα = F·δL より τ = F·L'(α)/2
+      const er=L-k.L, vr=dLdA(g,S.a)*S.wa;
+      const Fr=P.kr*er-((C.phase==='THRUST'&&er>0.003)?0:P.dr*vr);
+      S.tca=Fr*dLdA(g,S.a)/2;
+      // ロール: 接線力 Ft = Mcmd/L を股トルクで直接（腕 ≈ L）
+      S.tc3=Mcmd;
+      S.tmode=true; S.ta=S.a; S.tpsi=S.psi; C.tip=null;
+    }else{
+      const a=AofL(g,L); if(a!==null)S.ta=a;
+      S.tpsi=S.psi+clamp(Mcmd/P.kp3,-0.5,0.5);
+    }
+  }
+}
+let logT=0, trailT=0;
+function advance(simDt){
+  const ctrlDt=1/P.rate; let n=Math.round(simDt/PHYS_DT);
+  for(let i=0;i<n&&!S.fallen;i++){
+    const tick=Math.floor(S.t/ctrlDt+1e-9);
+    if(tick!==C.tick){C.tick=tick;control();}
+    physStep(PHYS_DT);
+    if(S.t>=logT){logT+=0.005;
+      log.push({t:S.t,z:S.z,vy:S.vy,ph:S.ph*R2D,tau3:Math.abs(S.tau3)/P.stall3,w3:Math.abs(S.wpsi)/(P.nl3*2*Math.PI/60),
+        tau:Math.abs(S.tau)/P.stall,w:Math.abs(S.wa)/(P.nl*2*Math.PI/60)});
+      if(log.length>620)log.shift();}
+    if(S.t>=trailT){trailT+=0.01;trail.push({y:S.y,z:S.z});if(trail.length>500)trail.shift();}
+  }
+}
+
+// ---------- 入力 ----------
+const rows=[...document.querySelectorAll('.row[data-k]')];
+function save(){try{localStorage.setItem('hoproll2d',JSON.stringify(P));}catch(e){}}
+try{const t=localStorage.getItem('hoproll2d');if(t)Object.assign(P,JSON.parse(t));}catch(e){}
+function bind(){
+  rows.forEach(r=>{
+    const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
+    const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
+      if(k==='servo')applyServo();else if(['stall','nl','jr','kp','kd'].includes(k))P.servo=9;
+      if(k==='servo3')applyServo3();else if(['stall3','nl3','jr3','kp3','kd3'].includes(k))P.servo3=9;
+      if(['rate','hipMode','servo','servo3'].includes(k))P[k]=Math.round(v);
+      sync();save();updateResults();draw();};
+    if(num)num.addEventListener('input',e=>set(e.target.value));
+    if(rng)rng.addEventListener('input',e=>set(e.target.value));
+    if(sel)sel.addEventListener('change',e=>set(e.target.value));
+  });
+}
+function sync(){
+  rows.forEach(r=>{const k=r.dataset.k,v=P[k];
+    r.querySelectorAll('input').forEach(i=>{if(document.activeElement!==i||i.type==='range')i.value=v;});
+    const sel=r.querySelector('select');if(sel)sel.value=String(v);});
+}
+document.getElementById('reset').onclick=()=>{P=Object.assign({},DEF);sync();save();resetSim();updateResults();draw();};
+const playBtn=document.getElementById('play');
+function setRunning(v){running=v;playBtn.textContent=running?'一時停止':'再生';}
+playBtn.onclick=()=>{if(S.fallen)resetSim();setRunning(!running);};
+document.getElementById('step').onclick=()=>{setRunning(false);advance(1/P.rate);updateResults();draw();};
+document.getElementById('simReset').onclick=()=>{setRunning(false);resetSim();updateResults();draw();};
+document.getElementById('speed').onchange=e=>simSpeed=parseFloat(e.target.value);
+document.getElementById('drop').onchange=e=>{dropCm=parseFloat(e.target.value);setRunning(false);resetSim();updateResults();draw();};
+document.getElementById('pert').onchange=e=>{pertMode=parseInt(e.target.value);setRunning(false);resetSim();updateResults();draw();};
+function exportText(){
+  const L=['# Hopper Roll-Plane 2D Sim 設定','params: '+JSON.stringify(P)];
+  const c=C.last, wnl=P.nl*2*Math.PI/60, wnl3=P.nl3*2*Math.PI/60;
+  if(c)L.push(`last cycle: apex ${(c.apex*100).toFixed(1)} cm (target ${P.hdes})  vy ${c.v.toFixed(2)} m/s (target ${P.vdes})  roll ${(c.ph*R2D).toFixed(1)} deg  Ts ${(c.Ts*1000).toFixed(0)} ms  dL ${(c.dL*1000).toFixed(1)} mm  Fn ${c.Fn.toFixed(0)} N  roll servo tau ${c.tau3S.toFixed(2)} Nm (${(c.tau3S/P.stall3*100).toFixed(0)}% sustained, ${(c.tau3/P.stall3*100).toFixed(0)}% inst) w ${(c.w3S*60/2/Math.PI).toFixed(0)} rpm (${(c.w3S/wnl3*100).toFixed(0)}%)  leg servo tau ${c.tauS.toFixed(2)} Nm (${(c.tauS/P.stall*100).toFixed(0)}%) w ${(c.wS*60/2/Math.PI).toFixed(0)} rpm (${(c.wS/wnl*100).toFixed(0)}%)  delta ${(c.delta*1000).toFixed(1)} mm  P ${c.pow.toFixed(1)} W`);
+  L.push(`Ts pred/meas ${(C.tsPred*1000).toFixed(0)}/${(C.Ts*1000).toFixed(0)} ms  t ${S.t.toFixed(2)} s  hops ${C.hops}  ${S.fallen?'FALLEN':C.phase}`);
+  return L.join('\n');
+}
+document.getElementById('copyCfg').onclick=async()=>{const t=exportText(),b=document.getElementById('copyCfg');
+  try{await navigator.clipboard.writeText(t);b.textContent='コピーしました';}catch(e){window.prompt('コピーしてください',t);}
+  setTimeout(()=>b.textContent='設定と結果をコピー',1500);};
+document.getElementById('pasteCfg').onclick=()=>{const t=window.prompt('params: {...} を含むテキストを貼り付け');if(!t)return;
+  const m=t.match(/\{[^}]*\}/);if(!m)return;
+  try{const o=JSON.parse(m[0]);for(const k in DEF)if(typeof o[k]==='number')P[k]=o[k];sync();save();resetSim();updateResults();draw();}catch(e){alert('読み込めませんでした');}};
+
+// ---------- 結果 ----------
+const $=id=>document.getElementById(id);
+function barCls(r){return r>1?'crit':r>0.8?'warn':'';}
+function setBar(id,r){const b=$(id);b.style.width=clamp(r,0,1)*100+'%';b.className=barCls(r);}
+function dlist(id,items){$(id).innerHTML=items.map(([k,v,c])=>`<div><dt>${k}</dt><dd class="${c||''}">${v}</dd></div>`).join('');}
+function updateResults(){
+  const pill=$('pill');
+  if(S.fallen){pill.textContent='転倒';pill.className='pill crit';}
+  else if(!running&&S.t===0){pill.textContent='停止';pill.className='pill na';}
+  else{pill.textContent={FLIGHT:'飛行',COMP:'接地（圧縮）',THRUST:'接地（蹴り）'}[C.phase]+(running?'':'（一時停止）');pill.className='pill'+(C.phase==='FLIGHT'?'':' warn');}
+  const c=C.last, wnl=P.nl*2*Math.PI/60, wnl3=P.nl3*2*Math.PI/60;
+  if(c){
+    $('apex').textContent=(c.apex*100).toFixed(1)+' cm'; $('apexb').textContent='目標 '+P.hdes.toFixed(1)+' cm'; setBar('barA',c.apex*100/Math.max(P.hdes,0.1)*0.8);
+    $('vel').textContent=c.v.toFixed(2)+' m/s'; $('velb').textContent='目標 '+P.vdes.toFixed(2)+' m/s、ロール '+(c.ph*R2D).toFixed(1)+'°';
+    $('tau3P').textContent=c.tau3S.toFixed(2)+' N·m'; $('tau3Pb').textContent=(c.tau3S/P.stall3*100).toFixed(0)+'% of stall '+P.stall3+' N·m（瞬時 '+(c.tau3/P.stall3*100).toFixed(0)+'%）'; setBar('barT3',c.tau3S/P.stall3);
+    $('w3P').textContent=(c.w3S*60/2/Math.PI).toFixed(0)+' rpm'; $('w3Pb').textContent=(c.w3S/wnl3*100).toFixed(0)+'% of no-load '+P.nl3+' rpm（瞬時 '+(c.w3/wnl3*100).toFixed(0)+'%）'; setBar('barW3',c.w3S/wnl3);
+    $('tauP').textContent=c.tauS.toFixed(2)+' N·m'; $('tauPb').textContent=(c.tauS/P.stall*100).toFixed(0)+'% of stall '+P.stall+' N·m（瞬時 '+(c.tau/P.stall*100).toFixed(0)+'%）'; setBar('barT',c.tauS/P.stall);
+    $('wP').textContent=(c.wS*60/2/Math.PI).toFixed(0)+' rpm'; $('wPb').textContent=(c.wS/wnl*100).toFixed(0)+'% of no-load '+P.nl+' rpm（瞬時 '+(c.w/wnl*100).toFixed(0)+'%）'; setBar('barW',c.wS/wnl);
+    dlist('cycList',[
+      ['接地時間 Ts',(c.Ts*1000).toFixed(0)+' ms'],
+      ['蹴り出し量 ΔL',(c.dL*1000).toFixed(1)+' mm',c.dL>=P.dlmax/1000-1e-6?'warn':''],
+      ['接地力 ピーク',c.Fn.toFixed(0)+' N ('+(c.Fn/((P.mb+P.mf)*G)).toFixed(1)+'×mg)'],
+      ['バネ圧縮 最大',(c.delta*1000).toFixed(1)+' mm'+(c.delta>=P.ls0/1000?'（底付き）':''),c.delta>=P.ls0/1000?'crit':''],
+      ['逆駆動（ω > 無負荷）',(c.w3/wnl3>1.05||c.w/wnl>1.05)?'発生（ロール '+(c.w3/wnl3*100).toFixed(0)+'% / 脚長 '+(c.w/wnl*100).toFixed(0)+'%）':'なし',(c.w3/wnl3>1.05||c.w/wnl>1.05)?'crit':'good'],
+      ['サーボ出力 ピーク',c.pow.toFixed(1)+' W（3 個合計）'],
+      ['ホップ回数',String(C.hops)],
+    ]);
+  }else{
+    ['apex','vel','tau3P','w3P','tauP','wP'].forEach(i=>$(i).textContent='–');['apexb','velb','tau3Pb','w3Pb','tauPb','wPb'].forEach(i=>$(i).textContent='–');
+    ['barA','barT3','barW3','barT','barW'].forEach(i=>setBar(i,0));
+    dlist('cycList',[['（1 ホップ後に表示）','']]);
+  }
+  const g=geom();
+  dlist('nowList',[
+    ['時刻',S.t.toFixed(3)+' s'],
+    ['胴体高さ / 横位置',(S.z*100).toFixed(1)+' / '+(S.y*100).toFixed(1)+' cm'],
+    ['横速度',S.vy.toFixed(2)+' m/s'],
+    ['ロール角 φ',(S.ph*R2D).toFixed(1)+'°',Math.abs(S.ph)>0.5?'crit':Math.abs(S.ph)>0.25?'warn':''],
+    ['脚面角 ψ（胴体基準）',(S.psi*R2D).toFixed(1)+'°'],
+    ['脚長 L（先端）',((LofA(g,S.a)||0)*1000).toFixed(0)+' mm、クランク '+(S.a*R2D).toFixed(0)+'°'],
+    ['伝達比 r',(Math.abs(dLdA(g,S.a))*1000).toFixed(0)+' mm/rad'],
+    ['バネ圧縮',(S.delta*1000).toFixed(1)+' mm'],
+    ['接地力 縦 / 横',S.Fn.toFixed(0)+' / '+S.Ft.toFixed(0)+' N'],
+    ['股モーメント 指令 / 実',C.Mcmd.toFixed(2)+' / '+(-C.Mhip).toFixed(2)+' N·m'],
+    ['接地時間 予測 / 実測',(C.tsPred*1000).toFixed(0)+' / '+(C.Ts*1000).toFixed(0)+' ms'],
+    ['足先配置 指令',(C.yfCmd*1000).toFixed(1)+' mm（目標速度 '+(P.vRamp>0?C.vdesEff:P.vdes).toFixed(2)+' m/s）'],
+  ]);
+  $('clock').textContent='t = '+S.t.toFixed(3)+' s';
+}
+
+// ---------- 描画 ----------
+const mech=$('mech'),mctx=mech.getContext('2d'),chart=$('chart'),cctx=chart.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function sizeCanvas(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;
+  if(c.width!==Math.round(r.width*d)||c.height!==Math.round(r.height*d)){c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);}
+  return{w:r.width,h:r.height,d};}
+let camY=0;
+function drawMech(){
+  const {w,h,d}=sizeCanvas(mech), ctx=mctx; ctx.setTransform(d,0,0,d,0,0); ctx.clearRect(0,0,w,h);
+  const k=kin(), g=k.g;
+  const viewH=Math.max(0.6,(P.hb+P.L0)/1000*1.3+P.hdes/100+0.15);
+  const ppm=h*0.85/viewH, gy=h*0.9;
+  camY+=(S.y-camY)*0.15; if(!isFinite(camY))camY=0;
+  const X=y=>w/2+(y-camY)*ppm, Y=z=>gy-z*ppm;
+  ctx.fillStyle=css('--surf'); ctx.fillRect(0,gy,w,h-gy);
+  ctx.strokeStyle=css('--ink3'); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(0,gy+0.5); ctx.lineTo(w,gy+0.5); ctx.stroke();
+  ctx.fillStyle=css('--ink3'); ctx.font='10px ui-monospace,monospace'; ctx.textAlign='center';
+  const y0=Math.floor((camY-w/2/ppm)/0.1)*0.1;
+  for(let y=y0;y<camY+w/2/ppm;y+=0.1){const px=X(y);ctx.beginPath();ctx.moveTo(px,gy);ctx.lineTo(px,gy+(Math.abs(Math.round(y*10))%5===0?10:5));ctx.stroke();
+    if(Math.abs(Math.round(y*10))%5===0)ctx.fillText(y.toFixed(1)+' m',px,gy+22);}
+  const zs=standH();
+  ctx.setLineDash([4,4]); ctx.strokeStyle=css('--grid2'); ctx.beginPath(); ctx.moveTo(0,Y(zs)); ctx.lineTo(w,Y(zs)); ctx.stroke();
+  ctx.strokeStyle=css('--good'); ctx.beginPath(); ctx.moveTo(0,Y(zs+P.hdes/100)); ctx.lineTo(w,Y(zs+P.hdes/100)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.textAlign='left'; ctx.fillStyle=css('--good'); ctx.fillText('目標頂点',6,Y(zs+P.hdes/100)-3);
+  if(trail.length>1){ctx.strokeStyle=css('--ink3');ctx.lineWidth=1;ctx.beginPath();trail.forEach((p,i)=>{if(i)ctx.lineTo(X(p.y),Y(p.z));else ctx.moveTo(X(p.y),Y(p.z));});ctx.stroke();}
+  // 胴体
+  const bw=P.bwl/1000,bh=P.bh/1000;
+  ctx.save(); ctx.translate(X(S.y),Y(S.z)); ctx.rotate(-S.ph);
+  ctx.fillStyle=css('--panel'); ctx.strokeStyle=css('--steel'); ctx.lineWidth=2;
+  ctx.beginPath(); ctx.rect(-bw/2*ppm,-bh/2*ppm,bw*ppm,bh*ppm); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=css('--steel'); ctx.beginPath(); ctx.arc(0,0,3,0,7); ctx.fill();
+  ctx.restore();
+  // ロールサーボ（股）・脚面付け根・脚
+  const hip={x:X(k.hip.y),y:Y(k.hip.z)}, base={x:X(k.base.y),y:Y(k.base.z)}, tip={x:X(k.tip.y),y:Y(k.tip.z)};
+  ctx.strokeStyle=css('--roll'); ctx.lineWidth=5; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(hip.x,hip.y); ctx.lineTo(base.x,base.y); ctx.stroke();
+  ctx.fillStyle=css('--roll'); ctx.beginPath(); ctx.arc(hip.x,hip.y,7,0,7); ctx.fill();
+  ctx.strokeStyle=css('--link'); ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(base.x,base.y); ctx.lineTo(tip.x,tip.y); ctx.stroke();
+  // 脚長サーボ（脚面に載る箱）
+  ctx.save(); ctx.translate(base.x,base.y); ctx.rotate(-(k.b));
+  ctx.fillStyle=css('--surf'); ctx.strokeStyle=css('--link'); ctx.lineWidth=1.5; ctx.beginPath(); ctx.rect(-0.03*ppm,0.01*ppm,0.06*ppm,0.05*ppm); ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.fillStyle=css('--panel'); ctx.strokeStyle=css('--ink2'); ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(tip.x,tip.y,3.5,0,7); ctx.fill(); ctx.stroke();
+  // 直列バネ
+  const fx=X(S.fy),fy=Y(S.fz);
+  ctx.strokeStyle=css('--spring'); ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(tip.x,tip.y);
+  const nz=8, ex=fx-tip.x, ey=fy-tip.y, nx=-ey, ny=ex, nl=Math.hypot(nx,ny)||1;
+  for(let i=1;i<nz;i++){const f=i/nz, s=(i%2?1:-1)*5;ctx.lineTo(tip.x+ex*f+nx/nl*s,tip.y+ey*f+ny/nl*s);}
+  ctx.lineTo(fx,fy); ctx.stroke();
+  ctx.fillStyle=css('--spring'); ctx.beginPath(); ctx.arc(fx,fy,5,0,7); ctx.fill();
+  if(S.Fn>0){const sc=0.15/((P.mb+P.mf)*G)*ppm; ctx.strokeStyle=css('--accent'); ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(fx+S.Ft*sc,fy-S.Fn*sc); ctx.stroke();
+    ctx.fillStyle=css('--accent'); ctx.font='11px ui-monospace,monospace'; ctx.fillText(S.Fn.toFixed(0)+' N',fx+8,fy-S.Fn*sc-4);}
+  if(C.phase==='FLIGHT'&&C.tip){const tx=X(C.tip.y),ty=Y(C.tip.z);ctx.strokeStyle=css('--ink2');ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(tx-5,ty-5);ctx.lineTo(tx+5,ty+5);ctx.moveTo(tx+5,ty-5);ctx.lineTo(tx-5,ty+5);ctx.stroke();}
+  ctx.fillStyle=css('--ink2'); ctx.font='11.5px ui-monospace,monospace'; ctx.textAlign='left';
+  ctx.fillText(`${S.fallen?'FALLEN':C.phase}  ${P.rate} Hz  roll τ ${S.tau3.toFixed(2)} N·m ω ${(S.wpsi*60/6.283).toFixed(0)} rpm  leg τ ${S.tau.toFixed(2)} ω ${(S.wa*60/6.283).toFixed(0)} rpm  φ ${(S.ph*R2D).toFixed(1)}° ψ ${(S.psi*R2D).toFixed(1)}°`,10,16);
+}
+function drawChart(){
+  const {w,h,d}=sizeCanvas(chart), ctx=cctx; ctx.setTransform(d,0,0,d,0,0); ctx.clearRect(0,0,w,h);
+  const rowsN=5, padL=44, padR=10, rh=(h-10)/rowsN, t1=S.t, t0=t1-3;
+  const X=t=>padL+(t-t0)/3*(w-padL-padR);
+  const specs=[
+    {label:'高さ cm',get:p=>p.z*100,ref:[standH()*100,standH()*100+P.hdes],min:0},
+    {label:'vy m/s',get:p=>p.vy,ref:[P.vdes],sym:true},
+    {label:'ロール °',get:p=>p.ph,ref:[0],sym:true},
+    {label:'ロール③ τ% / ω%',get:p=>p.tau3*100,get2:p=>p.w3*100,ref:[100],min:0},
+    {label:'脚長①② τ% / ω%',get:p=>p.tau*100,get2:p=>p.w*100,ref:[100],min:0},
+  ];
+  const pts=log.filter(p=>p.t>=t0);
+  specs.forEach((s,i)=>{
+    const top=5+i*rh, bot=top+rh-14;
+    let lo=s.min!==undefined?s.min:Infinity, hi=-Infinity; const vals=[];
+    pts.forEach(p=>{vals.push(s.get(p));if(s.get2)vals.push(s.get2(p));});
+    vals.concat(s.ref).forEach(v=>{lo=Math.min(lo,v);hi=Math.max(hi,v);});
+    if(s.sym){const m=Math.max(Math.abs(lo),Math.abs(hi),s.label.startsWith('ロール')?5:0.2);lo=-m;hi=m;}
+    if(!isFinite(lo))lo=0; if(!isFinite(hi)||hi<=lo)hi=lo+1; const span=(hi-lo)*1.1; hi=lo+span;
+    const Y=v=>bot-(v-lo)/(hi-lo)*(bot-top);
+    ctx.strokeStyle=css('--grid2'); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(padL,bot+0.5); ctx.lineTo(w-padR,bot+0.5); ctx.stroke();
+    ctx.fillStyle=css('--ink3'); ctx.font='10px ui-monospace,monospace'; ctx.textAlign='right';
+    ctx.fillText(hi.toFixed(s.sym?1:0),padL-4,top+9); ctx.fillText(lo.toFixed(s.sym?1:0),padL-4,bot);
+    ctx.textAlign='left'; ctx.fillStyle=css('--ink2'); ctx.fillText(s.label,padL+4,top+9);
+    ctx.setLineDash([3,3]);
+    s.ref.forEach((r,j)=>{ctx.strokeStyle=(i===0&&j===0)?css('--grid2'):i>=3?css('--crit'):css('--good');ctx.beginPath();ctx.moveTo(padL,Y(r));ctx.lineTo(w-padR,Y(r));ctx.stroke();});
+    ctx.setLineDash([]);
+    const line=(get,col)=>{ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();pts.forEach((p,j)=>{const x=X(p.t),y=Y(get(p));if(j)ctx.lineTo(x,y);else ctx.moveTo(x,y);});ctx.stroke();};
+    line(s.get,i===3?css('--roll'):css('--steel')); if(s.get2)line(s.get2,css('--link'));
+  });
+}
+function draw(){drawMech();drawChart();}
+let lastT=0, acc=0;
+function frame(ts){
+  const dtReal=Math.min(0.05,(ts-lastT)/1000||0); lastT=ts;
+  if(running&&!S.fallen){acc+=dtReal*simSpeed;const n=Math.floor(acc/PHYS_DT);acc-=n*PHYS_DT;advance(n*PHYS_DT);if(S.fallen)setRunning(false);updateResults();}
+  draw(); requestAnimationFrame(frame);
+}
+window.addEventListener('resize',draw);
+bind(); sync(); resetSim(); updateResults(); requestAnimationFrame(frame);
+})();
+</script>
+</body></html>

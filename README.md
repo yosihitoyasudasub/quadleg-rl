@@ -11,6 +11,7 @@ quadleg-rl/
 ├─ tools/
 │   ├─ webapp/quad-leg-5bar.html        5 節リンク脚のトルク計算 Web アプリ（ブラウザで開くだけ）
 │   ├─ webapp/hopper-2d.html            一本脚ホッパー 2D シミュレーター（派生テーマ）
+│   ├─ webapp/hopper-roll-2d.html       同 ロール面版（正面図、段階 1）
 │   ├─ webapp/quad-leg-linkage.html     旧四節リンク版（参考）
 │   └─ fusion/QuadLegLinkage/           Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
 └─ pyproject.toml
