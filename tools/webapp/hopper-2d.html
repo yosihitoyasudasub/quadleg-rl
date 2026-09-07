@@ -125,6 +125,11 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
       <div class="row" data-k="kh"><label><b>高さゲイン</b><span class="sym">Kh</span></label><input type="number" step="0.05"><input type="range" min="0" max="2" step="0.05"></div>
       <div class="row" data-k="cn"><label><b>中立点係数（×Ts/2）</b><span class="sym">cn</span></label><input type="number" step="0.05"><input type="range" min="0" max="1.5" step="0.05"></div>
       <div class="row" data-k="kv"><label><b>速度ゲイン</b><span class="sym">Kv s</span></label><input type="number" step="0.005"><input type="range" min="0" max="0.1" step="0.005"></div>
+      <p class="hint">前進速度ループ 1・2 は実験用（HANDOFF §8.7）。a・b は標準設定の定常ホップで強制実験して測った値で、構成を変えたら測り直す。</p>
+      <div class="row" data-k="vLoop"><label><b>前進速度ループ</b><span class="sym">mode</span></label><select><option value="0">Raibert（前回 Ts）</option><option value="1">予測中立点（Ts を飛行中に予測）</option><option value="2">デッドビート（接地写像を同定）</option></select></div>
+      <div class="row" data-k="vA"><label><b>速度増幅率 a（設計値）</b><span class="sym">v_out/v_in</span></label><input type="number" step="0.1"><input type="range" min="0.5" max="6" step="0.1"></div>
+      <div class="row" data-k="vB"><label><b>足先感度 b（設計値）</b><span class="sym">(m/s)/m</span></label><input type="number" step="5"><input type="range" min="-100" max="-5" step="5"></div>
+      <div class="row" data-k="vLam"><label><b>デッドビート混合率</b><span class="sym">λ</span></label><input type="number" step="0.1"><input type="range" min="0" max="1" step="0.1"></div>
       <div class="row" data-k="thrustMs"><label><b>蹴り出し時間の上限（0=無制限）</b><span class="sym">ms</span></label><input type="number" step="5"><input type="range" min="0" max="150" step="5"></div>
       <div class="row" data-k="hipMode"><label><b>接地中の制御方式</b><span class="sym">mode</span></label><select><option value="1">電流制御（トルク指令、XM540 等）</option><option value="0">位置指令のみ（XL-320 相当）</option></select></div>
       <div class="row" data-k="kr"><label><b>脚長インピーダンス 剛性</b><span class="sym">Kr N/m</span></label><input type="number" step="100"><input type="range" min="500" max="20000" step="100"></div>
@@ -197,7 +202,7 @@ const DEF={mb:2.0,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:80,l2:140,ls0:80,ks:1200,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:30,kd:1.0,
            rate:200,hdes:8,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.01,cn:1.0,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
-           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0};
+           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0,vLoop:0,vLam:0.3,vA:3.1,vB:-50};
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -268,7 +273,8 @@ function resetSim(){
   C={phase:'FLIGHT',Ts:0.12,Tf:0.2,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tTO:0,tick:-1,hops:0,
      pk:{Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
      tauF1:0,tauF2:0,wF1:0,wF2:0,
-     rTD:0,rTH:0,tTH:0,lastR:null};
+     rTD:0,rTH:0,tTH:0,lastR:null,
+     vin:0,xfTD:0,tsPred:0,tsAtTD:0,tsCorr:1,hist:[],map:null,xfPrev:0,xfCmd:0};
   log=[]; trail=[]; logT=0; trailT=0;
 }
 function kin(){
@@ -379,11 +385,15 @@ function control(){
       C.last={apex:C.apex,v:S.vx,Ts:C.Ts,dL:C.dL,...C.pk};
       C.pk={Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0};
     }
-    if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);C.rTD=Math.abs(ratioNow(k));}
+    if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);C.rTD=Math.abs(ratioNow(k));
+      C.vin=S.vx; C.xfTD=S.fx-k.hip.x; C.tsAtTD=C.tsPred; C.xfPrev=C.xfCmd;}   // 接地写像の入力を記録
   }else{
     if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002){C.phase='THRUST';C.rTH=Math.abs(ratioNow(k));C.tTH=now;}
     if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';C.tTO=now;
-      C.lastR={TD:C.rTD,TH:C.rTH,TO:Math.abs(ratioNow(k))};}
+      C.lastR={TD:C.rTD,TH:C.rTH,TO:Math.abs(ratioNow(k))};
+      if(C.tsAtTD>0)C.tsCorr=clamp(C.tsCorr+0.5*(C.Ts/C.tsAtTD-C.tsCorr),0.5,2);   // 予測接地時間の補正係数
+      C.hist.push({vin:C.vin,xf:C.xfTD,vout:S.vx}); if(C.hist.length>10)C.hist.shift();
+      C.map=identMap(C.hist,P.vA,P.vB);}
   }
   C.vyPrev=S.vy; C.deltaPrev=S.delta;
   // ラッチの係合／解放（モード C）
@@ -399,7 +409,18 @@ function control(){
   let tip;
   S.tmode=false;
   if(C.phase==='FLIGHT'){
-    let xf=clamp(C.xfOverride!==undefined?C.xfOverride:P.cn*S.vx*C.Ts/2+P.kv*(S.vx-P.vdes),-0.6*Lr,0.6*Lr);
+    // 接地時間の予測: バネ質量系の着地（v0 = 予測着地速度）。T = (2/ω)(π − atan(v0 ω / g))、実測との比で補正
+    const om=Math.sqrt(P.ks/(P.mb+P.mf)), v0=Math.sqrt(Math.max(0,S.vy*S.vy+2*G*Math.max(0,S.y-standH())));
+    C.tsPred=clamp((2/om)*(Math.PI-Math.atan(v0*om/G))*C.tsCorr,0.03,0.6);
+    const TsUse=P.vLoop===0?C.Ts:C.tsPred;
+    let xf=P.cn*S.vx*TsUse/2+P.kv*(S.vx-P.vdes);
+    if(P.vLoop===2){                                 // デッドビート: v_out = a·v_in + b·xf + c を vdes に合わせる
+      const cc=C.map?C.map.c:0, xdb=(P.vdes-P.vA*S.vx-cc)/P.vB;
+      xf=xf+P.vLam*(xdb-xf);
+      xf=clamp(xf,C.xfPrev-0.02,C.xfPrev+0.02);      // 1 ホップあたりの変化を ±20 mm に制限
+    }
+    if(C.xfOverride!==undefined)xf=C.xfOverride;
+    xf=clamp(xf,-0.6*Lr,0.6*Lr); C.xfCmd=xf;
     const w={x:xf,y:-Math.sqrt(Math.max(0,Lr*Lr-xf*xf))};
     tip={x:k.c*w.x+k.s*w.y, y:-k.s*w.x+k.c*w.y};        // 世界→胴体座標
   }else{
@@ -433,6 +454,15 @@ function control(){
   for(let i=0;i<10&&!r;i++){r=ik(g,tip.x*sc,tip.y*sc);if(!r)sc*=0.97;}
   if(r){S.tg1=unwrap(r.t1,S.t1);S.tg2=unwrap(r.t2,S.t2);C.tip={x:tip.x*sc,y:tip.y*sc};}
 }
+// 接地写像 v_out = a·v_in + b·xf + c。足先 xf は v_in の関数として決まるので a と b は閉ループ中に同時同定できない。
+// a（速度増幅率）と b（足先感度 (m/s)/m）は設計値 vA / vB（定常ホップ中に強制実験で測る。標準設定で 3.1 / −50）とし、
+// 切片 c（モデル誤差の吸収）だけを直近ホップから緩やかに同定する
+function identMap(h,a,b){
+  if(h.length<2)return null;
+  let num=0,den=0.5;                                   // 事前値 c=0 への正則化
+  h.forEach((r,i)=>{const w=Math.pow(0.7,h.length-1-i); num+=w*(r.vout-a*r.vin-b*r.xf); den+=w;});
+  return {a,b,c:clamp(num/den,-0.3,0.3),n:h.length};
+}
 function unwrap(target,ref){let d=target-ref;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return ref+d;}   // ±180° の折返し対策
 // 飛行姿勢で足先が接地する胴体高さ。モード C は実際に巻けた蓄勢量ぶん脚が短くなる
 // （目標 δpre ではなく実測 dLatch を使う。巻き切れていないと脚が伸びたままなので）
@@ -463,7 +493,7 @@ function bind(){
     const k=r.dataset.k,num=r.querySelector('input[type=number]'),rng=r.querySelector('input[type=range]'),sel=r.querySelector('select');
     const set=v=>{v=parseFloat(v);if(isNaN(v))return;P[k]=v;
       if(k==='servo')applyServo();else if(['stall','nl','jr','kp','kd'].includes(k))P.servo=9;
-      if(['rate','hipMode','chgMode','chgSv','chgRel'].includes(k))P[k]=Math.round(v);
+      if(['rate','hipMode','chgMode','chgSv','chgRel','vLoop'].includes(k))P[k]=Math.round(v);
       if(k==='chgMode'||k==='chgPre')resetSim();
       sync();save();updateResults();draw();};
     if(num)num.addEventListener('input',e=>set(e.target.value));
@@ -491,6 +521,7 @@ function exportText(){
   const g=C.lastChg, csv=SERVOS[P.chgSv]||SERVOS[0];
   L.push('charge mode: '+(P.chgMode===1?`C 飛行中蓄勢＋ラッチ (δpre ${P.chgPre} mm, rc ${P.chgR} mm/rad, ${csv.name}, ${P.chgRel===1?'接地で解放':'最大圧縮で解放'})`:'A 着地エネルギー'));
   if(P.chgMode===1&&g)L.push(`last charge: ${(g.pre*1000).toFixed(1)}/${P.chgPre} mm  E ${g.E.toFixed(2)} J  wind ${(g.t*1000).toFixed(0)}/${(g.Tf*1000).toFixed(0)} ms  tau ${g.tau.toFixed(3)} Nm (${(g.tau/csv.stall*100).toFixed(0)}%)  ${g.full?'OK':(g.stalled?'STALLED':'TIME-SHORT')}`);
+  L.push(`vloop: ${['raibert','predTs','deadbeat'][P.vLoop]||P.vLoop}  Ts pred/meas ${(C.tsPred*1000).toFixed(0)}/${(C.Ts*1000).toFixed(0)} ms  map ${C.map?`a ${C.map.a.toFixed(2)} b ${C.map.b.toFixed(0)} c ${C.map.c.toFixed(3)}`:'-'}`);
   L.push(`t ${S.t.toFixed(2)} s  hops ${C.hops}  ${S.fallen?'FALLEN':C.phase}`);
   return L.join('\n');
 }
@@ -574,6 +605,9 @@ function updateResults(){
     ['接地力',S.Fn.toFixed(0)+' N'],
     ['バネ固有振動',fn.toFixed(2)+' Hz（静的沈み '+((P.mb+P.mf)*G/P.ks*1000).toFixed(1)+' mm）'],
     ['リンク',S.broken?'到達不能（伸び切り）':'OK',S.broken?'crit':'good'],
+    ['接地時間 予測 / 実測',(C.tsPred*1000).toFixed(0)+' / '+(C.Ts*1000).toFixed(0)+' ms（補正 ×'+C.tsCorr.toFixed(2)+'）'],
+    ['接地写像 a / b / c',C.map?C.map.a.toFixed(2)+' / '+C.map.b.toFixed(0)+' / '+C.map.c.toFixed(3)+'（'+C.map.n+' hop）':'未同定'],
+    ['足先配置 指令',(C.xfCmd*1000).toFixed(1)+' mm'],
   ]);
   $('clock').textContent='t = '+S.t.toFixed(3)+' s';
 }
