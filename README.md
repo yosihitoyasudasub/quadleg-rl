@@ -7,7 +7,9 @@ quadleg-rl/
 ├─ quadleg_rl/              学習コード（MuJoCo Playground / MJX / Brax PPO）
 │   └─ train.py             train() / render_video() / plot_history()
 ├─ notebooks/
-│   └─ 01_go1_playground.ipynb   Colab: テスト機 Go1 で歩行学習を体験
+│   ├─ 01_go1_playground.ipynb   Colab: テスト機 Go1 で歩行学習を体験
+│   └─ 02_hopper_mujoco.ipynb    Colab(CPU): 一本脚ホッパーを MuJoCo で動かす
+├─ hopper/                       一本脚ホッパーの MJCF 生成・Raibert 制御・実行
 ├─ tools/
 │   ├─ webapp/quad-leg-5bar.html        5 節リンク脚のトルク計算 Web アプリ（ブラウザで開くだけ）
 │   ├─ webapp/hopper-2d.html            一本脚ホッパー 2D シミュレーター（派生テーマ）
