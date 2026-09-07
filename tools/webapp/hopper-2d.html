@@ -166,8 +166,8 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     <div class="big">
       <div><div class="k">頂点での足先地上高</div><div class="v mono" id="apex">–</div><div class="u mono" id="apexb">–</div><div class="bar"><i id="barA"></i></div></div>
       <div><div class="k">前進速度（頂点時）</div><div class="v mono" id="vel">–</div><div class="u mono" id="velb">–</div></div>
-      <div><div class="k">サーボトルク ピーク（前回サイクル）</div><div class="v mono" id="tauP">–</div><div class="u mono" id="tauPb">–</div><div class="bar"><i id="barT"></i></div></div>
-      <div><div class="k">サーボ速度 ピーク</div><div class="v mono" id="wP">–</div><div class="u mono" id="wPb">–</div><div class="bar"><i id="barW"></i></div></div>
+      <div><div class="k">サーボトルク 持続ピーク（5 ms 平均、前回サイクル）</div><div class="v mono" id="tauP">–</div><div class="u mono" id="tauPb">–</div><div class="bar"><i id="barT"></i></div></div>
+      <div><div class="k">サーボ速度 持続ピーク（5 ms 平均）</div><div class="v mono" id="wP">–</div><div class="u mono" id="wPb">–</div><div class="bar"><i id="barW"></i></div></div>
     </div>
     <div class="sectionTitle">前回サイクル</div>
     <dl id="cycList"></dl>
@@ -266,7 +266,8 @@ function resetSim(){
   const k=kin();
   S.fx=k.rest.x-pre*k.u.x; S.fy=k.rest.y-pre*k.u.y;   // 足はラッチ位置（バネを δpre 縮めた長さ）
   C={phase:'FLIGHT',Ts:0.12,Tf:0.2,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tTO:0,tick:-1,hops:0,
-     pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
+     pk:{Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
+     tauF1:0,tauF2:0,wF1:0,wF2:0,
      rTD:0,rTH:0,tTH:0,lastR:null};
   log=[]; trail=[]; logT=0; trailT=0;
 }
@@ -360,6 +361,11 @@ function physStep(dt){
   pk.Fn=Math.max(pk.Fn,Fn); pk.tau=Math.max(pk.tau,Math.abs(m1),Math.abs(m2));
   pk.w=Math.max(pk.w,Math.abs(S.w1),Math.abs(S.w2)); pk.delta=Math.max(pk.delta,S.delta);
   pk.pow=Math.max(pk.pow,Math.abs(m1*S.w1)+Math.abs(m2*S.w2));
+  // 持続ピーク: 5 ms の一次遅れ平均。指令段差の瞬時スパイク（<1 ms）を除いた実効負荷
+  const af=dt/0.005;
+  C.tauF1+=(Math.abs(m1)-C.tauF1)*af; C.tauF2+=(Math.abs(m2)-C.tauF2)*af;
+  C.wF1+=(Math.abs(S.w1)-C.wF1)*af;   C.wF2+=(Math.abs(S.w2)-C.wF2)*af;
+  pk.tauS=Math.max(pk.tauS,C.tauF1,C.tauF2); pk.wS=Math.max(pk.wS,C.wF1,C.wF2);
   if(Math.abs(S.th)>1.2||S.y<0.3*standH()||!isFinite(S.y))S.fallen=true;
 }
 // ---------- 制御 ----------
@@ -371,7 +377,7 @@ function control(){
       C.apex=S.y-standH(); C.vApex=S.vx; C.hops++;
       C.dL=clamp(C.dL+P.kh*(P.hdes/100-C.apex),0,P.dlmax/1000);
       C.last={apex:C.apex,v:S.vx,Ts:C.Ts,dL:C.dL,...C.pk};
-      C.pk={Fn:0,tau:0,w:0,delta:0,pow:0};
+      C.pk={Fn:0,tau:0,w:0,tauS:0,wS:0,delta:0,pow:0};
     }
     if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);C.rTD=Math.abs(ratioNow(k));}
   }else{
@@ -481,7 +487,7 @@ document.getElementById('drop').onchange=e=>{dropCm=parseFloat(e.target.value);s
 function exportText(){
   const L=['# Hopper 2D Sim 設定','params: '+JSON.stringify(P)];
   const c=C.last;
-  if(c)L.push(`last cycle: apex ${(c.apex*100).toFixed(1)} cm (target ${P.hdes})  v ${c.v.toFixed(2)} m/s (target ${P.vdes})  Ts ${(c.Ts*1000).toFixed(0)} ms  dL ${(c.dL*1000).toFixed(1)} mm  Fn ${c.Fn.toFixed(0)} N  tau ${c.tau.toFixed(2)} Nm (${(c.tau/P.stall*100).toFixed(0)}%)  w ${(c.w*60/2/Math.PI).toFixed(0)} rpm (${(c.w/(P.nl*2*Math.PI/60)*100).toFixed(0)}%)  delta ${(c.delta*1000).toFixed(1)} mm  P ${c.pow.toFixed(1)} W`);
+  if(c)L.push(`last cycle: apex ${(c.apex*100).toFixed(1)} cm (target ${P.hdes})  v ${c.v.toFixed(2)} m/s (target ${P.vdes})  Ts ${(c.Ts*1000).toFixed(0)} ms  dL ${(c.dL*1000).toFixed(1)} mm  Fn ${c.Fn.toFixed(0)} N  tau ${c.tauS.toFixed(2)} Nm (${(c.tauS/P.stall*100).toFixed(0)}% sustained, ${(c.tau/P.stall*100).toFixed(0)}% inst)  w ${(c.wS*60/2/Math.PI).toFixed(0)} rpm (${(c.wS/(P.nl*2*Math.PI/60)*100).toFixed(0)}% sustained, ${(c.w/(P.nl*2*Math.PI/60)*100).toFixed(0)}% inst)  delta ${(c.delta*1000).toFixed(1)} mm  P ${c.pow.toFixed(1)} W`);
   const g=C.lastChg, csv=SERVOS[P.chgSv]||SERVOS[0];
   L.push('charge mode: '+(P.chgMode===1?`C 飛行中蓄勢＋ラッチ (δpre ${P.chgPre} mm, rc ${P.chgR} mm/rad, ${csv.name}, ${P.chgRel===1?'接地で解放':'最大圧縮で解放'})`:'A 着地エネルギー'));
   if(P.chgMode===1&&g)L.push(`last charge: ${(g.pre*1000).toFixed(1)}/${P.chgPre} mm  E ${g.E.toFixed(2)} J  wind ${(g.t*1000).toFixed(0)}/${(g.Tf*1000).toFixed(0)} ms  tau ${g.tau.toFixed(3)} Nm (${(g.tau/csv.stall*100).toFixed(0)}%)  ${g.full?'OK':(g.stalled?'STALLED':'TIME-SHORT')}`);
@@ -509,8 +515,8 @@ function updateResults(){
   if(c){
     $('apex').textContent=(c.apex*100).toFixed(1)+' cm'; $('apexb').textContent='目標 '+P.hdes.toFixed(1)+' cm'; setBar('barA',c.apex*100/Math.max(P.hdes,0.1)*0.8);
     $('vel').textContent=c.v.toFixed(2)+' m/s'; $('velb').textContent='目標 '+P.vdes.toFixed(2)+' m/s';
-    $('tauP').textContent=c.tau.toFixed(2)+' N·m'; $('tauPb').textContent=(c.tau/P.stall*100).toFixed(0)+'% of stall '+P.stall+' N·m'; setBar('barT',c.tau/P.stall);
-    $('wP').textContent=(c.w*60/2/Math.PI).toFixed(0)+' rpm'; $('wPb').textContent=(c.w/wnl*100).toFixed(0)+'% of no-load '+P.nl+' rpm'; setBar('barW',c.w/wnl);
+    $('tauP').textContent=c.tauS.toFixed(2)+' N·m'; $('tauPb').textContent=(c.tauS/P.stall*100).toFixed(0)+'% of stall '+P.stall+' N·m（瞬時ピーク '+(c.tau/P.stall*100).toFixed(0)+'%）'; setBar('barT',c.tauS/P.stall);
+    $('wP').textContent=(c.wS*60/2/Math.PI).toFixed(0)+' rpm'; $('wPb').textContent=(c.wS/wnl*100).toFixed(0)+'% of no-load '+P.nl+' rpm（瞬時ピーク '+(c.w/wnl*100).toFixed(0)+'%）'; setBar('barW',c.wS/wnl);
     dlist('cycList',[
       ['接地時間 Ts',(c.Ts*1000).toFixed(0)+' ms'],
       ['蹴り出し量 ΔL（引込み位置から）',(c.dL*1000).toFixed(1)+' mm',c.dL>=P.dlmax/1000-1e-6?'warn':''],
