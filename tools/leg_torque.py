@@ -183,3 +183,114 @@ def stat5(d0, l1, l2, fx, fy, mass, legs, sf, fxr=0.0):
     v2 = (s["F"][0] - s["B"][0], s["F"][1] - s["B"][1])
     s["inner"] = math.degrees(math.acos(max(-1, min(1, (v1[0] * v2[0] + v1[1] * v2[1]) / (l2 * l2)))))
     return s
+
+
+# =====================================================================
+# 伝達比（可変機械利得）と並列バネ — 2026-09-07 追加
+#
+# 対称姿勢の 5 節リンクは自由度 1 で、鏡像対称は t1 + t2 = -180°。
+# 伝達比 r = dL/dα（脚長 mm / クランク角 rad）が姿勢で連続的に変わる＝可変ギヤ。
+#   足先力 F = 2τ/r、足先速度 v = r·ω。r が小さい＝ローギヤ（力が出て遅い）。
+# 機械利得はパワーを増やさない（P = (2τ/r)·(r·ω) = 2τω で r が消える）。
+# 変えられるのはモータがトルク─速度直線のどこに載るかだけ。
+# =====================================================================
+
+def ratio5(d0, l1, l2, L, h=1e-5):
+    """対称姿勢（足先が中心軸上、脚長 L）での伝達比 r = dL/dα [mm/rad]。"""
+    a = _alpha_for_L(d0, l1, l2, L)
+    if a is None:
+        return None
+    lo, hi = _L_of_alpha(d0, l1, l2, a - h), _L_of_alpha(d0, l1, l2, a + h)
+    if lo is None or hi is None:
+        return None
+    return (hi - lo) / (2 * h)
+
+
+def _L_of_alpha(d0, l1, l2, a):
+    """対称姿勢のクランク角 α（= t1）から脚長 L を求める。"""
+    q = d0 / 2 - l1 * math.cos(a)
+    if abs(q) > l2:
+        return None
+    return math.sqrt(l2 * l2 - q * q) - l1 * math.sin(a)
+
+
+def _alpha_for_L(d0, l1, l2, L, lo=None, hi=None):
+    """脚長 L を与えるクランク角 α を二分法で求める（L は α に対し単調な枝を使う）。"""
+    lo = math.radians(95) if lo is None else lo
+    hi = math.radians(265) if hi is None else hi
+    for _ in range(120):
+        m = (lo + hi) / 2
+        v = _L_of_alpha(d0, l1, l2, m)
+        if v is None or v < L:
+            lo = m
+        else:
+            hi = m
+    return (lo + hi) / 2
+
+
+def ratio_profile(d0, l1, l2, n=200):
+    """可動域全体の (L, r, 内角) を返す。r は山なりで両端の特異点で 0 に落ちる。"""
+    out = []
+    for i in range(n + 1):
+        L = (l2 - l1) + 0.002 + ((l1 + l2) - (l2 - l1) - 0.004) * i / n
+        r = ratio5(d0, l1, l2, L)
+        s = stat5(d0, l1, l2, 0.0, -L, 1.0, 2, 1.0)
+        if r is None or s is None:
+            continue
+        out.append((L, r, s["inner"]))
+    return out
+
+
+def _unwrap(x, ref):
+    """ref を基準に ±180° の折返しを解く。"""
+    while x - ref > math.pi:
+        x -= 2 * math.pi
+    while x - ref < -math.pi:
+        x += 2 * math.pi
+    return x
+
+
+def par_spring5(d0, l1, l2, fy_stand, mass, legs, sf,
+                fx_range=(-25, 25), fy_range=None, n=9):
+    """並列バネ（各クランクの線形トーションバネ）を設計し、残るサーボトルクを返す。
+
+    バネは左右で鏡像。crank1 は S1(t1) = tau0 + k·(t1 - t1s)、
+    crank2 は S2(t2) = -S1(-pi - t2)（t1 + t2 = -pi の鏡像対称を使う）。
+    (tau0, k) は可動域での残りトルクの最大値を最小化するように選ぶ。
+    """
+    fy_range = fy_range or (fy_stand - 22, fy_stand + 13)
+    st = stat5(d0, l1, l2, 0.0, fy_stand, mass, legs, sf)
+    if not st:
+        return None
+    t1s = st["t1"]
+
+    grid = []
+    for i in range(n):
+        fx = fx_range[0] + (fx_range[1] - fx_range[0]) * i / (n - 1)
+        for j in range(n):
+            fy = fy_range[0] + (fy_range[1] - fy_range[0]) * j / (n - 1)
+            s = stat5(d0, l1, l2, fx, fy, mass, legs, sf)
+            if s and s["inner"] >= 20:          # 特異点近傍は使わない（HANDOFF §3）
+                grid.append((fx, fy, s))
+
+    def worst(tau0, k):
+        m = 0.0
+        for _, _, s in grid:
+            a1 = _unwrap(s["t1"], t1s)
+            a2 = _unwrap(-math.pi - s["t2"], t1s)     # crank2 を crank1 の座標へ写す
+            m = max(m, abs(s["tau1"] - (tau0 + k * (a1 - t1s))),
+                       abs(s["tau2"] + (tau0 + k * (a2 - t1s))))
+        return m
+
+    best = None
+    for ki in range(-60, 61):
+        k = ki * 0.002
+        for ti in range(0, 61):
+            tau0 = ti * 0.005
+            w = worst(tau0, k)
+            if best is None or w < best[0]:
+                best = (w, k, tau0)
+    res, k, tau0 = best
+    bare = max(max(abs(s["tau1"]), abs(s["tau2"])) for _, _, s in grid)
+    return dict(tau0=tau0, k=k, worst=res, bare=bare, t1s=t1s, n=len(grid),
+                stand=max(abs(st["tau1"]), abs(st["tau2"])))

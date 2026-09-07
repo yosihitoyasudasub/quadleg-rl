@@ -38,7 +38,7 @@ border-radius:6px;padding:3px 6px;font:12px ui-monospace,monospace;width:100%}
 .canvasWrap{position:relative;padding:0;overflow:hidden}
 canvas{display:block;width:100%}
 #mech{height:440px}
-#chart{height:300px}
+#chart{height:360px}
 .toolbar{display:flex;gap:8px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--line);font-size:12px;flex-wrap:wrap}
 .toolbar select{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:6px;padding:4px 6px;font:12px ui-monospace,monospace}
 .toolbar .t{margin-left:auto;color:var(--ink3);font-family:ui-monospace,monospace}
@@ -172,6 +172,8 @@ dd.good{color:var(--good)} dd.warn{color:var(--warn)} dd.crit{color:var(--crit)}
     <dl id="cycList"></dl>
     <div class="sectionTitle">蓄勢（モード C）</div>
     <dl id="chgList"></dl>
+    <div class="sectionTitle">伝達比（可変機械利得 E）</div>
+    <dl id="ratioList"></dl>
     <div class="sectionTitle">現在</div>
     <dl id="nowList"></dl>
     <p class="note">胴体は剛体、リンクは質量なし（下腿相当は足質量に含める）。サーボはギヤ比²×ロータ慣性の反射慣性を持ち、トルク─速度直線（<code>τ = stall·(1−|ω|/ω₀)</code>）で飽和。飛行中は位置 PD、接地中は「電流制御」なら脚長インピーダンス＋股トルク（<code>τ = Jᵀ F</code>）を制御周期ごとに送る。直列バネは足先方向のみ（自然長で底付き）、横方向は剛。接地はバネダンパ＋クーロン摩擦。物理は固定 0.25 ms。速度・接地・姿勢は真値（推定誤差なし）。成立可否の判断用で、学習用ではない。<br>
@@ -222,6 +224,29 @@ function fk(g,t1,t2){
   return {A,B,F:{x:mx+h*dy/d, y:my-h*dx/d}};
 }
 function geom(){return {d0:P.d0/1000,l1:P.l1/1000,l2:P.l2/1000,hb:P.hb/1000,ls0:P.ls0/1000};}
+// ---------- 伝達比 r = dL/dα（可変機械利得。HANDOFF §8.3）----------
+// 対称姿勢の 5 節リンクは自由度 1（鏡像対称 t1+t2 = -180°）で、脚長 L とクランク角 α の比が
+// 姿勢で変わる＝可変ギヤ。足先力 F = 2τ/r、足先速度 v = r·ω。r は山なりで両端の特異点で 0。
+function LofA(g,a){const q=g.d0/2-g.l1*Math.cos(a);return Math.abs(q)>g.l2?null:Math.sqrt(g.l2*g.l2-q*q)-g.l1*Math.sin(a);}
+function ratioA(g,a,e=1e-5){const lo=LofA(g,a-e),hi=LofA(g,a+e);return(lo===null||hi===null)?null:(hi-lo)/(2*e);}
+let _pkCache=null;
+function ratioPeak(){                       // 寸法が変わったときだけ再計算
+  const g=geom(), key=P.d0+','+P.l1+','+P.l2;
+  if(_pkCache&&_pkCache.key===key)return _pkCache;
+  let best={key,r:0,L:0};
+  for(let i=0;i<=400;i++){
+    const a=Math.PI*(95+170*i/400)/180, r=ratioA(g,a), L=LofA(g,a);
+    if(r!==null&&L!==null&&r>best.r){best.r=r;best.L=L;}
+  }
+  return _pkCache=best;
+}
+// 現在姿勢の r（非対称姿勢でも、脚方向の伸展モードとして定義できる）
+function ratioNow(k){
+  const F=k.f&&k.f.F, J=k.J;
+  if(!F||!J)return 0;
+  const Ln=Math.hypot(F.x,F.y)||1e-9;
+  return (F.x/Ln)*(J[0][0]-J[0][1])+(F.y/Ln)*(J[1][0]-J[1][1]);
+}
 function inertia(){const w=P.bw/1000,h=P.bh/1000;return P.mb*(w*w+h*h)/12;}
 
 // ---------- 状態 ----------
@@ -240,7 +265,8 @@ function resetSim(){
   const k=kin();
   S.fx=k.rest.x-pre*k.u.x; S.fy=k.rest.y-pre*k.u.y;   // 足はラッチ位置（バネを δpre 縮めた長さ）
   C={phase:'FLIGHT',Ts:0.12,Tf:0.2,dL:P.dlmax/2000,apex:null,vyPrev:0,deltaPrev:0,tTD:0,tTO:0,tick:-1,hops:0,
-     pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0};
+     pk:{Fn:0,tau:0,w:0,delta:0,pow:0},last:null,lastChg:null,tip:null,vApex:0,
+     rTD:0,rTH:0,lastR:null};
   log=[]; trail=[]; logT=0; trailT=0;
 }
 function kin(){
@@ -346,10 +372,11 @@ function control(){
       C.last={apex:C.apex,v:S.vx,Ts:C.Ts,dL:C.dL,...C.pk};
       C.pk={Fn:0,tau:0,w:0,delta:0,pow:0};
     }
-    if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);}
+    if(loaded){C.phase='COMP';C.tTD=now;C.Tf=clamp(now-C.tTO,0.02,2);C.rTD=Math.abs(ratioNow(k));}
   }else{
-    if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002)C.phase='THRUST';
-    if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';C.tTO=now;}
+    if(C.phase==='COMP'&&S.delta<C.deltaPrev&&S.delta>0.002){C.phase='THRUST';C.rTH=Math.abs(ratioNow(k));}
+    if(!S.contact){C.Ts=clamp(now-C.tTD,0.03,0.6);C.phase='FLIGHT';C.tTO=now;
+      C.lastR={TD:C.rTD,TH:C.rTH,TO:Math.abs(ratioNow(k))};}
   }
   C.vyPrev=S.vy; C.deltaPrev=S.delta;
   // ラッチの係合／解放（モード C）
@@ -408,7 +435,8 @@ function advance(simDt){
     physStep(PHYS_DT);
     if(S.t>=logT){logT+=0.005;
       log.push({t:S.t,y:S.y,vx:S.vx,tau:[Math.abs(S.tau1)/P.stall,Math.abs(S.tau2)/P.stall],
-        w:[Math.abs(S.w1)/(P.nl*2*Math.PI/60),Math.abs(S.w2)/(P.nl*2*Math.PI/60)]});
+        w:[Math.abs(S.w1)/(P.nl*2*Math.PI/60),Math.abs(S.w2)/(P.nl*2*Math.PI/60)],
+        r:Math.abs(ratioNow(kin()))*1000});
       if(log.length>620)log.shift();}
     if(S.t>=trailT){trailT+=0.01;trail.push({x:S.x,y:S.y});if(trail.length>500)trail.shift();}
   }
@@ -485,6 +513,20 @@ function updateResults(){
       ['サーボ出力 ピーク',c.pow.toFixed(1)+' W（2個合計）'],
       ['ホップ回数',String(C.hops)],
     ]);
+  }
+  // 伝達比（可変機械利得 E）
+  const pk=ratioPeak(), rr=C.lastR;
+  if(rr&&rr.TD>0){
+    const gain=rr.TO/rr.TD;
+    dlist('ratioList',[
+      ['伝達比のピーク',(pk.r*1000).toFixed(1)+' mm/rad @ L='+(pk.L*1000).toFixed(0)+' mm'],
+      ['接地時 → 最大圧縮 → 離陸',(rr.TD*1000).toFixed(1)+' → '+(rr.TH*1000).toFixed(1)+' → '+(rr.TO*1000).toFixed(1)+' mm/rad'],
+      ['ストロークのギヤ変化',gain.toFixed(2)+' 倍（'+(gain>1.05?'ギヤアップ':gain<0.95?'ギヤダウン':'ほぼ一定')+'）',
+        gain>1.3?'good':gain<0.95?'crit':'warn'],
+      ['判定',gain<0.95?'山を越えている。L0 を小さくして上り坂側へ':gain>1.3?'上り坂を使えている':'変調が浅い。L0 を小さくする'],
+    ]);
+  }else{
+    dlist('ratioList',[['伝達比のピーク',(pk.r*1000).toFixed(1)+' mm/rad @ L='+(pk.L*1000).toFixed(0)+' mm'],['（1 ホップ後に表示）','']]);
   }
   const g=C.lastChg, csv=SERVOS[P.chgSv]||SERVOS[0];
   if(P.chgMode===1&&g){
@@ -590,13 +632,14 @@ function drawMech(){
 }
 function drawChart(){
   const {w,h,d}=sizeCanvas(chart), ctx=cctx; ctx.setTransform(d,0,0,d,0,0); ctx.clearRect(0,0,w,h);
-  const rowsN=4, padL=44, padR=10, rh=(h-10)/rowsN, t1=S.t, t0=t1-3;
+  const rowsN=5, padL=44, padR=10, rh=(h-10)/rowsN, t1=S.t, t0=t1-3;
   const X=t=>padL+(t-t0)/3*(w-padL-padR);
   const specs=[
     {label:'高さ cm',get:p=>p.y*100,ref:[standH()*100,standH()*100+P.hdes],min:0},
     {label:'vx m/s',get:p=>p.vx,ref:[P.vdes],sym:true},
     {label:'τ %stall',get:p=>p.tau[0]*100,get2:p=>p.tau[1]*100,ref:[100],min:0},
     {label:'ω %無負荷',get:p=>p.w[0]*100,get2:p=>p.w[1]*100,ref:[100],min:0},
+    {label:'r mm/rad',get:p=>p.r,ref:[ratioPeak().r*1000],min:0},   // 伝達比。破線が山のピーク
   ];
   const pts=log.filter(p=>p.t>=t0);
   specs.forEach((s,i)=>{
