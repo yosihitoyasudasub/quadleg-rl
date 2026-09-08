@@ -31,8 +31,9 @@ class ControlGains:
     dlmax: float = 0.050    # 最大蹴り出し [m]
     kh: float = 0.5
     # ピッチ面（前進）
-    cn: float = 0.5
-    kv: float = 0.03
+    cn: float = 0.35     # 3D の掃引（HANDOFF §8.10）で決めた値。2D は 0.5
+    kv: float = 0.02
+    ki: float = 0.004    # 足先配置の積分補正 [m per (m/s) per hop]。定常の速度偏差（写像の切片）を消す
     kth: float = 40.0
     kthd: float = 1.0
     kr: float = 20000.0
@@ -43,6 +44,7 @@ class ControlGains:
     # ロール面（横）
     cn_r: float = 0.7
     kv_r: float = 0.02
+    ki_r: float = 0.004
     kphi: float = 40.0
     kphid: float = 1.0
     kp3: float = 30.0
@@ -86,6 +88,8 @@ class HopperController:
         self.filt = np.zeros(4)    # 5 ms 平均（τ12, ω12, τ3, ω3）
         self.xf_cmd = 0.0
         self.yf_cmd = 0.0
+        self.xbias = 0.0
+        self.ybias = 0.0
         self.Mcmd = 0.0
         self.Mcmd3 = 0.0
         self.alloc = (0.0, 0.0)
@@ -155,6 +159,8 @@ class HopperController:
                 self.vx_eff = float(np.clip(g.vx_des, self.vx_eff - g.v_ramp, self.vx_eff + g.v_ramp)) if g.v_ramp > 0 else g.vx_des
                 self.vy_eff = float(np.clip(g.vy_des, self.vy_eff - g.v_ramp, self.vy_eff + g.v_ramp)) if g.v_ramp > 0 else g.vy_des
                 self.dL = float(np.clip(self.dL + g.kh * (g.hdes - self.apex), 0.0, g.dlmax))
+                self.xbias = float(np.clip(self.xbias + g.ki * (o["vx"] - self.vx_eff), -0.03, 0.03))
+                self.ybias = float(np.clip(self.ybias + g.ki_r * (o["vy"] - self.vy_eff), -0.03, 0.03))
                 self.last = dict(apex=self.apex, vx=o["vx"], vy=o["vy"], th=o["th"], roll=o["roll"], yaw=o["yaw"],
                                  Ts=self.Ts, dL=self.dL, **self.pk)
                 self.pk = self._new_pk()
@@ -182,8 +188,8 @@ class HopperController:
             v0 = math.sqrt(max(0.0, o["vz"] ** 2 + 2 * G * max(0.0, o["pos"][2] - self.stand_h())))
             self.ts_pred = float(np.clip((2 / om) * (math.pi - math.atan(v0 * om / G)) * self.ts_corr, 0.03, 0.6))
             # 足先配置（前後 x、左右 y）。世界水平（ヨー基準）
-            xf = g.cn * o["vx"] * self.ts_pred / 2 + g.kv * (o["vx"] - self.vx_eff)
-            yf = g.cn_r * o["vy"] * self.ts_pred / 2 + g.kv_r * (o["vy"] - self.vy_eff)
+            xf = g.cn * o["vx"] * self.ts_pred / 2 + g.kv * (o["vx"] - self.vx_eff) + self.xbias
+            yf = g.cn_r * o["vy"] * self.ts_pred / 2 + g.kv_r * (o["vy"] - self.vy_eff) + self.ybias
             xf = float(np.clip(xf, -0.6 * Lr, 0.6 * Lr))
             yf = float(np.clip(yf, -0.6 * Lr, 0.6 * Lr))
             self.xf_cmd, self.yf_cmd = xf, yf

@@ -163,7 +163,7 @@ def check_kinematics(params: HopperParams | None = None):
         print(f" ({x*1000:5.1f},{z*1000:6.1f})  ({F[0]*1000:6.1f},{F[1]*1000:7.1f})   ({loc[0]*1000:6.1f},{loc[1]*1000:5.1f},{loc[2]*1000:7.1f})   {np.hypot(F[0]-loc[0], F[1]-loc[2])*1000:5.2f}")
 
 
-def sweep_gains(cns=(0.3, 0.4, 0.5, 0.6, 0.8), kvs=(0.01, 0.02, 0.03, 0.05), duration: float = 12.0,
+def sweep_gains(cns=(0.25, 0.3, 0.35, 0.4, 0.5), kvs=(0.01, 0.02, 0.03), duration: float = 12.0,
                 vx0: float = 0.1, th0: float = 0.03, vx_des: float = 0.0, params: HopperParams | None = None, base: ControlGains | None = None):
     """前進速度ループの cn / Kv を掃引し、外乱（vx0, th0）からの生存と直近 10 ホップの vx の平均・範囲を表にする。
     3D では接地写像が 2D と違うので、2D の値（cn 0.5 / Kv 0.03）をそのまま使わずここで決める。"""
@@ -200,7 +200,7 @@ def summarize(res) -> str:
                  f"w {c['wS']*60/2/math.pi:.0f} rpm ({c['wS']/w0*100:.0f}%)  |  roll servo tau {c['tau3S']:.2f} Nm ({c['tau3S']/p.stall3*100:.0f}%)  "
                  f"w {c['w3S']*60/2/math.pi:.0f} rpm ({c['w3S']/w03*100:.0f}%)  |  Fn {c['Fn']:.0f} N  delta {c['delta']*1000:.1f} mm  P {c['pow']:.1f} W")
         back = max(c['w'] / w0, c['w3'] / w03)
-        L.append(f"backdrive: {'YES ' + format(back*100, '.0f') + '%' if back > 1.05 else 'none'}   Ts pred/meas {ctl.ts_pred*1000:.0f}/{ctl.Ts*1000:.0f} ms")
+        L.append(f"backdrive: {'YES ' + format(back*100, '.0f') + '%' if back > 1.05 else 'none'}   Ts pred/meas {ctl.ts_pred*1000:.0f}/{ctl.Ts*1000:.0f} ms   foot bias x/y {ctl.xbias*1000:.1f}/{ctl.ybias*1000:.1f} mm")
     return "\n".join(L)
 
 
