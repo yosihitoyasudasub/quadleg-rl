@@ -4,7 +4,7 @@
   胴体（フリージョイント）
    └ ロール軸（x 軸ヒンジ、重心から hb 下）… XH540-W150
       ├ クランク①②（−y 軸ヒンジ、軸間 d0）→ 下腿①② → 先端（5 節閉ループ、equality/connect）… XM540 ×2
-      └ キャリア（先端に connect、x/z スライドで追従）→ 足（z スライドが直列バネ、圧縮で +、球の点接地）
+      └ 脚バー（股で自由に回るヒンジ）→ キャリア（バー軸上のスライドで先端に追従、connect）→ 足（バー軸上の直列バネ、圧縮で +、球の点接地）
 サーボは general アクチュエータで τ = ctrl − (stall/ω₀)·q̇（forcerange ±stall）＝トルク─速度直線。
 反射慣性はジョイントの armature。閉ループの連結は site 同士の connect（anchor 指定だと相手側の点が既定姿勢 qpos0 で決まり初期姿勢と食い違う）。
 """
@@ -87,6 +87,7 @@ def build_xml(p: HopperParams) -> str:
     b3 = 0.02 * k3
     cs = 2 * p.zs * math.sqrt(p.ks * p.mf)
     z0 = p.hb - fz + p.ls0 + p.drop   # 足が地面から drop の高さになる胴体高さ
+    Ln = math.hypot(fx, fz)
     cap = 0.004
     return f"""<mujoco model="hopper1leg">
   <compiler angle="radian" autolimits="true"/>
@@ -137,17 +138,23 @@ def build_xml(p: HopperParams) -> str:
             <site name="s2end" pos="{p.l2} 0 0" size="0.004"/>
           </body>
         </body>
-        <body name="carrier" pos="{fx:.5f} 0 {fz:.5f}">
-          <joint name="cx" type="slide" axis="1 0 0"/>
-          <joint name="cz" type="slide" axis="0 0 1"/>
-          <inertial pos="0 0 {-p.ls0/2}" mass="0.010" diaginertia="2e-6 2e-6 2e-6"/>
-          <site name="ctop" size="0.004"/>
-          <geom type="capsule" fromto="0 0 0 0 0 {-p.ls0}" size="0.003" rgba="0.79 0.46 0.17 1"/>
-          <body name="foot" pos="0 0 {-p.ls0}">
-            <joint name="fz" type="slide" axis="0 0 1" stiffness="{p.ks}" damping="{cs:.4f}" springref="0" range="-0.02 {p.ls0}"/>
-            <inertial pos="0 0 0" mass="{p.mf - 0.010}" diaginertia="2e-6 2e-6 2e-6"/>
-            <geom name="foot" type="sphere" size="0.010" contype="1" conaffinity="1" friction="{p.mu} 0.005 0.0001" rgba="0.79 0.46 0.17 1"/>
-            <site name="foot" type="sphere" size="0.013"/>
+        <!-- 脚バー: 股で自由に回り、その軸（股→先端の線）上にキャリアの追従スライドと足の直列バネを置く。
+             接地力の作用線が常に股を通る（2D モデルと同じ）。バネを脚面の鉛直に置くと足の前後ずれ×接地力の
+             ピッチモーメントが出て蹴り出しで機首上げになる（初回 Colab で判明） -->
+        <body name="legbar" pos="0 0 0">
+          <joint name="bar" type="hinge" axis="0 -1 0"/>
+          <inertial pos="0 0 -0.05" mass="0.003" diaginertia="1e-6 1e-6 1e-7"/>
+          <body name="carrier" pos="0 0 {-Ln:.5f}">
+            <joint name="cx" type="slide" axis="0 0 1"/>
+            <inertial pos="0 0 {-p.ls0/2}" mass="0.010" diaginertia="2e-6 2e-6 2e-6"/>
+            <site name="ctop" size="0.004"/>
+            <geom type="capsule" fromto="0 0 0 0 0 {-p.ls0}" size="0.003" rgba="0.79 0.46 0.17 1"/>
+            <body name="foot" pos="0 0 {-p.ls0}">
+              <joint name="fz" type="slide" axis="0 0 1" stiffness="{p.ks}" damping="{cs:.4f}" springref="0" range="-0.02 {p.ls0}"/>
+              <inertial pos="0 0 0" mass="{p.mf - 0.010}" diaginertia="2e-6 2e-6 2e-6"/>
+              <geom name="foot" type="sphere" size="0.010" contype="1" conaffinity="1" friction="{p.mu} 0.005 0.0001" rgba="0.79 0.46 0.17 1"/>
+              <site name="foot" type="sphere" size="0.013"/>
+            </body>
           </body>
         </body>
       </body>
@@ -173,10 +180,11 @@ def build_xml(p: HopperParams) -> str:
 
 
 def initial_qpos(p: HopperParams):
-    """build_xml と整合する初期 qpos（root 7 + roll + c1 s1 c2 s2 + cx cz fz）。"""
+    """build_xml と整合する初期 qpos（root 7 + roll + c1 s1 c2 s2 + bar cx fz）。"""
     t1, t2, s1, s2, fx, fz = initial_joints(p)
     z0 = p.hb - fz + p.ls0 + p.drop
-    return [0.0, 0.0, z0, 1.0, 0.0, 0.0, 0.0, 0.0, t1, s1, t2, s2, 0.0, 0.0, 0.0]
+    bar = math.atan2(fx, -fz)      # 脚バーの傾き（真下から +x へ）
+    return [0.0, 0.0, z0, 1.0, 0.0, 0.0, 0.0, 0.0, t1, s1, t2, s2, bar, 0.0, 0.0]
 
 
 if __name__ == "__main__":

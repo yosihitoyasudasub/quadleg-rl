@@ -98,8 +98,8 @@ class HopperController:
         j = lambda n: model.joint(n).id
         self.q_root = model.jnt_qposadr[j("root")]
         self.v_root = model.jnt_dofadr[j("root")]
-        self.q = {n: model.jnt_qposadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz", "fz")}
-        self.v = {n: model.jnt_dofadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz", "fz")}
+        self.q = {n: model.jnt_qposadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "bar", "cx", "fz")}
+        self.v = {n: model.jnt_dofadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "bar", "cx", "fz")}
         self.a = {n: model.actuator(n).id for n in ("a1", "a2", "a3")}
         self.s_touch = model.sensor("foot_touch").adr[0]
         self.site_tip = model.site("tip").id

@@ -118,7 +118,7 @@ def trace(duration: float = 0.35, every: float = 0.01, params: HopperParams | No
     dt = model.opt.timestep
     ctrl_dt = 1.0 / g.rate
     nxt = 0.0
-    print("    t     z    vz    th°   om    vx   phase  cont  Fn   delta  t1°   t2°   tc1   tc2   f1    f2    Mcmd   cx    cz   nefc")
+    print("    t     z    vz    th°   om    vx   phase  cont  Fn   delta  t1°   t2°   tc1   tc2   f1    f2    Mcmd  bar°   cx   nefc")
     for i in range(int(duration / dt)):
         o = ctl.observe(data)
         tick = int(math.floor(data.time / ctrl_dt + 1e-9))
@@ -129,7 +129,7 @@ def trace(duration: float = 0.35, every: float = 0.01, params: HopperParams | No
         if data.time >= nxt:
             nxt += every
             f = data.actuator_force
-            print(f"{data.time:6.3f} {o['pos'][2]:5.3f} {o['vz']:5.2f} {math.degrees(o['th']):5.1f} {o['om']:5.2f} {o['vx']:5.2f}  {ctl.phase:6s} {int(o['contact'])}  {o['Fn']:5.1f} {o['delta']*1000:6.1f} {math.degrees(o['t1']):6.1f} {math.degrees(o['t2']):6.1f} {ctl.tc[0]:5.2f} {ctl.tc[1]:5.2f} {f[0]:5.2f} {f[1]:5.2f} {ctl.Mcmd:6.2f} {data.qpos[ctl.q['cx']]*1000:5.1f} {data.qpos[ctl.q['cz']]*1000:5.1f} {data.nefc}")
+            print(f"{data.time:6.3f} {o['pos'][2]:5.3f} {o['vz']:5.2f} {math.degrees(o['th']):5.1f} {o['om']:5.2f} {o['vx']:5.2f}  {ctl.phase:6s} {int(o['contact'])}  {o['Fn']:5.1f} {o['delta']*1000:6.1f} {math.degrees(o['t1']):6.1f} {math.degrees(o['t2']):6.1f} {ctl.tc[0]:5.2f} {ctl.tc[1]:5.2f} {f[0]:5.2f} {f[1]:5.2f} {ctl.Mcmd:6.2f} {math.degrees(data.qpos[ctl.q['bar']]):5.1f} {data.qpos[ctl.q['cx']]*1000:5.1f} {data.nefc}")
         mujoco.mj_step(model, data)
         if ctl.fallen(o):
             print("FALLEN at", round(data.time, 3))
@@ -153,6 +153,7 @@ def check_kinematics(params: HopperParams | None = None):
         s1, s2 = shank_angles(g, *r)
         q = initial_qpos(p)
         q[8], q[9], q[10], q[11] = r[0], s1, r[1], s2
+        q[12] = math.atan2(x, -z)
         data.qpos[:] = q
         mujoco.mj_kinematics(model, data)
         F = fk(g, *r)["F"]
