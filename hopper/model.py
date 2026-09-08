@@ -37,7 +37,7 @@ class HopperParams:
     # 接地（2D と同じバネダンパ: 剛性 kg、臨界減衰。MuJoCo 既定の solref 0.02 s は軽い足では柔らかく減衰が大きい）
     mu: float = 0.8
     kg: float = 20000.0
-    foot_pad: float = 0.0  # 足パッドの捩り摩擦（長さ単位 [m]、≈ μ × パッド半径）。0 なら点接地（ヨー抵抗なし）
+    foot_pad: float = 0.02  # 足パッドの捩り摩擦（長さ単位 [m]、≈ μ × パッド半径）。0 なら点接地。0.02 でヨー 18.7 → 3.8°/hop（HANDOFF §8.10）
     # 脚長サーボ ①②（XM540-W270）
     stall: float = 10.6
     nl_rpm: float = 30.0
