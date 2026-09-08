@@ -103,6 +103,34 @@ def simulate(duration: float = 15.0, params: HopperParams | None = None, gains: 
     return res
 
 
+def trace(duration: float = 0.35, every: float = 0.01, params: HopperParams | None = None, gains: ControlGains | None = None):
+    """着地前後の内部状態を every 秒ごとに表示する診断。転倒の切り分け用。"""
+    p, model, data = make(params)
+    g = gains or ControlGains()
+    ctl = HopperController(p, g)
+    ctl.bind(model)
+    dt = model.opt.timestep
+    ctrl_dt = 1.0 / g.rate
+    nxt = 0.0
+    print("    t     z    vz    th°  phase  cont  Fn   delta  t1°   t2°   tq1°  tq2°  tc1   tc2   f1    f2    ctrl1 ctrl2  cx    cz   nefc")
+    for i in range(int(duration / dt)):
+        o = ctl.observe(data)
+        tick = int(math.floor(data.time / ctrl_dt + 1e-9))
+        if tick != ctl.tick:
+            ctl.tick = tick
+            ctl.control(data, o)
+        ctl.servo_step(data, o)
+        if data.time >= nxt:
+            nxt += every
+            f = data.actuator_force
+            print(f"{data.time:6.3f} {o['pos'][2]:5.3f} {o['vz']:5.2f} {math.degrees(o['th']):5.1f}  {ctl.phase:6s} {int(o['contact'])}  {o['Fn']:5.1f} {o['delta']*1000:6.1f} {math.degrees(o['t1']):6.1f} {math.degrees(o['t2']):6.1f} {math.degrees(ctl.tq[0]):6.1f} {math.degrees(ctl.tq[1]):6.1f} {ctl.tc[0]:5.2f} {ctl.tc[1]:5.2f} {f[0]:5.2f} {f[1]:5.2f} {data.ctrl[0]:5.2f} {data.ctrl[1]:5.2f} {data.qpos[ctl.q['cx']]*1000:5.1f} {data.qpos[ctl.q['cz']]*1000:5.1f} {data.nefc}")
+        mujoco.mj_step(model, data)
+        if ctl.fallen(o):
+            print("FALLEN at", round(data.time, 3))
+            break
+    return model, data, ctl
+
+
 def summarize(res) -> str:
     p, g, ctl = res["params"], res["gains"], res["ctl"]
     hops = res["hops"]
