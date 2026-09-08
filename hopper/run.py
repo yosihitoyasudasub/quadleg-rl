@@ -163,6 +163,27 @@ def check_kinematics(params: HopperParams | None = None):
         print(f" ({x*1000:5.1f},{z*1000:6.1f})  ({F[0]*1000:6.1f},{F[1]*1000:7.1f})   ({loc[0]*1000:6.1f},{loc[1]*1000:5.1f},{loc[2]*1000:7.1f})   {np.hypot(F[0]-loc[0], F[1]-loc[2])*1000:5.2f}")
 
 
+def sweep_gains(cns=(0.3, 0.4, 0.5, 0.6, 0.8), kvs=(0.01, 0.02, 0.03, 0.05), duration: float = 12.0,
+                vx0: float = 0.1, th0: float = 0.03, vx_des: float = 0.0, params: HopperParams | None = None, base: ControlGains | None = None):
+    """前進速度ループの cn / Kv を掃引し、外乱（vx0, th0）からの生存と直近 10 ホップの vx の平均・範囲を表にする。
+    3D では接地写像が 2D と違うので、2D の値（cn 0.5 / Kv 0.03）をそのまま使わずここで決める。"""
+    base = base or ControlGains()
+    print(f"      {'kv':>5} " + "".join(f"{kv:>22.3f}" for kv in kvs))
+    for cn in cns:
+        row = [f"cn {cn:4.2f}      "]
+        for kv in kvs:
+            g = replace(base, cn=cn, kv=kv, vx_des=vx_des)
+            r = simulate(duration, params=params, gains=g, vx0=vx0, th0=th0, verbose=False)
+            h = r["hops"][-10:]
+            if r["fallen"]:
+                row.append(f"{'X@' + format(r['t_end'], '.1f') + 's':>22}")
+            else:
+                vx = [x["vx"] for x in h]
+                ap = np.mean([x["apex"] for x in h]) * 100
+                row.append(f"{np.mean(vx):6.2f}[{min(vx):5.2f}..{max(vx):5.2f}] {ap:4.1f}cm")
+        print("".join(row))
+
+
 def summarize(res) -> str:
     p, g, ctl = res["params"], res["gains"], res["ctl"]
     hops = res["hops"]
