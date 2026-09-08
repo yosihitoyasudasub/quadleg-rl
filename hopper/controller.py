@@ -37,6 +37,7 @@ class ControlGains:
     kthd: float = 1.0
     kr: float = 20000.0
     dr: float = 300.0
+    thrust_frac: float = 0.6   # 蹴り出し（逆方向成分）のトルク上限 [×stall]。速度飽和の余裕を残し姿勢トルクを守る
     kp: float = 30.0        # 脚長サーボ 位置 PD
     kd: float = 1.0
     # ロール面（横）
@@ -87,6 +88,7 @@ class HopperController:
         self.yf_cmd = 0.0
         self.Mcmd = 0.0
         self.Mcmd3 = 0.0
+        self.alloc = (0.0, 0.0)
 
     @staticmethod
     def _new_pk():
@@ -223,10 +225,35 @@ class HopperController:
             self.tmode = True
 
     # ---------- サーボ内蔵ループ（物理ステップごと） ----------
+    def allocate(self, t1: float, t2: float, w1: float, w2: float):
+        """姿勢優先のトルク配分。クランク①②のトルクを同方向成分 s（接線力＝ピッチモーメント）と
+        逆方向成分 d（脚長方向の力）に分け、各サーボが今の速度で出せる範囲 [lo, hi]（トルク─速度直線）に
+        収まるよう d を削る。蹴り出しで片方だけ速度飽和すると、削らない場合は寄生の同方向成分が出て
+        機首上げになる（3D で判明、HANDOFF §8.10）。"""
+        p = self.p
+        st, k = p.stall, self.k
+        def rng(w):
+            return max(-st, -st - k * w), min(st, st - k * w)
+        lo1, hi1 = rng(w1); lo2, hi2 = rng(w2)
+        s = 0.5 * (t1 + t2); dd = 0.5 * (t1 - t2)
+        dmax = self.g.thrust_frac * st
+        dd = min(max(dd, -dmax), dmax)
+        lo, hi = max(lo1, lo2), min(hi1, hi2)
+        if lo > hi:
+            lo = hi = 0.5 * (lo + hi)
+        s = min(max(s, lo), hi)
+        if dd >= 0:
+            dd = min(dd, hi1 - s, s - lo2)
+        else:
+            dd = max(dd, lo1 - s, s - hi2)
+        self.alloc = (s, dd)
+        return s + dd, s - dd
+
     def servo_step(self, d: mujoco.MjData, o: dict):
         p, g = self.p, self.g
         if self.tmode:
-            t1, t2, t3 = self.tc[0], self.tc[1], self.tc3
+            t1, t2 = self.allocate(self.tc[0], self.tc[1], o["w1"], o["w2"])
+            t3 = self.tc3
         else:
             t1 = g.kp * (self.tq[0] - o["t1"]) - g.kd * o["w1"]
             t2 = g.kp * (self.tq[1] - o["t2"]) - g.kd * o["w2"]
