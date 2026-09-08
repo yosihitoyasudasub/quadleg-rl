@@ -37,7 +37,7 @@ class ControlGains:
     kthd: float = 1.0
     kr: float = 20000.0
     dr: float = 300.0
-    thrust_frac: float = 0.6   # 蹴り出し（逆方向成分）のトルク上限 [×stall]。速度飽和の余裕を残し姿勢トルクを守る
+    thrust_frac: float = 0.75  # 蹴り出し（逆方向成分）のトルク上限 [×stall]。速度飽和の余裕を残し姿勢トルクを守る
     kp: float = 30.0        # 脚長サーボ 位置 PD
     kd: float = 1.0
     # ロール面（横）
