@@ -29,7 +29,8 @@ class ControlGains:
     vy_des: float = 0.0     # 横速度指令 [m/s]（+y = 左）
     v_ramp: float = 0.02    # 目標速度ランプ [m/s / hop]
     dlmax: float = 0.050    # 最大蹴り出し [m]
-    kh: float = 0.5
+    dlmin: float = 0.003    # 最小蹴り出し [m]（0 にすると 1 ホップで着地エネルギーを失って立て直せない）
+    kh: float = 0.3         # 高さ調整ゲイン（2D は 0.5。3D 前進時に振動したので下げた）
     # ピッチ面（前進）
     cn: float = 0.35     # 3D の掃引（HANDOFF §8.10）で決めた値。2D は 0.5
     kv: float = 0.02
@@ -158,7 +159,7 @@ class HopperController:
                 self.hops += 1
                 self.vx_eff = float(np.clip(g.vx_des, self.vx_eff - g.v_ramp, self.vx_eff + g.v_ramp)) if g.v_ramp > 0 else g.vx_des
                 self.vy_eff = float(np.clip(g.vy_des, self.vy_eff - g.v_ramp, self.vy_eff + g.v_ramp)) if g.v_ramp > 0 else g.vy_des
-                self.dL = float(np.clip(self.dL + g.kh * (g.hdes - self.apex), 0.0, g.dlmax))
+                self.dL = float(np.clip(self.dL + g.kh * (g.hdes - self.apex), g.dlmin, g.dlmax))
                 self.xbias = float(np.clip(self.xbias + g.ki * (o["vx"] - self.vx_eff), -0.03, 0.03))
                 self.ybias = float(np.clip(self.ybias + g.ki_r * (o["vy"] - self.vy_eff), -0.03, 0.03))
                 self.last = dict(apex=self.apex, vx=o["vx"], vy=o["vy"], th=o["th"], roll=o["roll"], yaw=o["yaw"],
