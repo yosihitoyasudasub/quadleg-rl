@@ -98,8 +98,8 @@ class HopperController:
         j = lambda n: model.joint(n).id
         self.q_root = model.jnt_qposadr[j("root")]
         self.v_root = model.jnt_dofadr[j("root")]
-        self.q = {n: model.jnt_qposadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz")}
-        self.v = {n: model.jnt_dofadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz")}
+        self.q = {n: model.jnt_qposadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz", "fz")}
+        self.v = {n: model.jnt_dofadr[j(n)] for n in ("roll", "c1", "s1", "c2", "s2", "cx", "cz", "fz")}
         self.a = {n: model.actuator(n).id for n in ("a1", "a2", "a3")}
         self.s_touch = model.sensor("foot_touch").adr[0]
         self.site_tip = model.site("tip").id
@@ -129,8 +129,8 @@ class HopperController:
         psi, wpsi = float(qp[self.q["roll"]]), float(qv[self.v["roll"]])
         t1, t2 = float(qp[self.q["c1"]]), float(qp[self.q["c2"]])
         w1, w2 = float(qv[self.v["c1"]]), float(qv[self.v["c2"]])
-        delta = -float(qp[self.q["cz"]])            # バネ圧縮（+）
-        ddelta = -float(qv[self.v["cz"]])
+        delta = float(qp[self.q["fz"]])             # バネ圧縮（+、足が上へ押される）
+        ddelta = float(qv[self.v["fz"]])
         touch = float(d.sensordata[self.s_touch])
         contact = touch > 0.5
         return dict(pos=pos, R=R, vel=vel, vx=vx, vy=vy, vz=vz, th=th, om=om_pitch, roll=roll, omr=float(omb[0]),
