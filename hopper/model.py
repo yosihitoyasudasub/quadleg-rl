@@ -37,6 +37,7 @@ class HopperParams:
     # 接地（2D と同じバネダンパ: 剛性 kg、臨界減衰。MuJoCo 既定の solref 0.02 s は軽い足では柔らかく減衰が大きい）
     mu: float = 0.8
     kg: float = 20000.0
+    foot_pad: float = 0.0  # 足パッドの捩り摩擦（長さ単位 [m]、≈ μ × パッド半径）。0 なら点接地（ヨー抵抗なし）
     # 脚長サーボ ①②（XM540-W270）
     stall: float = 10.6
     nl_rpm: float = 30.0
@@ -105,7 +106,7 @@ def build_xml(p: HopperParams) -> str:
   </asset>
   <worldbody>
     <light pos="0 -1 2" dir="0 0.4 -1" diffuse="0.8 0.8 0.8"/>
-    <geom name="floor" type="plane" size="10 10 0.1" material="grid" contype="1" conaffinity="1" friction="{p.mu} 0.005 0.0001" solref="{-p.kg:.0f} {-cg:.1f}"/>
+    <geom name="floor" type="plane" size="10 10 0.1" material="grid" contype="1" conaffinity="1" condim="{4 if p.foot_pad > 0 else 3}" friction="{p.mu} {max(p.foot_pad, 0.005)} 0.0001" solref="{-p.kg:.0f} {-cg:.1f}"/>
     <body name="torso" pos="0 0 {z0:.5f}">
       <freejoint name="root"/>
       <inertial pos="0 0 0" mass="{p.mb}" diaginertia="{ixx:.6f} {iyy:.6f} {izz:.6f}"/>
@@ -154,7 +155,7 @@ def build_xml(p: HopperParams) -> str:
             <body name="foot" pos="0 0 {-p.ls0}">
               <joint name="fz" type="slide" axis="0 0 1" stiffness="{p.ks}" damping="{cs:.4f}" springref="0" range="-0.02 {p.ls0}"/>
               <inertial pos="0 0 0" mass="{p.mf - 0.010}" diaginertia="2e-6 2e-6 2e-6"/>
-              <geom name="foot" type="sphere" size="0.010" contype="1" conaffinity="1" friction="{p.mu} 0.005 0.0001" solref="{-p.kg:.0f} {-cg:.1f}" rgba="0.79 0.46 0.17 1"/>
+              <geom name="foot" type="sphere" size="0.010" contype="1" conaffinity="1" condim="{4 if p.foot_pad > 0 else 3}" friction="{p.mu} {max(p.foot_pad, 0.005)} 0.0001" solref="{-p.kg:.0f} {-cg:.1f}" rgba="0.79 0.46 0.17 1"/>
               <site name="foot" type="sphere" size="0.013"/>
             </body>
           </body>

@@ -184,6 +184,23 @@ def sweep_gains(cns=(0.25, 0.3, 0.35, 0.4, 0.5), kvs=(0.01, 0.02, 0.03), duratio
         print("".join(row))
 
 
+def yaw_test(pads=(0.0, 0.005, 0.02), duration: float = 15.0, vy_des: float = 0.2, params: HopperParams | None = None):
+    """足パッドの捩り摩擦（foot_pad）を変えて横移動時のヨードリフトを比べる。"""
+    base = params or HopperParams()
+    for pad in pads:
+        p = replace(base, foot_pad=pad)
+        r = simulate(duration, params=p, vy_des=vy_des, verbose=False)
+        h = r["hops"]
+        if len(h) >= 4:
+            yaws = [x["yaw"] for x in h[-6:]]
+            dyaw = np.mean(np.degrees(np.diff(np.unwrap(yaws))))
+        else:
+            dyaw = float("nan")
+        c = h[-1] if h else {}
+        print(f"pad {pad*1000:4.1f} mm: {'FALLEN@' + format(r['t_end'], '.1f') if r['fallen'] else 'ok    '}  hops {len(h):3d}  vy {np.mean([x['vy'] for x in h[-10:]]) if h else 0:5.2f}  "
+              f"yaw/hop {dyaw:6.1f} deg  roll servo {c.get('tau3S', 0)/base.stall3*100:3.0f}%/{c.get('w3S', 0)/base.w03()*100:3.0f}%")
+
+
 def summarize(res) -> str:
     p, g, ctl = res["params"], res["gains"], res["ctl"]
     hops = res["hops"]
