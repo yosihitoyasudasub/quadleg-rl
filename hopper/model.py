@@ -121,7 +121,7 @@ def build_xml(p: HopperParams) -> str:
             <inertial pos="{p.l2/2} 0 0" mass="0.005" diaginertia="3e-6 3e-6 1e-7"/>
             <geom type="capsule" fromto="0 0 0 {p.l2} 0 0" size="{cap}" rgba="0.18 0.62 0.56 1"/>
             <body name="tip" pos="{p.l2} 0 0">
-              <inertial pos="0 0 0" mass="0.002" diaginertia="1e-7 1e-7 1e-7"/>
+              <inertial pos="0 0 0" mass="0.005" diaginertia="5e-7 5e-7 5e-7"/>
               <site name="tip" size="0.004"/>
             </body>
           </body>
@@ -140,12 +140,12 @@ def build_xml(p: HopperParams) -> str:
         <body name="carrier" pos="{fx:.5f} 0 {fz:.5f}">
           <joint name="cx" type="slide" axis="1 0 0"/>
           <joint name="cz" type="slide" axis="0 0 1"/>
-          <inertial pos="0 0 {-p.ls0/2}" mass="0.005" diaginertia="1e-6 1e-6 1e-6"/>
+          <inertial pos="0 0 {-p.ls0/2}" mass="0.010" diaginertia="2e-6 2e-6 2e-6"/>
           <site name="ctop" size="0.004"/>
           <geom type="capsule" fromto="0 0 0 0 0 {-p.ls0}" size="0.003" rgba="0.79 0.46 0.17 1"/>
           <body name="foot" pos="0 0 {-p.ls0}">
             <joint name="fz" type="slide" axis="0 0 1" stiffness="{p.ks}" damping="{cs:.4f}" springref="0" range="-0.02 {p.ls0}"/>
-            <inertial pos="0 0 0" mass="{p.mf - 0.005}" diaginertia="2e-6 2e-6 2e-6"/>
+            <inertial pos="0 0 0" mass="{p.mf - 0.010}" diaginertia="2e-6 2e-6 2e-6"/>
             <geom name="foot" type="sphere" size="0.010" contype="1" conaffinity="1" friction="{p.mu} 0.005 0.0001" rgba="0.79 0.46 0.17 1"/>
             <site name="foot" type="sphere" size="0.013"/>
           </body>
@@ -154,8 +154,9 @@ def build_xml(p: HopperParams) -> str:
     </body>
   </worldbody>
   <equality>
-    <connect name="loop" site1="s2end" site2="tip"/>
-    <connect name="spring" site1="ctop" site2="tip"/>
+    <!-- solref の負値は剛性・減衰の直接指定。既定（有効質量比例）だと数 g の部品では 20 N で数十 cm ずれる -->
+    <connect name="loop" site1="s2end" site2="tip" solref="-30000 -300"/>
+    <connect name="spring" site1="ctop" site2="tip" solref="-30000 -300"/>
   </equality>
   <actuator>
     <general name="a1" joint="c1" gaintype="fixed" biastype="affine" gainprm="1 0 0" biasprm="0 0 {-k:.5f}" ctrlrange="{-p.stall} {p.stall}" forcerange="{-p.stall} {p.stall}"/>
