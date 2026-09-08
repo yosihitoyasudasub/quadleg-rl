@@ -16,7 +16,7 @@ XL-320 が 14 個以上あることが判明したため、**4 脚 × 3 自由�
 | 項目 | 状態 |
 | --- | --- |
 | 脚設計ツール（Web） | **`tools/webapp/quad-leg-5bar.html`（現行・5 節リンク）**。足先ドラッグ、到達範囲・内角・トルク掃引・正面図・外転トルクを表示。`quad-leg-linkage.html` は旧四節リンク版（参考用に保持） |
-| ホッパー MuJoCo（3D） | **`hopper/`**（`model.py` MJCF 生成、`controller.py` Raibert、`run.py`）＋ **`notebooks/02_hopper_mujoco.ipynb`**（2026-09-08 作成、Colab CPU で実行。**未実行**） |
+| ホッパー MuJoCo（3D） | **`hopper/`**（`model.py` MJCF 生成、`controller.py` Raibert、`run.py`）＋ **`notebooks/02_hopper_mujoco.ipynb`**。Colab CPU で**成立を確認済み**（2026-09-08、動画 `notebooks/02_hopper_forward_0.15.mp4`）。修正の経緯とコツは **`docs/hopper-mujoco-notes.md`** |
 | ホッパー ロール面 2D | **`tools/webapp/hopper-roll-2d.html`**（2026-09-08、段階 1: 正面図・股ロールサーボ直結・脚長 1 自由度）。§8.9 参照 |
 | 一本脚ホッパー 2D シミュレーター | **`tools/webapp/hopper-2d.html`**（2026-09-07 作成、Node で検証済み）。蓄勢方式 A（着地エネルギー）/ C（飛行中蓄勢＋ラッチ）を切替比較できる。§8 参照。総括レポートは **`docs/hopper-report.md`** |
 | 設計計算スクリプト | `tools/leg_torque.py`。5 節（`ik5`/`fk5`/`stat5`）、四節（`fk`/`statics`）、伝達比（`ratio5`/`ratio_profile`）、並列バネ（`par_spring5`）|
@@ -791,6 +791,9 @@ Kp 30 で飛行中の速度 95 → 67 %、トルク 75 → 32 %（頂点 8.3 cm 
 
   ヨーは飛行中の脚振りの反作用で生じ、接地中に捩り摩擦で回転が止まるだけなので、ゼロにはならない（20 mm で 95 ホップに 1 回転）。
   **実機の足は半径 25 mm 前後のゴムパッド**（μ 0.8 × 25 mm ≈ 20 mm）にする。前進のみならヨードリフトは出ない
+
+**動画で確認（2026-09-08）**: 前進 0.15 m/s・8 s、転倒なしで跳躍。`notebooks/02_hopper_forward_0.15.mp4`。
+7 回の修正の経緯（症状 → 診断 → 原因 → 修正 → 教訓）と MJCF・制御移植・診断のコツは **`docs/hopper-mujoco-notes.md`** にまとめた。
 **ヨーのドリフト**は 3D で初めて見えた設計課題: 足に小さなパッドを付けて鉛直軸の摩擦トルクを持たせるか、横の足振りの反作用を打ち消す振り方が要る。
 
 **確認項目（ノートブックの順）**: 静的確認 → その場 15 s（2D 期待値: 5.0 cm、Ts 165 ms、脚長サーボ 56 / 77 %）→ 外乱回復 → 前進・横 0.2 m/s → 動画 → パラメータ変更。

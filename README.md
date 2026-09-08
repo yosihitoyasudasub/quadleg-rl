@@ -8,7 +8,8 @@ quadleg-rl/
 │   └─ train.py             train() / render_video() / plot_history()
 ├─ notebooks/
 │   ├─ 01_go1_playground.ipynb   Colab: テスト機 Go1 で歩行学習を体験
-│   └─ 02_hopper_mujoco.ipynb    Colab(CPU): 一本脚ホッパーを MuJoCo で動かす
+│   ├─ 02_hopper_mujoco.ipynb    Colab(CPU): 一本脚ホッパーを MuJoCo で動かす
+│   └─ 02_hopper_forward_0.15.mp4 その動画（前進 0.15 m/s）
 ├─ hopper/                       一本脚ホッパーの MJCF 生成・Raibert 制御・実行
 ├─ tools/
 │   ├─ webapp/quad-leg-5bar.html        5 節リンク脚のトルク計算 Web アプリ（ブラウザで開くだけ）
@@ -16,6 +17,8 @@ quadleg-rl/
 │   ├─ webapp/hopper-roll-2d.html       同 ロール面版（正面図、段階 1）
 │   ├─ webapp/quad-leg-linkage.html     旧四節リンク版（参考）
 │   └─ fusion/QuadLegLinkage/           Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
+├─ docs/hopper-report.md      一本脚ホッパーの設計レポート（2D・3D の総括）
+├─ docs/hopper-mujoco-notes.md MuJoCo 移行で踏んだ問題と対処、コツ
 └─ pyproject.toml
 ```
 
