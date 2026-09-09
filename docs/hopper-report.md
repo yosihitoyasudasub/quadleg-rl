@@ -1,6 +1,8 @@
-# 一本脚ホッパー 設計レポート（2D 検討の総括）
+# 一本脚ホッパー 設計レポート（2D 設計 → MuJoCo 3D 検証の総括）
 
-作成: 2026-09-07　対象: `tools/webapp/hopper-2d.html`（2D シミュレーター）と `docs/HANDOFF.md` §8 の検討結果
+作成: 2026-09-07　更新: 2026-09-09（3D の結果を反映、参照先を再編）
+対象: 2D シミュレーター（`tools/webapp/hopper-2d.html` / `hopper-roll-2d.html`）と MuJoCo（`hopper/`）の検討結果。
+時系列の詳細は `hopper-log.md`、MuJoCo 移行の実務は `hopper-mujoco-notes.md`。
 
 ---
 

@@ -1,6 +1,7 @@
 # 一本脚ホッパー MuJoCo 移行ノート — 何が起きて、どう直したか
 
 作成: 2026-09-08　対象: `hopper/`（`model.py` / `controller.py` / `run.py`）、`notebooks/02_hopper_mujoco.ipynb`
+関連: 設計の結論は `hopper-report.md`、時系列の検討ログは `hopper-log.md`（コード中の「HANDOFF §8.x」はそこ）
 
 2D シミュレーター（`tools/webapp/hopper-2d.html`、`hopper-roll-2d.html`）で成立した機体と Raibert 制御を MuJoCo に移すまでに 7 回の修正を要した。
 どれも「2D では暗黙に仮定していたことが 3D の物理エンジンでは成り立たない」種類の問題で、今後の四脚 MJCF 作成や実機でも同じ落とし穴を踏む。

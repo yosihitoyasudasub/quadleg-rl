@@ -1,53 +1,81 @@
 # quadleg-rl
 
-四脚ロボット（4 脚 × 3 自由度、股外転＋股ピッチ＋膝の四節リンク脚、DYNAMIXEL XL-320 × 12）の設計と歩行学習。
+跳ぶ脚の設計と制御。**現在の主線は一本脚ホッパー**（DYNAMIXEL XM540 × 2 ＋ XH540 × 1、直列バネ、5 節リンク脚）。
+リポジトリ名は起点だった四脚ロボット（XL-320 × 12）に由来する。四脚は保留中で、資産と再開手順は `docs/quadruped.md` にある。
+
+**到達点**（MuJoCo 3D、2026-09-08）
+
+| 項目 | 結果 |
+| --- | --- |
+| その場ホップ | 40 ホップ連続、頂点 5.0 cm、接地 165〜190 ms、脚長サーボ トルク 48 % / 速度 75 % |
+| 前進 | 0.15 m/s で安定（動画 `notebooks/02_hopper_forward_0.15.mp4`）。0.2 m/s はサーボ速度の上限で転倒 |
+| 横移動 | 0.2 m/s で安定。ロールサーボ 35〜56 % |
+| 外乱 | 前後 ±0.3 m/s・ピッチ 0.1 rad、横 0.3 m/s・ロール 0.1 rad から回復 |
+
+## ドキュメント
+
+| 読む順 | 文書 | 内容 |
+| --- | --- | --- |
+| 1 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | 引き継ぎ。現在地・サーボ仕様・共通の実装方針・進め方・次の作業 |
+| 2 | [`docs/hopper-report.md`](docs/hopper-report.md) | ホッパーの設計レポート。結論・物理メカニズム・制御・設計指針 |
+| 3 | [`docs/hopper-mujoco-notes.md`](docs/hopper-mujoco-notes.md) | MuJoCo 移行で踏んだ 8 件の問題と対処、MJCF・制御移植・診断のコツ |
+| — | [`docs/hopper-log.md`](docs/hopper-log.md) | ホッパーの検討ログ（時系列）。コード中の「HANDOFF §8.x」はここ |
+| — | [`docs/quadruped.md`](docs/quadruped.md) | 四脚（起点・保留）。設計値・学習パイプライン・再開手順 |
+
+## 構成
 
 ```
 quadleg-rl/
-├─ quadleg_rl/              学習コード（MuJoCo Playground / MJX / Brax PPO）
-│   └─ train.py             train() / render_video() / plot_history()
-├─ notebooks/
-│   ├─ 01_go1_playground.ipynb   Colab: テスト機 Go1 で歩行学習を体験
-│   ├─ 02_hopper_mujoco.ipynb    Colab(CPU): 一本脚ホッパーを MuJoCo で動かす
-│   └─ 02_hopper_forward_0.15.mp4 その動画（前進 0.15 m/s）
-├─ hopper/                       一本脚ホッパーの MJCF 生成・Raibert 制御・実行
+├─ hopper/                    【主線】一本脚ホッパー（MuJoCo）
+│   ├─ kinematics.py            5 節リンクの IK / FK / ヤコビアン
+│   ├─ model.py                 MJCF 生成（HopperParams で寸法・サーボ・接触を指定）
+│   ├─ controller.py            Raibert 3 分割制御（電流指令、姿勢優先のトルク配分）
+│   └─ run.py                   実行・指標・動画・診断（trace / sweep_gains / yaw_test）
 ├─ tools/
-│   ├─ webapp/quad-leg-5bar.html        5 節リンク脚のトルク計算 Web アプリ（ブラウザで開くだけ）
-│   ├─ webapp/hopper-2d.html            一本脚ホッパー 2D シミュレーター（派生テーマ）
-│   ├─ webapp/hopper-roll-2d.html       同 ロール面版（正面図、段階 1）
-│   ├─ webapp/quad-leg-linkage.html     旧四節リンク版（参考）
-│   └─ fusion/QuadLegLinkage/           Fusion 360 アドイン（骨格・サーボ・ジョイント生成）
-├─ docs/hopper-report.md      一本脚ホッパーの設計レポート（2D・3D の総括）
-├─ docs/hopper-mujoco-notes.md MuJoCo 移行で踏んだ問題と対処、コツ
+│   ├─ webapp/hopper-2d.html        ホッパー 2D シミュレーター（ピッチ面、単一 HTML）
+│   ├─ webapp/hopper-roll-2d.html   同 ロール面（正面図）
+│   ├─ hopper_harness.js            2D をブラウザなしで実行する検証ハーネス
+│   ├─ hopper_sweeps.js             掃引と回帰（node tools/hopper_sweeps.js）
+│   ├─ webapp/quad-leg-5bar.html    四脚: 5 節リンク脚のトルク計算
+│   ├─ webapp/quad-leg-linkage.html 四脚: 旧四節リンク版（参考）
+│   ├─ leg_torque.py                四脚: 静的トルク・伝達比・並列バネの計算
+│   └─ fusion/QuadLegLinkage/       四脚: Fusion 360 アドイン
+├─ quadleg_rl/                 四脚: 学習コード（MuJoCo Playground / MJX / Brax PPO）
+├─ notebooks/
+│   ├─ 02_hopper_mujoco.ipynb       Colab(CPU): ホッパーを MuJoCo で動かす
+│   ├─ 02_hopper_forward_0.15.mp4   その動画（前進 0.15 m/s）
+│   └─ 01_go1_playground.ipynb      Colab(GPU): 四脚のテスト機 Go1 で歩行学習
+├─ docs/
 └─ pyproject.toml
 ```
 
-## ワークフロー
+## 始め方
 
-1. **Zed で編集** — `quadleg_rl/` にロジックを書く。ノートブックは呼び出すだけ。
-2. **GitHub に push** — `git push`
-3. **Colab で学習** — `notebooks/01_go1_playground.ipynb` を Colab で開く
-   （GitHub 上のファイルを `https://colab.research.google.com/github/yosihitoyasudasub/quadleg-rl/blob/main/notebooks/01_go1_playground.ipynb` で直接開ける）。
-   セル 2 で `git clone`/`pull`、セル 5 で学習、セル 6 で継続学習（チェックポイント再開）、セル 7 で指令追従の診断、セル 8-9 で動画。
-4. チェックポイントと動画は Google Drive `MyDrive/quadleg-rl/logs/` に残る。
+**ホッパーを動かす（GPU 不要）**
 
-## ローカルで動作確認（CPU、任意）
+[Colab で 02 を開く](https://colab.research.google.com/github/yosihitoyasudasub/quadleg-rl/blob/main/notebooks/02_hopper_mujoco.ipynb)
+→ ランタイムは CPU のまま、セル 1 → 1b → 2 → 3 → 4 → 6 の順に実行。動画はセル 7。
+
+ローカルで動かすなら:
 
 ```sh
-uv venv --python 3.12 && .venv\Scripts\activate    # Windows は WSL2 推奨
-uv pip install -e .
-python -c "from quadleg_rl import train; print(train.gpu_info())"
+uv venv --python 3.12 && .venv\Scripts\activate
+uv pip install -e ".[hopper]"
+python -m hopper.run --duration 15 --vx 0.15
 ```
 
-CPU では学習は現実的でないが、環境の読み込みや MJCF の検証はできる。
+**2D シミュレーターを触る**
 
-## 次の段階（予定）
+`tools/webapp/hopper-2d.html` をブラウザで開くだけ（依存なし）。寸法・バネ・サーボ機種・制御係数をその場で変えられる。
+数値で掃引するときは `node tools/hopper_sweeps.js`。
 
-- `02_custom_quadruped.ipynb`: Web アプリの寸法から自作四脚の MJCF を生成し、Go1 環境をベースに差し替えて学習
-- アクチュエータモデル: XL330 は BAM（Microduck の `microduck_rl` 参照）、XL-320 は PD＋トルク上限＋遅延で近似
-- Sim2Real: ONNX 書き出し → Raspberry Pi＋U2D2＋IMU で 50 Hz 実行
+**四脚の学習（保留中）**
+
+[Colab で 01 を開く](https://colab.research.google.com/github/yosihitoyasudasub/quadleg-rl/blob/main/notebooks/01_go1_playground.ipynb)
+→ ランタイムを GPU（T4 以上）にして上から実行。累計 1 億ステップで Go1 が歩く（約 40 分）。詳細は `docs/quadruped.md`。
 
 ## 参考
 
 - MuJoCo Playground: https://github.com/google-deepmind/mujoco_playground
+- BAM（同定済みアクチュエータ摩擦モデル、XL-320 / XL330 あり）: https://github.com/Rhoban/bam
 - Microduck RL（XL330 の sim2real レシピ）: https://github.com/pollen-robotics/microduck_rl

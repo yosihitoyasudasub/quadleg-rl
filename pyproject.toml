@@ -1,7 +1,7 @@
 [project]
 name = "quadleg-rl"
 version = "0.1.0"
-description = "Quadruped leg design + RL locomotion (MuJoCo Playground)"
+description = "One-leg hopper (MuJoCo) + quadruped leg design and RL locomotion (MuJoCo Playground)"
 requires-python = ">=3.10"
 dependencies = [
     "playground",
@@ -14,10 +14,12 @@ dependencies = [
 
 [project.optional-dependencies]
 cuda = ["jax[cuda12]"]
+# ホッパー（hopper/）は MuJoCo だけで動く。学習しないので playground / brax / jax は要らない
+hopper = ["mujoco", "numpy"]
 
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["quadleg_rl*"]
+include = ["quadleg_rl*", "hopper*"]
