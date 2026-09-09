@@ -41,6 +41,7 @@ quadleg-rl/
 │   ├─ webapp/quad-leg-5bar.html    四脚: 5 節リンク脚のトルク計算
 │   ├─ webapp/quad-leg-linkage.html 四脚: 旧四節リンク版（参考）
 │   ├─ leg_torque.py                四脚: 静的トルク・伝達比・並列バネの計算
+│   ├─ fusion/HopperLeg/            Fusion 360 アドイン: ホッパー脚の骨格・サーボ・ジョイント生成
 │   └─ fusion/QuadLegLinkage/       四脚: Fusion 360 アドイン
 ├─ quadleg_rl/                 四脚: 学習コード（MuJoCo Playground / MJX / Brax PPO）
 ├─ notebooks/

@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "9a4f1d3c-2b58-4e07-8c16-5d7a0e93b6f1",
+    "author": "Hopper Leg Lab",
+    "description": {
+        "": "一本脚ホッパーの脚（5 節リンク＋直列バネ＋ロール軸）を生成するアドイン。ソリッドタブ→作成パネルにボタンを追加します。要件は docs/hopper-mechanical-spec.md。"
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}
