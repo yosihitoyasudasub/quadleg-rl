@@ -31,6 +31,7 @@ def make(params: HopperParams | None = None):
 
 def simulate(duration: float = 15.0, params: HopperParams | None = None, gains: ControlGains | None = None,
              vx_des: float | None = None, vy_des: float | None = None, hdes: float | None = None,
+             circle_r: float | None = None,
              vx0: float = 0.0, vy0: float = 0.0, th0: float = 0.0, roll0: float = 0.0,
              record: bool = False, fps: int = 50, camera: str = "track", width: int = 640, height: int = 360,
              log_dt: float = 0.005, verbose: bool = True):
@@ -40,6 +41,7 @@ def simulate(duration: float = 15.0, params: HopperParams | None = None, gains: 
     if vx_des is not None: g = replace(g, vx_des=vx_des)
     if vy_des is not None: g = replace(g, vy_des=vy_des)
     if hdes is not None: g = replace(g, hdes=hdes)
+    if circle_r is not None: g = replace(g, circle_r=circle_r)
     ctl = HopperController(p, g)
     ctl.bind(model)
     # 初期外乱
@@ -60,6 +62,8 @@ def simulate(duration: float = 15.0, params: HopperParams | None = None, gains: 
         cam = mujoco.MjvCamera()
         cam.type = mujoco.mjtCamera.mjCAMERA_FREE
         cam.distance, cam.azimuth, cam.elevation = 1.2, 135, -15
+        if camera == "wide":                     # 円運動の全体像を見るための固定俯瞰
+            cam.distance, cam.azimuth, cam.elevation = 3.2, 90, -35
     frames, log, hops_log = [], [], []
     dt = model.opt.timestep
     ctrl_dt = 1.0 / g.rate
@@ -87,7 +91,7 @@ def simulate(duration: float = 15.0, params: HopperParams | None = None, gains: 
                         o["w1"], o["w2"], o["wpsi"], o["delta"], o["Fn"]))
         if renderer is not None and data.time >= next_frame:
             next_frame += 1.0 / fps
-            cam.lookat[:] = [o["pos"][0], o["pos"][1], 0.15]
+            cam.lookat[:] = [0.0, g.circle_r, 0.15] if camera == "wide" else [o["pos"][0], o["pos"][1], 0.15]
             renderer.update_scene(data, camera=cam)
             frames.append(renderer.render().copy())
         if ctl.fallen(o):
@@ -199,6 +203,29 @@ def yaw_test(pads=(0.0, 0.005, 0.02), duration: float = 15.0, vy_des: float = 0.
         c = h[-1] if h else {}
         print(f"pad {pad*1000:4.1f} mm: {'FALLEN@' + format(r['t_end'], '.1f') if r['fallen'] else 'ok    '}  hops {len(h):3d}  vy {np.mean([x['vy'] for x in h[-10:]]) if h else 0:5.2f}  "
               f"yaw/hop {dyaw:6.1f} deg  roll servo {c.get('tau3S', 0)/base.stall3*100:3.0f}%/{c.get('w3S', 0)/base.w03()*100:3.0f}%")
+
+
+def path_table(res, n: int = 12) -> str:
+    """ホップごとの水平位置と、軌跡に当てはめた円（代数フィット）。円運動の確認用。"""
+    log = res["log"]
+    if len(log) < 10:
+        return "(データ不足)"
+    x, y = log[:, 1], log[:, 2]
+    # 代数フィット: x² + y² + a·x + b·y + c = 0 → 中心 (−a/2, −b/2)、半径 √(中心² − c)
+    A = np.column_stack([x, y, np.ones_like(x)])
+    sol, *_ = np.linalg.lstsq(A, -(x ** 2 + y ** 2), rcond=None)
+    cx, cy = -sol[0] / 2, -sol[1] / 2
+    r = math.sqrt(max(0.0, cx ** 2 + cy ** 2 - sol[2]))
+    rad = np.hypot(x - cx, y - cy)
+    ang = np.unwrap(np.arctan2(y - cy, x - cx))
+    rows = [f"円フィット: 中心 ({cx:.2f}, {cy:.2f}) m  半径 {r:.2f} m  半径のばらつき ±{rad.std()*1000:.0f} mm  "
+            f"回った角度 {math.degrees(abs(ang[-1] - ang[0])):.0f} 度  移動距離 {np.abs(np.diff(ang)).sum()*r:.2f} m",
+            "hop   t[s]     x[m]    y[m]   yaw[deg]  vx    vy"]
+    hops = res["hops"][-n:]
+    for i, h in enumerate(hops):
+        k = int(np.argmin(np.abs(log[:, 0] - h["t"])))
+        rows.append(f"{len(res['hops'])-len(hops)+i+1:>3} {h['t']:6.2f} {log[k,1]:8.2f} {log[k,2]:7.2f} {math.degrees(h['yaw']):9.1f} {h['vx']:5.2f} {h['vy']:5.2f}")
+    return "\n".join(rows)
 
 
 def summarize(res) -> str:

@@ -28,6 +28,8 @@ class ControlGains:
     vx_des: float = 0.0     # 前進速度指令 [m/s]
     vy_des: float = 0.0     # 横速度指令 [m/s]（+y = 左）
     v_ramp: float = 0.02    # 目標速度ランプ [m/s / hop]
+    circle_r: float = 0.0   # 円運動の半径 [m]。>0 で「速度ベクトルを世界座標で回す」円運動になり、
+                            # vx_des を経路速度として使う（vy_des は無視）。胴体のヨーは回らない（横移動を伴う）
     dlmax: float = 0.050    # 最大蹴り出し [m]
     dlmin: float = 0.003    # 最小蹴り出し [m]（0 にすると 1 ホップで着地エネルギーを失って立て直せない）
     kh: float = 0.3         # 高さ調整ゲイン（2D は 0.5。3D 前進時に振動したので下げた）
@@ -148,6 +150,20 @@ class HopperController:
         """飛行姿勢で足先が接地する胴体高さ。"""
         return self.p.hb + self.p.L0 - self.p.retract
 
+    def command(self, t: float, yaw: float):
+        """その時刻の速度指令（ヨー基準の前後・左右）を返す。
+
+        円運動モード（`circle_r > 0`）では、世界座標の速度ベクトルを角速度 ω = v / r で回す。
+        胴体のヨーを回す（＝旋回する）わけではないので、機体は向きを保ったまま円周上を平行移動する。
+        ヨー方向の駆動軸を持たない 3 自由度機ではこれが素直な円運動になる（真の旋回は `hopper-report.md` §8 の課題）。
+        """
+        g = self.g
+        if g.circle_r > 0.0 and abs(g.vx_des) > 1e-9:
+            v = g.vx_des
+            psi = v / g.circle_r * t          # 進行方向の世界角
+            return v * math.cos(psi - yaw), v * math.sin(psi - yaw)
+        return g.vx_des, g.vy_des
+
     # ---------- ホスト制御（制御周期ごと） ----------
     def control(self, d: mujoco.MjData, o: dict):
         p, g, geom = self.p, self.g, self.geom
@@ -157,8 +173,9 @@ class HopperController:
             if self.vz_prev > 0 and o["vz"] <= 0:                     # 頂点
                 self.apex = o["pos"][2] - self.stand_h()
                 self.hops += 1
-                self.vx_eff = float(np.clip(g.vx_des, self.vx_eff - g.v_ramp, self.vx_eff + g.v_ramp)) if g.v_ramp > 0 else g.vx_des
-                self.vy_eff = float(np.clip(g.vy_des, self.vy_eff - g.v_ramp, self.vy_eff + g.v_ramp)) if g.v_ramp > 0 else g.vy_des
+                cx, cy = self.command(now, o["yaw"])
+                self.vx_eff = float(np.clip(cx, self.vx_eff - g.v_ramp, self.vx_eff + g.v_ramp)) if g.v_ramp > 0 else cx
+                self.vy_eff = float(np.clip(cy, self.vy_eff - g.v_ramp, self.vy_eff + g.v_ramp)) if g.v_ramp > 0 else cy
                 self.dL = float(np.clip(self.dL + g.kh * (g.hdes - self.apex), g.dlmin, g.dlmax))
                 self.xbias = float(np.clip(self.xbias + g.ki * (o["vx"] - self.vx_eff), -0.03, 0.03))
                 self.ybias = float(np.clip(self.ybias + g.ki_r * (o["vy"] - self.vy_eff), -0.03, 0.03))
