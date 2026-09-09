@@ -20,6 +20,7 @@
 | 1 | [`docs/HANDOFF.md`](docs/HANDOFF.md) | 引き継ぎ。現在地・サーボ仕様・共通の実装方針・進め方・次の作業 |
 | 2 | [`docs/hopper-report.md`](docs/hopper-report.md) | ホッパーの設計レポート。結論・物理メカニズム・制御・設計指針 |
 | 3 | [`docs/hopper-mujoco-notes.md`](docs/hopper-mujoco-notes.md) | MuJoCo 移行で踏んだ 8 件の問題と対処、MJCF・制御移植・診断のコツ |
+| 4 | [`docs/hopper-mechanical-spec.md`](docs/hopper-mechanical-spec.md) | 実機の機構設計要件（CAD の入力）。寸法・荷重・可動域・必須制約 |
 | — | [`docs/hopper-log.md`](docs/hopper-log.md) | ホッパーの検討ログ（時系列）。コード中の「HANDOFF §8.x」はここ |
 | — | [`docs/quadruped.md`](docs/quadruped.md) | 四脚（起点・保留）。設計値・学習パイプライン・再開手順 |
 

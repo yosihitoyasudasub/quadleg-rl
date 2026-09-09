@@ -32,6 +32,7 @@ Colab で Go1 が歩くところまでは動いている。2026-09-06 の派生�
 - `hopper-report.md` — ホッパーの設計レポート（結論・物理・制御）
 - `hopper-log.md` — ホッパーの検討ログ（時系列）。**コード中の「HANDOFF §8.x」はこの文書の §8.x を指す**
 - `hopper-mujoco-notes.md` — MuJoCo 移行で踏んだ問題と対処、コツ
+- `hopper-mechanical-spec.md` — 実機の機構設計要件（CAD の入力）。寸法・荷重・可動域・必須制約
 - `quadruped.md` — 四脚（起点・保留）
 
 ## 約束事

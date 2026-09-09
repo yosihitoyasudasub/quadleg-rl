@@ -10,6 +10,7 @@
 | ホッパーの結論・物理・制御（**まずこれ**） | `hopper-report.md` |
 | ホッパーの検討ログ（時系列。コード中の「HANDOFF §8.x」はここ） | `hopper-log.md` |
 | MuJoCo で踏んだ問題と対処、MJCF・制御移植のコツ | `hopper-mujoco-notes.md` |
+| **実機の機構設計（CAD の入力）**: 寸法・荷重・可動域・必須制約 | `hopper-mechanical-spec.md` |
 | 四脚（起点、現在は保留）の設計値・学習パイプライン | `quadruped.md` |
 | サーボ仕様・実機の制御器・共通の実装方針・次の作業 | **本書**（以下） |
 
@@ -34,7 +35,7 @@
 | ホッパー 2D シミュレーター（ロール面） | `tools/webapp/hopper-roll-2d.html`。正面図、股ロールサーボ直結、脚長 1 自由度 |
 | ホッパーの検証ハーネス | `tools/hopper_harness.js`（2D をブラウザなしで実行）＋ `tools/hopper_sweeps.js`。`node tools/hopper_sweeps.js` |
 | ホッパーの円運動 | `ControlGains.circle_r`（速度ベクトルを世界座標で回す方式）。**成立を確認済み**（2026-09-09、半径 0.5 m・経路速度 0.12 m/s・1 周 26 s）。ノートブック 02 のセル 7b / 7c |
-| ホッパーの実機 | **未着手**（§6） |
+| ホッパーの実機 | 機構設計要件を `hopper-mechanical-spec.md` にまとめた（2026-09-09）。**CAD は未着手** |
 | 四脚 — 学習コード | `quadleg_rl/train.py`。Colab で動作確認済み |
 | 四脚 — Colab ノートブック | `notebooks/01_go1_playground.ipynb`。通しで実行し Go1 の歩行を確認済み |
 | 四脚 — 脚設計ツール | `tools/webapp/quad-leg-5bar.html`（5 節リンク）、`tools/leg_torque.py` |
@@ -167,8 +168,9 @@ Go1 だけが大きい設定を使っているので、それを引き継がな�
    真値なしでも制御が成り立つか MuJoCo で確認する。前進ループは速度推定誤差に直接効く
 2. **反射慣性の実測**: XM540 / XH540 のロータ慣性を測って `HopperParams.jr` / `jr3` を更新する。
    足先換算 8 kg 相当と支配的なパラメータなので、ここで数値の信頼度が決まる
-3. **実機設計**: 直列バネ（900 N/m・ストローク 80 mm）の実装、足パッド（半径 25 mm 前後のゴム）、
-   股軸を重心高さに置く胴体、AtomS3R での 200 Hz 電流指令（§4.1）
+3. **実機設計（CAD）**: 要件は `hopper-mechanical-spec.md` にまとめてある。
+   直列バネの方式、ロールサーボの逃がし方、胴体の形が主な検討点。CAD で出た質量・慣性を
+   `HopperParams` に戻して再検証する（同 §9）
 4. 速度・跳躍の上限を上げるなら機構変更（`hopper-report.md` §6 の案 B ＝ 直列股ピッチ、または蓄勢方式 C）
 
 **四脚（保留、再開するとき）**
