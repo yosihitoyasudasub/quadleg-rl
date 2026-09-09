@@ -33,7 +33,7 @@
 | ホッパー 2D シミュレーター（ピッチ面） | `tools/webapp/hopper-2d.html`。蓄勢方式 A（着地エネルギー）/ C（飛行中蓄勢＋ラッチ）を切替比較できる |
 | ホッパー 2D シミュレーター（ロール面） | `tools/webapp/hopper-roll-2d.html`。正面図、股ロールサーボ直結、脚長 1 自由度 |
 | ホッパーの検証ハーネス | `tools/hopper_harness.js`（2D をブラウザなしで実行）＋ `tools/hopper_sweeps.js`。`node tools/hopper_sweeps.js` |
-| ホッパーの円運動 | `ControlGains.circle_r` で速度ベクトルを世界座標で回す方式を実装（2026-09-09）。**Colab で検証待ち**。ノートブック 02 のセル 7b / 7c |
+| ホッパーの円運動 | `ControlGains.circle_r`（速度ベクトルを世界座標で回す方式）。**成立を確認済み**（2026-09-09、半径 0.5 m・経路速度 0.12 m/s・1 周 26 s）。ノートブック 02 のセル 7b / 7c |
 | ホッパーの実機 | **未着手**（§6） |
 | 四脚 — 学習コード | `quadleg_rl/train.py`。Colab で動作確認済み |
 | 四脚 — Colab ノートブック | `notebooks/01_go1_playground.ipynb`。通しで実行し Go1 の歩行を確認済み |
