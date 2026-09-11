@@ -86,30 +86,30 @@
 <text x="560" y="303" font-size="11.5" fill="#5b6470">ラジアル荷重が集中する。外側にもう 1 枚板を置き、軸受で受けて両持ちにする</text>
 <text x="560" y="320" font-size="11.5" fill="#5b6470">（コの字フレーム）。脚長サーボ 2 個は軸が平行なので外側板は共用できる。</text>
 <text x="560" y="348" font-size="14" font-weight="bold">C. 膝 K・足先 F の関節（二面せん断 = クレビス）</text>
-<rect x="630" y="382" width="150" height="16" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>
-<rect x="630" y="440" width="150" height="16" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>
-<rect x="630" y="382" width="26" height="74" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>
-<rect x="726" y="406" width="150" height="26" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>
-<rect x="748" y="406" width="26" height="6" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>
-<rect x="748" y="426" width="26" height="6" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>
-<rect x="752" y="368" width="18" height="14" rx="2" fill="#9aa4b0" stroke="#444" stroke-width="1.4"/>
-<rect x="754" y="382" width="14" height="74" fill="#b9c2cc" stroke="#444" stroke-width="1.4"/>
-<rect x="756" y="456" width="10" height="13" fill="#7f8894" stroke="#444" stroke-width="1.2"/>
-<text x="780" y="378" font-size="11.5" fill="#333">段付ボルト（φ4 軸 / M3 ねじ）</text>
-<text x="780" y="474" font-size="11.5" fill="#333">ねじ部で締結</text>
-<text x="568" y="396" font-size="11.5" fill="#4a6fa5">クランク</text>
-<text x="568" y="412" font-size="11.5" fill="#4a6fa5">（二股）</text>
-<text x="882" y="424" font-size="11.5" fill="#2f9e8f">下腿</text>
-<text x="780" y="428" font-size="11.5" fill="#c0392b">軸受</text>
-<text x="560" y="488" font-size="11.5" fill="#5b6470">強度は φ3 でも十分（二面せん断 7.6 MPa、面圧 8.9 MPa）。寸法を決めるのは</text>
-<text x="560" y="505" font-size="11.5" fill="#5b6470">軸受の内径とガタ。樹脂すべり軸受なら PV 0.07（許容 0.3〜1）で余裕があり、</text>
-<text x="560" y="522" font-size="11.5" fill="#5b6470">1 個 0.15 g と軽い。ガタが問題になったら 684ZZ（φ4×φ9×4、1.5 g）に置換。</text>
-<text x="560" y="548" font-size="11.5" font-weight="600" fill="#c0392b">片持ちは不可</text>
-<text x="648" y="548" font-size="11.5" fill="#5b6470">: 軸に曲げが入るうえ、リンク面が Z 方向にずれて</text>
-<text x="560" y="565" font-size="11.5" fill="#5b6470">接地力の作用線が脚面から外れる（3D で転倒条件になった問題）。</text>
-<rect x="560" y="586" width="452" height="82" fill="#fdf6e8" stroke="#c98a12" stroke-width="1.2" rx="4"/>
-<text x="572" y="607" font-size="11.5" font-weight="600" fill="#8a5d00">質量制約: 下腿＋足で 50 g（150 g で転倒）</text>
-<text x="572" y="625" font-size="11.5" fill="#5b6470">実部品で積むと 54 g。重いのはバネ 14 g と段付ボルト 3 本で 8.7 g。</text>
-<text x="572" y="642" font-size="11.5" fill="#5b6470">バネを硬くする（k 900 → 2000）と 5.6 g に減り 48 g に収まる。</text>
-<text x="572" y="659" font-size="11" fill="#8a5d00">※ 50 g と 150 g の間は未検証。実質量が出たらシミュレーションで確認できる</text>
+<rect x="600" y="396" width="140" height="26" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>
+<rect x="660" y="386" width="140" height="10" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>
+<rect x="660" y="422" width="140" height="10" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>
+<rect x="774" y="386" width="26" height="46" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>
+<rect x="683" y="396" width="6" height="26" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>
+<rect x="703" y="396" width="6" height="26" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>
+<rect x="686" y="372" width="20" height="14" rx="2" fill="#9aa4b0" stroke="#444" stroke-width="1.4"/>
+<rect x="689" y="386" width="14" height="46" fill="#b9c2cc" stroke="#444" stroke-width="1.4"/>
+<rect x="691" y="432" width="10" height="13" fill="#7f8894" stroke="#444" stroke-width="1.2"/>
+<line x1="630" y1="422" x2="630" y2="458" stroke="#4a6fa5" stroke-width="0.9"/>
+<text x="560" y="470" font-size="11.5" fill="#4a6fa5">クランク（平板。根元はホーンに固定）</text>
+<text x="806" y="412" font-size="11.5" fill="#2f9e8f">下腿（二股）</text>
+<text x="712" y="382" font-size="11.5" fill="#333">段付ボルト φ4 / M3</text>
+<line x1="686" y1="409" x2="650" y2="440" stroke="#c0392b" stroke-width="0.9"/>
+<text x="606" y="444" font-size="11.5" fill="#c0392b">軸受</text>
+<text x="560" y="492" font-size="11.5" fill="#5b6470">二股にするのは<tspan font-weight="600">下腿側</tspan>。クランクは根元で 10.6 N·m の曲げを受けるので</text>
+<text x="560" y="509" font-size="11.5" fill="#5b6470">板厚 6 mm が要り、平板のまま作れる形にしておく（レーザー切断や meviy で作れる）。</text>
+<text x="560" y="526" font-size="11.5" fill="#5b6470">足先 F は下腿 2 本とバネが集まるので、二股の「足先ブロック」を 1 部品作って</text>
+<text x="560" y="543" font-size="11.5" fill="#5b6470">下腿 2 本のタングを挟む（各下腿は膝側フォーク・足先側タングの非対称になる）。</text>
+<text x="560" y="560" font-size="11.5" fill="#5b6470">強度は φ3 でも十分（二面せん断 7.6 MPa、面圧 8.9 MPa）。決めるのは軸受の内径とガタ。</text>
+<text x="560" y="577" font-size="11.5" fill="#5b6470">樹脂すべり軸受なら PV 0.07（許容 0.3〜1）で 1 個 0.15 g。ガタが出たら 684ZZ（1.5 g）に置換。</text>
+<rect x="560" y="600" width="452" height="82" fill="#fdf6e8" stroke="#c98a12" stroke-width="1.2" rx="4"/>
+<text x="572" y="621" font-size="11.5" font-weight="600" fill="#8a5d00">質量制約: 下腿＋足で 50 g（150 g で転倒）</text>
+<text x="572" y="639" font-size="11.5" fill="#5b6470">実部品で積むと 54 g。重いのはバネ 14 g と段付ボルト 3 本で 8.7 g。</text>
+<text x="572" y="656" font-size="11.5" fill="#5b6470">バネを硬くする（k 900 → 2000）と 5.6 g に減り 48 g に収まる。</text>
+<text x="572" y="673" font-size="11" fill="#8a5d00">※ 50 g と 150 g の間は未検証。実質量が出たらシミュレーションで確認できる</text>
 </svg>

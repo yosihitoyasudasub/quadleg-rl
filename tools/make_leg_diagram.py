@@ -158,52 +158,51 @@ for i, t in enumerate([
 CX, CY = 560, 348
 A('<text x="%d" y="%d" font-size="14" font-weight="bold">'
   'C. 膝 K・足先 F の関節（二面せん断 = クレビス）</text>' % (CX, CY))
-cx0, cy0 = CX + 70, CY + 34
-A('<rect x="%d" y="%d" width="150" height="16" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>'
-  % (cx0, cy0))
-A('<rect x="%d" y="%d" width="150" height="16" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>'
-  % (cx0, cy0 + 58))
-A('<rect x="%d" y="%d" width="26" height="74" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>'
-  % (cx0, cy0))
-A('<rect x="%d" y="%d" width="150" height="26" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>'
-  % (cx0 + 96, cy0 + 24))
-for yy in (cy0 + 24, cy0 + 44):
-    A('<rect x="%d" y="%d" width="26" height="6" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>'
-      % (cx0 + 118, yy))
-A('<rect x="%d" y="%d" width="18" height="14" rx="2" fill="#9aa4b0" stroke="#444" stroke-width="1.4"/>'
-  % (cx0 + 122, cy0 - 14))
-A('<rect x="%d" y="%d" width="14" height="74" fill="#b9c2cc" stroke="#444" stroke-width="1.4"/>'
-  % (cx0 + 124, cy0))
+cx0, cy0 = 620, CY + 26
+A('<rect x="%d" y="%d" width="140" height="26" fill="#dbe6f3" stroke="#4a6fa5" stroke-width="1.6"/>'
+  % (cx0 - 20, cy0 + 22))
+A('<rect x="%d" y="%d" width="140" height="10" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>'
+  % (cx0 + 40, cy0 + 12))
+A('<rect x="%d" y="%d" width="140" height="10" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>'
+  % (cx0 + 40, cy0 + 48))
+A('<rect x="%d" y="%d" width="26" height="46" fill="#d6efe9" stroke="#2f9e8f" stroke-width="1.6"/>'
+  % (cx0 + 154, cy0 + 12))
+for xx in (cx0 + 63, cx0 + 83):
+    A('<rect x="%d" y="%d" width="6" height="26" fill="#f3d9d9" stroke="#c0392b" stroke-width="1.2"/>'
+      % (xx, cy0 + 22))
+A('<rect x="%d" y="%d" width="20" height="14" rx="2" fill="#9aa4b0" stroke="#444" stroke-width="1.4"/>'
+  % (cx0 + 66, cy0 - 2))
+A('<rect x="%d" y="%d" width="14" height="46" fill="#b9c2cc" stroke="#444" stroke-width="1.4"/>'
+  % (cx0 + 69, cy0 + 12))
 A('<rect x="%d" y="%d" width="10" height="13" fill="#7f8894" stroke="#444" stroke-width="1.2"/>'
-  % (cx0 + 126, cy0 + 74))
-A('<text x="%d" y="%d" font-size="11.5" fill="#333">段付ボルト（φ4 軸 / M3 ねじ）</text>'
-  % (cx0 + 150, cy0 - 4))
-A('<text x="%d" y="%d" font-size="11.5" fill="#333">ねじ部で締結</text>' % (cx0 + 150, cy0 + 92))
-A('<text x="%d" y="%d" font-size="11.5" fill="#4a6fa5">クランク</text>' % (cx0 - 62, cy0 + 14))
-A('<text x="%d" y="%d" font-size="11.5" fill="#4a6fa5">（二股）</text>' % (cx0 - 62, cy0 + 30))
-A('<text x="%d" y="%d" font-size="11.5" fill="#2f9e8f">下腿</text>' % (cx0 + 252, cy0 + 42))
-A('<text x="%d" y="%d" font-size="11.5" fill="#c0392b">軸受</text>' % (cx0 + 150, cy0 + 46))
-for i, t in enumerate([
-        '強度は φ3 でも十分（二面せん断 7.6 MPa、面圧 8.9 MPa）。寸法を決めるのは',
-        '軸受の内径とガタ。樹脂すべり軸受なら PV 0.07（許容 0.3〜1）で余裕があり、',
-        '1 個 0.15 g と軽い。ガタが問題になったら 684ZZ（φ4×φ9×4、1.5 g）に置換。']):
-    A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">%s</text>' % (CX, CY + 140 + i * 17, t))
-A('<text x="%d" y="%d" font-size="11.5" font-weight="600" fill="#c0392b">片持ちは不可</text>'
-  % (CX, CY + 200))
-A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  ': 軸に曲げが入るうえ、リンク面が Z 方向にずれて</text>' % (CX + 88, CY + 200))
-A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  '接地力の作用線が脚面から外れる（3D で転倒条件になった問題）。</text>' % (CX, CY + 217))
+  % (cx0 + 71, cy0 + 58))
+A('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="#4a6fa5" stroke-width="0.9"/>'
+  % (cx0 + 10, cy0 + 48, cx0 + 10, cy0 + 84))
+A('<text x="%d" y="%d" font-size="11.5" fill="#4a6fa5">クランク（平板。根元はホーンに固定）</text>'
+  % (CX, cy0 + 96))
+A('<text x="%d" y="%d" font-size="11.5" fill="#2f9e8f">下腿（二股）</text>' % (cx0 + 186, cy0 + 38))
+A('<text x="%d" y="%d" font-size="11.5" fill="#333">段付ボルト φ4 / M3</text>' % (cx0 + 92, cy0 + 8))
+A('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="#c0392b" stroke-width="0.9"/>'
+  % (cx0 + 66, cy0 + 35, cx0 + 30, cy0 + 66))
+A('<text x="%d" y="%d" font-size="11.5" fill="#c0392b">軸受</text>' % (cx0 - 14, cy0 + 70))
+for i2, t in enumerate([
+        '二股にするのは<tspan font-weight="600">下腿側</tspan>。クランクは根元で 10.6 N·m の曲げを受けるので',
+        '板厚 6 mm が要り、平板のまま作れる形にしておく（レーザー切断や meviy で作れる）。',
+        '足先 F は下腿 2 本とバネが集まるので、二股の「足先ブロック」を 1 部品作って',
+        '下腿 2 本のタングを挟む（各下腿は膝側フォーク・足先側タングの非対称になる）。',
+        '強度は φ3 でも十分（二面せん断 7.6 MPa、面圧 8.9 MPa）。決めるのは軸受の内径とガタ。',
+        '樹脂すべり軸受なら PV 0.07（許容 0.3〜1）で 1 個 0.15 g。ガタが出たら 684ZZ（1.5 g）に置換。']):
+    A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">%s</text>' % (CX, cy0 + 118 + i2 * 17, t))
 A('<rect x="%d" y="%d" width="452" height="82" fill="#fdf6e8" stroke="#c98a12" stroke-width="1.2" rx="4"/>'
-  % (CX, CY + 238))
+  % (CX, CY + 252))
 A('<text x="%d" y="%d" font-size="11.5" font-weight="600" fill="#8a5d00">'
-  '質量制約: 下腿＋足で 50 g（150 g で転倒）</text>' % (CX + 12, CY + 259))
+  '質量制約: 下腿＋足で 50 g（150 g で転倒）</text>' % (CX + 12, CY + 273))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  '実部品で積むと 54 g。重いのはバネ 14 g と段付ボルト 3 本で 8.7 g。</text>' % (CX + 12, CY + 277))
+  '実部品で積むと 54 g。重いのはバネ 14 g と段付ボルト 3 本で 8.7 g。</text>' % (CX + 12, CY + 291))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  'バネを硬くする（k 900 → 2000）と 5.6 g に減り 48 g に収まる。</text>' % (CX + 12, CY + 294))
+  'バネを硬くする（k 900 → 2000）と 5.6 g に減り 48 g に収まる。</text>' % (CX + 12, CY + 308))
 A('<text x="%d" y="%d" font-size="11" fill="#8a5d00">'
-  '※ 50 g と 150 g の間は未検証。実質量が出たらシミュレーションで確認できる</text>' % (CX + 12, CY + 311))
+  '※ 50 g と 150 g の間は未検証。実質量が出たらシミュレーションで確認できる</text>' % (CX + 12, CY + 325))
 A('</svg>')
 
 path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'img',
