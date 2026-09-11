@@ -20,6 +20,7 @@ Colab で Go1 が歩くところまでは動いている。2026-09-06 の派生�
 - `notebooks/02_hopper_mujoco.ipynb` — Colab(CPU) の薄いラッパー
 - `tools/webapp/hopper-2d.html`（ピッチ面）／`hopper-roll-2d.html`（ロール面） — 単一 HTML の 2D シミュレーター
 - `tools/fusion/HopperLeg/` — Fusion 360 アドイン。骨格・サーボ・ジョイントを生成。運動学は `hopper/kinematics.py` と同一式（一致確認済み）
+- `tools/make_leg_diagram.py` — `docs/img/hopper-leg-structure.svg` を運動学から生成。寸法を変えたら再生成する
 - `tools/hopper_harness.js` / `hopper_sweeps.js` — 2D をブラウザなしで回す検証ハーネス。
   **シミュレーターを直したら必ず `node tools/hopper_sweeps.js` を走らせ、`docs/hopper-log.md` の数字が再現するか確認する**
 
