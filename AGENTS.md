@@ -22,6 +22,7 @@ Colab で Go1 が歩くところまでは動いている。2026-09-06 の派生�
 - `tools/fusion/HopperLeg/` — Fusion 360 アドイン。骨格・サーボ・ジョイントを生成。運動学は `hopper/kinematics.py` と同一式（一致確認済み）
 - `tools/make_leg_diagram.py` — `docs/img/hopper-leg-structure.svg` を運動学から生成。寸法を変えたら再生成する
 - `tools/make_shank_diagram.py` — `docs/img/hopper-shank.svg`（シャンク両端の関節構造）を生成。同上
+- `tools/make_spring_diagram.py` — `docs/img/hopper-spring.svg`（直列バネの支持方式）を生成。同上
 - `tools/hopper_harness.js` / `hopper_sweeps.js` — 2D をブラウザなしで回す検証ハーネス。
   **シミュレーターを直したら必ず `node tools/hopper_sweeps.js` を走らせ、`docs/hopper-log.md` の数字が再現するか確認する**
 
