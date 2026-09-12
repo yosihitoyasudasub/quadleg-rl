@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 """docs/img/hopper-spring.svg を生成する。
 
-直列バネの支持方式：ガイドロッドを股軸 O でピン支持し、足先 F のキャリア（＝足先ブロック）を
-そのロッドに通す。ロッドは O を支点として F を通るので、必ず O→F 方向を向く。
+直列バネの支持方式：ガイドロッドはキャリア（＝足先ブロック）に固定し、股軸 O では
+「首振りするリニアブッシュ」で受ける。屈伸による股→足の長さ変化はロッドが股ブッシュを
+滑って吸収し、同時にロッドの線は必ず O を通るので、バネの軸は常に O→F 方向を向く。
+
+MJCF（hopper/model.py）との対応:
+  legbar の股ヒンジ        → 股の首振りブッシュブロック
+  carrier の slide  `cx`   → ロッドが股ブッシュを滑る
+  foot の slide     `fz`   → 足がロッド下部を滑る（＝バネ本体）
 姿勢は hopper/kinematics.py の運動学から計算する。
 """
 import math
@@ -13,24 +19,27 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from hopper.kinematics import LegGeom, ik, fk
 
 G = LegGeom(0.040, 0.090, 0.130)
-LS0 = 80.0          # バネ自然長＝ストローク [mm]
+LS0 = 80.0          # バネ自然長＝ストローク [mm]（キャリア → 足）
 PAD = 12.0          # 足＋パッドの半径ぶん [mm]
+ROD_UP = 212.0      # キャリアからロッド上端まで [mm]（最大 |OF| 199 ＋ ブッシュ半長）
+ROD_DN = 100.0      # キャリアからロッド下端まで [mm]
 
 
 def pose(x, y):
-    """先端 (x, y) [mm] のときの P1,P2,K1,K2,F,足 を返す"""
     t1, t2 = ik(G, x / 1000.0, y / 1000.0)
     f = fk(G, t1, t2)
-    K1 = (f['A'][0] * 1000, f['A'][1] * 1000)
-    K2 = (f['B'][0] * 1000, f['B'][1] * 1000)
     F = (f['F'][0] * 1000, f['F'][1] * 1000)
     n = math.hypot(*F)
-    u = (F[0] / n, F[1] / n)                       # 股 O から足先 F への単位ベクトル
-    foot = (F[0] + u[0] * LS0, F[1] + u[1] * LS0)
-    return dict(P1=(-20.0, 0.0), P2=(20.0, 0.0), K1=K1, K2=K2, F=F, foot=foot, u=u)
+    u = (F[0] / n, F[1] / n)                       # 股 O → 足先 F の単位ベクトル
+    q = lambda d: (F[0] + u[0] * d, F[1] + u[1] * d)
+    return dict(P1=(-20.0, 0.0), P2=(20.0, 0.0),
+                K1=(f['A'][0] * 1000, f['A'][1] * 1000),
+                K2=(f['B'][0] * 1000, f['B'][1] * 1000),
+                F=F, u=u, n=n, at=q,
+                foot=q(LS0), rtop=q(-ROD_UP), rbot=q(ROD_DN))
 
 
-W, H = 1180, 900
+W, H = 1280, 1030
 out = []
 A = out.append
 
@@ -38,8 +47,9 @@ CK = '#4a6fa5'      # クランク
 SH = '#3f8f57'      # シャンク
 FB = '#8e5bd6'      # キャリア（足先ブロック）
 RD = '#5b6470'      # ロッド
+BU = '#c9762b'      # ブッシュ
 SP = '#e07b1f'      # バネ
-RF = '#c1121f'      # 接地力
+RF = '#c1121f'      # 強調
 
 
 def txt(x, y, s, size=12, fill='#222', anchor='start', weight='normal'):
@@ -63,11 +73,10 @@ def circ(x, y, r, f, s, sw=1.5):
 
 
 def coil(x1, y1, x2, y2, n, amp, s, sw=2.0):
-    """(x1,y1)-(x2,y2) を軸とするコイルばねを正弦で描く"""
     dx, dy = x2 - x1, y2 - y1
     L = math.hypot(dx, dy)
     ux, uy = dx / L, dy / L
-    px, py = -uy, ux                       # 軸に垂直
+    px, py = -uy, ux
     pts = []
     N = n * 24
     for i in range(N + 1):
@@ -86,191 +95,186 @@ def ground(xc, y, w, s='#9aa0a6'):
         x += 9
 
 
+def dimline(x1, y1, x2, y2):
+    A('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="#5b6470" stroke-width="1" '
+      'marker-start="url(#d2)" marker-end="url(#d1)"/>' % (x1, y1, x2, y2))
+
+
 A('<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" viewBox="0 0 %d %d" '
   'font-family="Segoe UI, Meiryo, sans-serif" font-size="12">' % (W, H, W, H))
 A('<defs>'
-  '<marker id="rf" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">'
-  '<path d="M0,1 L10,5 L0,9 z" fill="%s"/></marker>'
   '<marker id="d1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">'
   '<path d="M0,0 L8,4 L0,8 z" fill="#5b6470"/></marker>'
   '<marker id="d2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">'
-  '<path d="M8,0 L0,4 L8,8 z" fill="#5b6470"/></marker></defs>' % RF)
+  '<path d="M8,0 L0,4 L8,8 z" fill="#5b6470"/></marker></defs>')
 rect(0, 0, W, H, '#ffffff', 'none', 0)
 
-txt(22, 34, '直列バネの支持方式 — ガイドロッドを股軸で支える', 19, '#111', 'start', 'bold')
-txt(22, 56, 'ロッドは股軸 O でピン支持し、足先 F のキャリアをそのロッドに通す。'
-            'ロッドは O を支点として F を通るので、必ず O→F 方向を向く', 12.5, '#5b6470')
+txt(22, 34, '直列バネの支持方式 — ロッドはキャリアに固定し、股では滑らせる', 19, '#111', 'start', 'bold')
+txt(22, 56, '屈伸による股→足の長さ変化はロッドが股のブッシュを滑って吸収する。'
+            'それでもロッドの線は必ず O を通るので、バネの軸は常に O→F 方向を向く',
+    12.5, '#5b6470')
+
+
+def draw_leg(X0, Y0, S, p, lw=1.0):
+    """脚一式を描く。X0,Y0 は股 O の画面位置、S は px/mm"""
+    gx = lambda q: X0 + q[0] * S
+    gy = lambda q: Y0 - q[1] * S
+    ang = math.degrees(math.atan2(p['u'][0], -p['u'][1]))
+    line(gx(p['rtop']), gy(p['rtop']), gx(p['rbot']), gy(p['rbot']), RD, 4.5 * lw)
+    line(gx(p['P1']), gy(p['P1']), gx(p['K1']), gy(p['K1']), CK, 5.5 * lw)
+    line(gx(p['P2']), gy(p['P2']), gx(p['K2']), gy(p['K2']), CK, 5.5 * lw)
+    line(gx(p['K1']), gy(p['K1']), gx(p['F']), gy(p['F']), SH, 4.0 * lw)
+    line(gx(p['K2']), gy(p['K2']), gx(p['F']), gy(p['F']), SH, 4.0 * lw)
+    coil(gx(p['at'](14)), gy(p['at'](14)), gx(p['at'](LS0 - 10)), gy(p['at'](LS0 - 10)),
+         8, 8 * lw, SP, 2.2 * lw)
+    A('<g transform="translate(%.1f,%.1f) rotate(%.1f)">' % (gx(p['F']), gy(p['F']), ang))
+    rect(-17 * lw, -13 * lw, 34 * lw, 26 * lw, '#efe3f7', FB, 1.8, 3)
+    A('</g>')
+    circ(gx(p['F']), gy(p['F']), 4.2 * lw, '#ffffff', FB, 1.6)
+    A('<g transform="translate(%.1f,%.1f) rotate(%.1f)">' % (gx(p['foot']), gy(p['foot']), ang))
+    rect(-11 * lw, -9 * lw, 22 * lw, 15 * lw, '#e8eaed', RD, 1.6, 2)
+    rect(-13 * lw, 6 * lw, 26 * lw, 7 * lw, '#4b4b4b', '#333', 1.2, 2)
+    A('</g>')
+    A('<g transform="translate(%.1f,%.1f) rotate(%.1f)">' % (X0, Y0, ang))
+    rect(-14 * lw, -13 * lw, 28 * lw, 26 * lw, '#ffe0b2', BU, 1.8, 3)
+    A('</g>')
+    for q, c in ((p['P1'], CK), (p['P2'], CK), (p['K1'], SH), (p['K2'], SH)):
+        circ(gx(q), gy(q), 4.0 * lw, '#ffffff', c, 1.6)
+    circ(X0, Y0, 4.5 * lw, '#ffffff', RD, 2.0)
+    return gx, gy
+
 
 # ==================================================================
-# A. 脚全体（前振り姿勢）
+# A. 脚全体
 # ==================================================================
 txt(40, 98, 'A. 脚全体（先端を前に 30 mm 振った姿勢）', 14.5, '#111', 'start', 'bold')
 
-AX, AY, SA = 195.0, 168.0, 1.45
-ax = lambda x: AX + x * SA
-ay = lambda y: AY - y * SA
+AX, AY, SA = 180.0, 250.0, 1.18
 p = pose(30.0, -150.0)
-
-ground(ax(p['foot'][0]), ay(p['foot'][1] - PAD), 250)
-# 鉛直の基準線
-line(ax(0), ay(0), ax(0), ay(-250), '#d5dae0', 1.2, '5 5')
-# 接地力の作用線（ロッドより先に描く）
-u = p['u']
-line(ax(p['foot'][0] - u[0] * PAD), ay(p['foot'][1] - u[1] * PAD),
-     ax(-u[0] * 34), ay(-u[1] * 34), RF, 1.3, '7 4')
-A('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" stroke-width="1.3" '
-  'marker-end="url(#rf)"/>' % (ax(u[0] * 6), ay(u[1] * 6), ax(-u[0] * 34), ay(-u[1] * 34), RF))
-# ロッド（O → 足）
-line(ax(0), ay(0), ax(p['foot'][0]), ay(p['foot'][1]), RD, 5.0)
-# リンク
-for K, c in ((p['K1'], CK), (p['K2'], CK)):
-    pass
-line(ax(p['P1'][0]), ay(p['P1'][1]), ax(p['K1'][0]), ay(p['K1'][1]), CK, 6.0)
-line(ax(p['P2'][0]), ay(p['P2'][1]), ax(p['K2'][0]), ay(p['K2'][1]), CK, 6.0)
-line(ax(p['K1'][0]), ay(p['K1'][1]), ax(p['F'][0]), ay(p['F'][1]), SH, 4.5)
-line(ax(p['K2'][0]), ay(p['K2'][1]), ax(p['F'][0]), ay(p['F'][1]), SH, 4.5)
-# バネ（F → 足）
-coil(ax(p['F'][0]), ay(p['F'][1]), ax(p['foot'][0]), ay(p['foot'][1]), 9, 9, SP, 2.2)
-# 節点
-for q, lab, col in ((p['P1'], 'P1', CK), (p['P2'], 'P2', CK),
-                    (p['K1'], 'K1', SH), (p['K2'], 'K2', SH)):
-    circ(ax(q[0]), ay(q[1]), 4.5, '#ffffff', col, 1.8)
-circ(ax(0), ay(0), 6, '#ffffff', RD, 2.2)
-txt(ax(0) - 12, ay(0) - 10, 'O', 13, RD, 'end', 'bold')
-txt(ax(0) - 12, ay(0) + 6, '股軸', 10.5, RD, 'end')
-# キャリア
-cxp, cyp = ax(p['F'][0]), ay(p['F'][1])
-ang = math.degrees(math.atan2(p['u'][0], -p['u'][1]))
-A('<g transform="translate(%.1f,%.1f) rotate(%.1f)">' % (cxp, cyp, ang))
-rect(-19, -11, 38, 22, '#efe3f7', FB, 1.8, 3)
-A('</g>')
-circ(cxp, cyp, 4.5, '#ffffff', FB, 1.8)
-# 足
-circ(ax(p['foot'][0]), ay(p['foot'][1]), 8, '#e8eaed', RD, 1.8)
-A('<g transform="translate(%.1f,%.1f) rotate(%.1f)">' % (ax(p['foot'][0]), ay(p['foot'][1]), ang))
-rect(-13, 6, 26, 8, '#4b4b4b', '#333', 1.2, 2)
-A('</g>')
-# ラベル
-txt(ax(-48), ay(10), 'クランク l1', 11.5, CK, 'middle', 'bold')
-txt(ax(-72), ay(-112), 'シャンク l2', 11.5, SH, 'middle', 'bold')
-txt(cxp + 26, cyp - 4, 'キャリア', 11.5, FB, 'start', 'bold')
-txt(cxp + 26, cyp + 11, '（＝足先ブロック）', 10.5, FB, 'start')
-txt(ax(30) + 40, ay(-200), 'バネ', 11.5, SP, 'start', 'bold')
-line(ax(30) + 36, ay(-200) - 4, ax(22), ay(-197), SP, 1.1)
-txt(ax(-6) - 14, ay(-70), 'ガイドロッド', 11.5, RD, 'end', 'bold')
-line(ax(-6) - 10, ay(-72), ax(6), ay(-68), RD, 1.1)
-txt(ax(0) - 6, ay(-232), '鉛直', 10.5, '#9aa0a6', 'end')
-txt(ax(-102), ay(-236), '接地力の作用線は', 11, RF, 'start', 'bold')
-txt(ax(-102), ay(-236) + 15, '常に股 O を通る', 11, RF, 'start', 'bold')
+ground(AX + p['foot'][0] * SA, AY - (p['foot'][1] - PAD) * SA, 240)
+ax, ay = draw_leg(AX, AY, SA, p)
+line(ax(p['at'](LS0 + PAD)), ay(p['at'](LS0 + PAD)),
+     ax(p['at'](-ROD_UP - 18)), ay(p['at'](-ROD_UP - 18)), RF, 1.3, '7 4')
+mx, my = (p['P2'][0] + p['K2'][0]) / 2, (p['P2'][1] + p['K2'][1]) / 2
+txt(ax((mx, my)) + 10, ay((mx, my)) - 12, 'クランク l1', 11.5, CK, 'start', 'bold')
+txt(ax(p['K1']) + 10, ay(p['F']) - 26, 'シャンク l2', 11.5, SH, 'end', 'bold')
+txt(AX - 26, AY - 36, '股軸 O', 11.5, RD, 'end', 'bold')
+txt(AX - 26, AY - 20, '首振りリニアブッシュ', 11, BU, 'end', 'bold')
+txt(AX - 26, AY - 6, '（股軸まわりに回転自由。', 10.5, BU, 'end')
+txt(AX - 26, AY + 8, 'ロッドはこの中を滑る）', 10.5, BU, 'end')
+txt(ax(p['rtop']) + 14, ay(p['rtop']) + 4, 'ロッド上端', 11, RD, 'start', 'bold')
+txt(ax(p['rtop']) + 14, ay(p['rtop']) + 18, '（屈むと胴体側へ出る）', 10.5, RD, 'start')
+txt(ax(p['F']) + 26, ay(p['F']) - 6, 'キャリア（＝足先ブロック）', 11.5, FB, 'start', 'bold')
+txt(ax(p['F']) + 26, ay(p['F']) + 9, 'ロッドに固定。滑らない', 10.5, FB, 'start')
+txt(ax(p['at'](44)) + 30, ay(p['at'](44)) + 4, 'バネ', 11.5, SP, 'start', 'bold')
+line(ax(p['at'](44)) + 26, ay(p['at'](44)), ax(p['at'](44)) + 12, ay(p['at'](44)), SP, 1.1)
+txt(ax(p['at'](LS0)) + 24, ay(p['at'](LS0)) + 4, '足（ロッドを滑る）', 11, '#333', 'start')
+txt(40, ay(p['at'](LS0 + PAD)) + 30, '接地力の作用線は常に股 O を通る', 11.5, RF, 'start', 'bold')
 
 # ==================================================================
-# B. 3 姿勢の重ね描き
+# B. 屈伸で何が動くか
 # ==================================================================
-txt(430, 98, 'B. ロッドの向きは自動で決まる', 14.5, '#111', 'start', 'bold')
-txt(430, 118, '支点 O と通過点 F が決まれば、ロッドの角度は一意', 11.5, '#5b6470')
+txt(420, 98, 'B. 屈伸で何が動くか', 14.5, '#111', 'start', 'bold')
+txt(420, 118, 'ロッドが股ブッシュを滑るので、股→足の長さはちゃんと変わる', 11.5, '#5b6470')
 
-BX, BY, SB = 590.0, 188.0, 1.12
-bx = lambda x: BX + x * SB
-by = lambda y: BY - y * SB
-poses = [(-35.0, -150.0, '#b9c6d6'), (0.0, -150.0, '#7f8a97'), (35.0, -150.0, '#b9c6d6')]
-ground(bx(0), by(-150 - LS0 - PAD), 300)
-for x, y, col in poses:
-    q = pose(x, y)
-    solid = (col == '#7f8a97')
-    lw = 3.4 if solid else 2.2
-    line(bx(q['P1'][0]), by(q['P1'][1]), bx(q['K1'][0]), by(q['K1'][1]),
-         CK if solid else '#b9c6d6', lw)
-    line(bx(q['P2'][0]), by(q['P2'][1]), bx(q['K2'][0]), by(q['K2'][1]),
-         CK if solid else '#b9c6d6', lw)
-    line(bx(q['K1'][0]), by(q['K1'][1]), bx(q['F'][0]), by(q['F'][1]),
-         SH if solid else '#c2d8c9', lw)
-    line(bx(q['K2'][0]), by(q['K2'][1]), bx(q['F'][0]), by(q['F'][1]),
-         SH if solid else '#c2d8c9', lw)
-    line(bx(0), by(0), bx(q['foot'][0]), by(q['foot'][1]), RD if solid else col, 4.0 if solid else 3.0)
-    circ(bx(q['F'][0]), by(q['F'][1]), 4.0, '#ffffff', FB if solid else col, 1.6)
-    circ(bx(q['foot'][0]), by(q['foot'][1]), 6.0, '#e8eaed', RD if solid else col, 1.5)
-circ(bx(0), by(0), 6, '#ffffff', RD, 2.2)
-txt(bx(0) - 12, by(0) - 10, 'O', 13, RD, 'end', 'bold')
-txt(bx(-95), by(-242) + 36, '足先 F が前後に動いても、ロッドは O を支点に振れるだけ。',
-    11, '#5b6470', 'start')
-txt(bx(-95), by(-242) + 53, '角度を決める機構は要らない', 11, '#5b6470', 'start')
+SB = 0.78
+for BXc, tipy, lab, sd in ((490.0, -125.0, '屈（|OF| = 125）', -1),
+                           (680.0, -195.0, '伸（|OF| = 195）', 1)):
+    BYc = 250.0
+    q = pose(0.0, tipy)
+    ground(BXc, BYc - (q['foot'][1] - PAD) * SB, 120)
+    bx, by = draw_leg(BXc, BYc, SB, q, lw=0.8)
+    txt(BXc, 150, lab, 12, '#111', 'middle', 'bold')
+    circ(bx(q['rtop']), by(q['rtop']), 4.2, RF, RF, 1.0)
+    txt(bx(q['rtop']) + 9, by(q['rtop']) + 4, '＋%d' % round(ROD_UP - q['n']), 10.5,
+        RF, 'start', 'bold')
+    xo = BXc + sd * 78
+    an = 'start' if sd > 0 else 'end'
+    line(BXc, BYc, xo + sd * 6, BYc, '#c9d3de', 1.0)
+    line(bx(q['foot']), by(q['foot']), xo + sd * 6, by(q['foot']), '#c9d3de', 1.0)
+    dimline(xo, BYc, xo, by(q['foot']))
+    txt(xo + sd * 9, (BYc + by(q['foot'])) / 2 - 3, '股→足', 10.5, '#5b6470', an)
+    txt(xo + sd * 9, (BYc + by(q['foot'])) / 2 + 12, '%d mm' % round(q['n'] + LS0), 11.5,
+        '#5b6470', an, 'bold')
+
+txt(420, 534, '赤丸＝ロッド上端。股ブッシュより上へ出る量が 87 → 17 mm と変わり、',
+    11.5, '#333')
+txt(420, 552, 'その差ぶんだけ股→足が 205 → 275 mm に伸びる。ロッドは股で固定されていない。',
+    11.5, '#333')
+txt(420, 576, 'バネはこの屈伸では縮まない。接地して初めて縮む。', 11.5, RF, 'start', 'bold')
 
 # ==================================================================
-# C. 足先まわりの拡大
+# C. キャリアまわりの断面
 # ==================================================================
-txt(790, 98, 'C. 足先まわり（ロッド軸に沿った断面）', 14.5, '#111', 'start', 'bold')
+txt(930, 98, 'C. キャリアまわり（ロッド軸に沿った断面）', 14.5, '#111', 'start', 'bold')
 
-CXp, CY0, SC = 900.0, 182.0, 2.6
-cy = lambda v: CY0 + v * SC        # v = F からロッドに沿って下向きの距離 [mm]
-RODW = 5.0 * SC / 2
+CXp, CY0, SC = 1030.0, 158.0, 2.45
+cy = lambda v: CY0 + v * SC        # v = キャリア F からロッドに沿って下向き [mm]
+RW = 5.0 * SC / 2                  # ロッド半径 φ5
 
-# ロッド
-rect(CXp - RODW, cy(-22), 2 * RODW, (118) * SC, '#dfe3e8', RD, 1.6)
-# キャリア（足先ブロック）
+rect(CXp - RW, cy(-18), 2 * RW, 118 * SC, '#dfe3e8', RD, 1.6)
 rect(CXp - 17 * SC, cy(-9), 34 * SC, 18 * SC, '#efe3f7', FB, 1.8, 3)
-# リニアブッシュ
-for x_ in (CXp - RODW - 1.5 * SC, CXp + RODW):
-    rect(x_, cy(-8), 1.5 * SC, 16 * SC, '#ffe0b2', '#c9762b', 1.2)
-# シャンクのピン F
-circ(CXp - 12 * SC, cy(0), 3.2 * SC / 2, '#ffffff', SH, 1.6)
-circ(CXp + 12 * SC, cy(0), 3.2 * SC / 2, '#ffffff', SH, 1.6)
-line(CXp - 25 * SC, cy(-6), CXp - 17 * SC, cy(-2), SH, 3.5)
-line(CXp + 25 * SC, cy(-6), CXp + 17 * SC, cy(-2), SH, 3.5)
-# バネ
-coil(CXp, cy(9), CXp, cy(74), 8, 11 * SC / 2, SP, 2.4)
-# 下側ばね座
-rect(CXp - 9 * SC, cy(74), 18 * SC, 4 * SC, '#dfe3e8', RD, 1.6)
-# ストッパ
-rect(CXp - 7 * SC, cy(30), 14 * SC, 3 * SC, '#f2f4f6', '#9aa0a6', 1.3)
-# 足＋パッド
-rect(CXp - 11 * SC, cy(78), 22 * SC, 8 * SC, '#e8eaed', RD, 1.8, 2)
-rect(CXp - 13 * SC, cy(86), 26 * SC, 6 * SC, '#4b4b4b', '#333', 1.3, 2)
-ground(CXp, cy(92), 200)
+for sg in (-1, 1):
+    line(CXp + sg * RW, cy(-9), CXp + sg * RW, cy(9), FB, 1.4)
+    circ(CXp + sg * 12 * SC, cy(0), 3.2 * SC / 2, '#ffffff', SH, 1.6)
+    line(CXp + sg * 25 * SC, cy(-6), CXp + sg * 17 * SC, cy(-2), SH, 3.5)
+coil(CXp, cy(10), CXp, cy(72), 8, 11 * SC / 2, SP, 2.4)
+rect(CXp - 11 * SC, cy(72), 22 * SC, 16 * SC, '#e8eaed', RD, 1.8, 2)
+for x_ in (CXp - RW - 1.5 * SC, CXp + RW):
+    rect(x_, cy(73), 1.5 * SC, 14 * SC, '#ffe0b2', BU, 1.2)
+rect(CXp - 13 * SC, cy(88), 26 * SC, 7 * SC, '#4b4b4b', '#333', 1.3, 2)
+rect(CXp - 7 * SC, cy(97), 14 * SC, 3 * SC, '#f2f4f6', '#9aa0a6', 1.3)
+ground(CXp, cy(95), 185)
 
-def lead(v, dx, s, sub=None, col='#333'):
-    x0 = CXp + (17 * SC if dx > 0 else -17 * SC)
-    txt(CXp + dx, cy(v) + 4, s, 11.5, col, 'start' if dx > 0 else 'end', 'bold')
+
+def lead(v, side, s, sub=None, col='#333', tx=108):
+    x = CXp + (tx if side > 0 else -tx)
+    txt(x, cy(v) + 4, s, 11.5, col, 'start' if side > 0 else 'end', 'bold')
     if sub:
-        txt(CXp + dx, cy(v) + 19, sub, 10.5, col, 'start' if dx > 0 else 'end')
+        txt(x, cy(v) + 19, sub, 10.5, col, 'start' if side > 0 else 'end')
 
-lead(0, 118, 'シャンクのピン F', 'キャリアに 2 本が集まる', SH)
-lead(-16, -122, 'キャリア', '（＝足先ブロック）', FB)
-lead(8, -122, 'リニアブッシュ', 'ロッド上を 125〜199 mm 滑る', '#c9762b')
-lead(40, 118, '圧縮コイルばね', 'ロッドに巻く（座屈防止）', SP)
-lead(30, -118, '底付きストッパ', '密着させない', '#5b6470')
-lead(76, 118, '下側ばね座', 'セットカラー／E リング', RD)
-lead(88, -118, '足＋ゴムパッド', None, '#333')
-line(CXp + 114, cy(0), CXp + 17 * SC, cy(0), SH, 1.0)
-line(CXp - 118, cy(-16), CXp - 17 * SC, cy(-7), FB, 1.0)
-line(CXp - 118, cy(8), CXp - RODW - 1.5 * SC, cy(6), '#c9762b', 1.0)
-line(CXp + 114, cy(40), CXp + 15, cy(40), SP, 1.0)
-line(CXp - 114, cy(30), CXp - 7 * SC, cy(31), '#5b6470', 1.0)
-line(CXp + 114, cy(76), CXp + 9 * SC, cy(76), RD, 1.0)
-line(CXp - 114, cy(88), CXp - 13 * SC, cy(88), '#333', 1.0)
+
+lead(-15, -1, 'ロッド φ5', '↑ 股のブッシュへ', RD)
+lead(0, 1, 'シャンクのピン F', 'キャリアに 2 本が集まる', SH)
+lead(6, -1, 'キャリア', 'ロッドに固定（滑らない）', FB)
+lead(40, 1, '圧縮コイルばね', 'ロッドに巻く（座屈防止）', SP)
+lead(78, 1, '足', 'ロッドを滑る（＝ストローク）', BU)
+lead(97, 1, '伸び切りストッパ', 'E リング', '#5b6470')
+line(CXp + 104, cy(0), CXp + 17 * SC, cy(0), SH, 1.0)
+line(CXp - 104, cy(6), CXp - 17 * SC, cy(4), FB, 1.0)
+line(CXp - 104, cy(-15), CXp - RW, cy(-15), RD, 1.0)
+line(CXp + 104, cy(40), CXp + 16, cy(40), SP, 1.0)
+line(CXp + 104, cy(78), CXp + RW + 1.5 * SC, cy(78), BU, 1.0)
+line(CXp + 104, cy(97), CXp + 7 * SC, cy(98), '#5b6470', 1.0)
 
 # ==================================================================
 # まとめ
 # ==================================================================
-YT = 630
-rect(30, YT - 26, W - 60, 248, '#f7f9fb', '#c9d3de', 1.2)
-txt(50, YT, 'なぜこの方式でなければならないか', 13.5, '#111', 'start', 'bold')
+YT = 645
+rect(30, YT - 26, W - 60, 358, '#f7f9fb', '#c9d3de', 1.2)
+txt(50, YT, 'なぜこの方式なのか', 13.5, '#111', 'start', 'bold')
 body = [
     ('1. バネの軸は「股 O → 足先 F」を向いている必要がある。',
      ['バネを脚に対して固定の向きで付けると、脚を前後に振ったときに接地力の作用線が股からずれ、'
       'ピッチモーメントが出て蹴り出すたびに機首が上がる',
       '（初回 Colab で発生。hopper/model.py の legbar のコメントに経緯がある）。']),
     ('2. 足先ブロックは単独では向きが決まらない。',
-     ['シャンク 2 本は同じ 1 本のピン F に集まる（別ピンにすると自由度が 1 個増えて機構が成立しない）ので、',
-      'ブロックは F まわりの自由な振り子になる。ここにバネを直付けしても角度が定まらない。']),
-    ('3. ロッドを股で支持すれば、向きは自動的に決まる。',
-     ['支点 O と通過点 F が決まればロッドの角度は一意。角度を決める機構が要らない。',
-      'Raibert の元祖ホッパー（伸縮脚＋股関節）と同じ構成で、5 節リンクは「脚軸に沿ってキャリアを'
-      '押し引きするアクチュエータ」として働く。']),
-    ('4. ガイドは必須。',
+     ['シャンク 2 本は同じ 1 本のピン F に集まる（別ピンにすると自由度が 1 個増えて機構が成立しない）ので、'
+      'ブロックは F まわりの自由な振り子になる。']),
+    ('3. ロッドの線が股 O を通れば、向きは自動的に決まる。',
+     ['ロッドをキャリアに固定し、股側を首振りするリニアブッシュで受ける。'
+      'ブッシュがロッドの線を必ず O に通すので、角度を決める機構が要らない。']),
+    ('4. 長さ変化はロッドが股ブッシュを滑って吸収する。',
+     ['股→足は 205〜275 mm（|OF| 125〜195 ＋ バネ 80）で変わる。'
+      'ロッドを股で「固定」してしまうと股→足が一定になり、脚が伸縮できなくなる。',
+      'ロッドは軸力を受けない。力は 足 → バネ → キャリア → 5 節リンク → 股 と流れ、'
+      'ロッドは向きを決める案内にすぎない。']),
+    ('5. ガイドは必須。',
      ['圧縮コイルばねは「自由長 / コイル平均径」が 2.6（両端ピン）〜5.2（両端平座固定）を超えると座屈する。'
       '候補は 130 / 14 = 9.3 なので、ガイドなしでは確実に座屈する。']),
-    ('参考：2 本のシャンクの二等分線は O→F 方向と最大 2.1°（常用域 1° 以内）しかずれない。',
-     ['ただし二等分線を機械的に作るには差動歯車が要るので、ロッド方式のほうが単純。']),
+    ('MJCF との対応（hopper/model.py）',
+     ['legbar の股ヒンジ → 股の首振りブッシュブロック。carrier の slide `cx` → ロッドが股ブッシュを滑る。'
+      'foot の slide `fz` → 足がロッド下部を滑る（＝バネ本体）。']),
 ]
 y = YT + 24
 for head, subs in body:

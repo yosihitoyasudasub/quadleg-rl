@@ -1,204 +1,234 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="900" viewBox="0 0 1180 900" font-family="Segoe UI, Meiryo, sans-serif" font-size="12">
-<defs><marker id="rf" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,1 L10,5 L0,9 z" fill="#c1121f"/></marker><marker id="d1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5b6470"/></marker><marker id="d2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 z" fill="#5b6470"/></marker></defs>
-<rect x="0.0" y="0.0" width="1180.0" height="900.0" rx="0.0" fill="#ffffff" stroke="none" stroke-width="0.0"/>
-<text x="22.0" y="34.0" font-size="19" fill="#111" text-anchor="start" font-weight="bold">直列バネの支持方式 — ガイドロッドを股軸で支える</text>
-<text x="22.0" y="56.0" font-size="12.5" fill="#5b6470" text-anchor="start" font-weight="normal">ロッドは股軸 O でピン支持し、足先 F のキャリアをそのロッドに通す。ロッドは O を支点として F を通るので、必ず O→F 方向を向く</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1030" viewBox="0 0 1280 1030" font-family="Segoe UI, Meiryo, sans-serif" font-size="12">
+<defs><marker id="d1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#5b6470"/></marker><marker id="d2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M8,0 L0,4 L8,8 z" fill="#5b6470"/></marker></defs>
+<rect x="0.0" y="0.0" width="1280.0" height="1030.0" rx="0.0" fill="#ffffff" stroke="none" stroke-width="0.0"/>
+<text x="22.0" y="34.0" font-size="19" fill="#111" text-anchor="start" font-weight="bold">直列バネの支持方式 — ロッドはキャリアに固定し、股では滑らせる</text>
+<text x="22.0" y="56.0" font-size="12.5" fill="#5b6470" text-anchor="start" font-weight="normal">屈伸による股→足の長さ変化はロッドが股のブッシュを滑って吸収する。それでもロッドの線は必ず O を通るので、バネの軸は常に O→F 方向を向く</text>
 <text x="40.0" y="98.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">A. 脚全体（先端を前に 30 mm 振った姿勢）</text>
-<line x1="136.2" y1="516.6" x2="386.2" y2="516.6" stroke="#9aa0a6" stroke-width="2.0" />
-<line x1="136.2" y1="516.6" x2="143.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="145.2" y1="516.6" x2="152.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="154.2" y1="516.6" x2="161.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="163.2" y1="516.6" x2="170.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="172.2" y1="516.6" x2="179.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="181.2" y1="516.6" x2="188.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="190.2" y1="516.6" x2="197.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="199.2" y1="516.6" x2="206.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="208.2" y1="516.6" x2="215.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="217.2" y1="516.6" x2="224.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="226.2" y1="516.6" x2="233.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="235.2" y1="516.6" x2="242.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="244.2" y1="516.6" x2="251.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="253.2" y1="516.6" x2="260.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="262.2" y1="516.6" x2="269.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="271.2" y1="516.6" x2="278.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="280.2" y1="516.6" x2="287.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="289.2" y1="516.6" x2="296.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="298.2" y1="516.6" x2="305.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="307.2" y1="516.6" x2="314.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="316.2" y1="516.6" x2="323.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="325.2" y1="516.6" x2="332.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="334.2" y1="516.6" x2="341.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="343.2" y1="516.6" x2="350.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="352.2" y1="516.6" x2="359.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="361.2" y1="516.6" x2="368.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="370.2" y1="516.6" x2="377.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="379.2" y1="516.6" x2="386.2" y2="525.6" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="195.0" y1="168.0" x2="195.0" y2="530.5" stroke="#d5dae0" stroke-width="1.2" stroke-dasharray="5 5"/>
-<line x1="257.8" y1="482.2" x2="185.3" y2="119.7" stroke="#c1121f" stroke-width="1.3" stroke-dasharray="7 4"/>
-<line x1="196.7" y1="176.5" x2="185.3" y2="119.7" stroke="#c1121f" stroke-width="1.3" marker-end="url(#rf)"/>
-<line x1="195.0" y1="168.0" x2="261.2" y2="499.2" stroke="#5b6470" stroke-width="5.0" />
-<line x1="166.0" y1="168.0" x2="87.7" y2="272.4" stroke="#4a6fa5" stroke-width="6.0" />
-<line x1="224.0" y1="168.0" x2="340.4" y2="226.9" stroke="#4a6fa5" stroke-width="6.0" />
-<line x1="87.7" y1="272.4" x2="238.5" y2="385.5" stroke="#3f8f57" stroke-width="4.5" />
-<line x1="340.4" y1="226.9" x2="238.5" y2="385.5" stroke="#3f8f57" stroke-width="4.5" />
-<polyline points="238.5,385.5 236.3,386.5 234.3,387.4 232.6,388.3 231.3,389.1 230.5,389.8 230.3,390.4 230.7,390.9 231.7,391.2 233.2,391.5 235.1,391.6 237.4,391.7 239.8,391.8 242.2,391.9 244.4,392.0 246.3,392.2 247.8,392.4 248.8,392.7 249.2,393.2 249.0,393.8 248.2,394.5 247.0,395.3 245.2,396.2 243.2,397.2 241.0,398.1 238.8,399.1 236.8,400.1 235.1,401.0 233.8,401.8 233.0,402.5 232.8,403.1 233.2,403.5 234.2,403.9 235.7,404.1 237.7,404.3 239.9,404.4 242.3,404.5 244.7,404.5 246.9,404.6 248.8,404.8 250.4,405.0 251.3,405.4 251.7,405.9 251.6,406.4 250.8,407.1 249.5,407.9 247.8,408.8 245.7,409.8 243.6,410.8 241.4,411.8 239.4,412.7 237.6,413.6 236.3,414.4 235.6,415.1 235.4,415.7 235.8,416.2 236.8,416.5 238.3,416.8 240.2,416.9 242.4,417.0 244.8,417.1 247.2,417.2 249.4,417.3 251.4,417.4 252.9,417.7 253.9,418.0 254.3,418.5 254.1,419.1 253.3,419.8 252.0,420.6 250.3,421.5 248.3,422.4 246.1,423.4 243.9,424.4 241.9,425.4 240.2,426.2 238.9,427.1 238.1,427.8 237.9,428.3 238.3,428.8 239.3,429.2 240.8,429.4 242.7,429.6 245.0,429.7 247.3,429.7 249.7,429.8 252.0,429.9 253.9,430.1 255.4,430.3 256.4,430.7 256.8,431.1 256.6,431.7 255.8,432.4 254.5,433.2 252.8,434.1 250.8,435.1 248.6,436.1 246.4,437.0 244.4,438.0 242.7,438.9 241.4,439.7 240.6,440.4 240.4,441.0 240.8,441.4 241.8,441.8 243.3,442.0 245.3,442.2 247.5,442.3 249.9,442.4 252.3,442.4 254.5,442.5 256.4,442.7 257.9,443.0 258.9,443.3 259.3,443.8 259.1,444.4 258.4,445.1 257.1,445.9 255.3,446.8 253.3,447.7 251.1,448.7 249.0,449.7 246.9,450.6 245.2,451.5 243.9,452.3 243.1,453.0 242.9,453.6 243.4,454.1 244.3,454.4 245.8,454.7 247.8,454.8 250.0,454.9 252.4,455.0 254.8,455.1 257.0,455.2 259.0,455.3 260.5,455.6 261.5,455.9 261.9,456.4 261.7,457.0 260.9,457.7 259.6,458.5 257.9,459.4 255.8,460.3 253.7,461.3 251.5,462.3 249.5,463.3 247.7,464.2 246.4,465.0 245.7,465.7 245.5,466.3 245.9,466.7 246.9,467.1 248.4,467.3 250.3,467.5 252.5,467.6 254.9,467.7 257.3,467.7 259.6,467.8 261.5,468.0 263.0,468.2 264.0,468.6 264.4,469.0 264.2,469.6 263.4,470.3 262.1,471.1 260.4,472.0 258.4,473.0 256.2,474.0 254.0,475.0 252.0,475.9 250.3,476.8 249.0,477.6 248.2,478.3 248.0,478.9 248.4,479.4 249.4,479.7 250.9,480.0 252.8,480.1 255.1,480.2 257.5,480.3 259.8,480.4 262.1,480.5 264.0,480.6 265.5,480.9 266.5,481.2 266.9,481.7 266.7,482.3 265.9,483.0 264.6,483.8 262.9,484.7 260.9,485.6 258.7,486.6 256.5,487.6 254.5,488.5 252.8,489.4 251.5,490.2 250.7,490.9 250.5,491.5 250.9,492.0 251.9,492.4 253.4,492.6 255.4,492.8 257.6,492.9 260.0,492.9 262.4,493.0 264.6,493.1 266.5,493.3 268.0,493.5 269.0,493.9 269.4,494.3 269.2,494.9 268.5,495.6 267.2,496.4 265.5,497.3 263.4,498.3 261.2,499.2" fill="none" stroke="#e07b1f" stroke-width="2.2" stroke-linejoin="round"/>
-<circle cx="166.0" cy="168.0" r="4.5" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.8"/>
-<circle cx="224.0" cy="168.0" r="4.5" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.8"/>
-<circle cx="87.7" cy="272.4" r="4.5" fill="#ffffff" stroke="#3f8f57" stroke-width="1.8"/>
-<circle cx="340.4" cy="226.9" r="4.5" fill="#ffffff" stroke="#3f8f57" stroke-width="1.8"/>
-<circle cx="195.0" cy="168.0" r="6.0" fill="#ffffff" stroke="#5b6470" stroke-width="2.2"/>
-<text x="183.0" y="158.0" font-size="13" fill="#5b6470" text-anchor="end" font-weight="bold">O</text>
-<text x="183.0" y="174.0" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">股軸</text>
-<g transform="translate(238.5,385.5) rotate(11.3)">
-<rect x="-19.0" y="-11.0" width="38.0" height="22.0" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
+<line x1="113.9" y1="533.7" x2="353.9" y2="533.7" stroke="#9aa0a6" stroke-width="2.0" />
+<line x1="113.9" y1="533.7" x2="120.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="122.9" y1="533.7" x2="129.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="131.9" y1="533.7" x2="138.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="140.9" y1="533.7" x2="147.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="149.9" y1="533.7" x2="156.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="158.9" y1="533.7" x2="165.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="167.9" y1="533.7" x2="174.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="176.9" y1="533.7" x2="183.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="185.9" y1="533.7" x2="192.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="194.9" y1="533.7" x2="201.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="203.9" y1="533.7" x2="210.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="212.9" y1="533.7" x2="219.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="221.9" y1="533.7" x2="228.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="230.9" y1="533.7" x2="237.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="239.9" y1="533.7" x2="246.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="248.9" y1="533.7" x2="255.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="257.9" y1="533.7" x2="264.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="266.9" y1="533.7" x2="273.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="275.9" y1="533.7" x2="282.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="284.9" y1="533.7" x2="291.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="293.9" y1="533.7" x2="300.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="302.9" y1="533.7" x2="309.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="311.9" y1="533.7" x2="318.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="320.9" y1="533.7" x2="327.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="329.9" y1="533.7" x2="336.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="338.9" y1="533.7" x2="345.9" y2="542.7" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="166.3" y1="181.7" x2="238.5" y2="542.7" stroke="#5b6470" stroke-width="4.5" />
+<line x1="156.4" y1="250.0" x2="92.7" y2="335.0" stroke="#4a6fa5" stroke-width="5.5" />
+<line x1="203.6" y1="250.0" x2="298.4" y2="298.0" stroke="#4a6fa5" stroke-width="5.5" />
+<line x1="92.7" y1="335.0" x2="215.4" y2="427.0" stroke="#3f8f57" stroke-width="4.0" />
+<line x1="298.4" y1="298.0" x2="215.4" y2="427.0" stroke="#3f8f57" stroke-width="4.0" />
+<polyline points="218.6,443.2 216.7,443.9 214.9,444.7 213.3,445.3 212.1,445.9 211.4,446.4 211.2,446.8 211.5,447.1 212.4,447.3 213.7,447.3 215.4,447.4 217.4,447.3 219.4,447.2 221.5,447.2 223.5,447.1 225.2,447.2 226.5,447.2 227.4,447.4 227.7,447.7 227.5,448.1 226.8,448.6 225.6,449.2 224.0,449.8 222.2,450.6 220.3,451.3 218.3,452.0 216.5,452.8 214.9,453.4 213.7,454.0 213.0,454.5 212.8,454.9 213.2,455.2 214.0,455.4 215.3,455.4 217.0,455.5 219.0,455.4 221.1,455.3 223.2,455.3 225.1,455.2 226.8,455.3 228.1,455.3 229.0,455.5 229.3,455.8 229.1,456.2 228.4,456.7 227.2,457.3 225.7,457.9 223.8,458.7 221.9,459.4 219.9,460.1 218.1,460.9 216.5,461.5 215.4,462.1 214.6,462.6 214.4,463.0 214.8,463.3 215.6,463.5 216.9,463.5 218.6,463.6 220.6,463.5 222.7,463.4 224.8,463.4 226.7,463.3 228.4,463.4 229.8,463.4 230.6,463.6 230.9,463.9 230.7,464.3 230.0,464.8 228.8,465.4 227.3,466.0 225.5,466.8 223.5,467.5 221.5,468.2 219.7,469.0 218.2,469.6 217.0,470.2 216.3,470.7 216.1,471.1 216.4,471.4 217.2,471.6 218.6,471.6 220.3,471.7 222.2,471.6 224.3,471.5 226.4,471.5 228.4,471.4 230.1,471.5 231.4,471.5 232.2,471.7 232.6,472.0 232.4,472.4 231.6,472.9 230.5,473.5 228.9,474.1 227.1,474.9 225.1,475.6 223.2,476.3 221.3,477.1 219.8,477.7 218.6,478.3 217.9,478.8 217.7,479.2 218.0,479.5 218.9,479.7 220.2,479.7 221.9,479.8 223.8,479.7 225.9,479.6 228.0,479.6 230.0,479.5 231.7,479.6 233.0,479.6 233.8,479.8 234.2,480.1 234.0,480.5 233.3,481.0 232.1,481.6 230.5,482.2 228.7,483.0 226.7,483.7 224.8,484.4 223.0,485.2 221.4,485.8 220.2,486.4 219.5,486.9 219.3,487.3 219.6,487.6 220.5,487.8 221.8,487.8 223.5,487.9 225.5,487.8 227.5,487.7 229.6,487.7 231.6,487.6 233.3,487.7 234.6,487.7 235.5,487.9 235.8,488.2 235.6,488.6 234.9,489.1 233.7,489.7 232.1,490.3 230.3,491.1 228.4,491.8 226.4,492.5 224.6,493.3 223.0,493.9 221.8,494.5 221.1,495.0 220.9,495.4 221.3,495.7 222.1,495.9 223.4,495.9 225.1,496.0 227.1,495.9 229.2,495.8 231.3,495.8 233.2,495.7 234.9,495.7 236.2,495.8 237.1,496.0 237.4,496.3 237.2,496.7 236.5,497.2 235.3,497.8 233.8,498.4 231.9,499.2 230.0,499.9 228.0,500.6 226.2,501.4 224.6,502.0 223.5,502.6 222.7,503.1 222.5,503.5 222.9,503.8 223.7,504.0 225.0,504.0 226.7,504.1 228.7,504.0 230.8,503.9 232.9,503.9 234.8,503.8 236.5,503.8 237.9,503.9 238.7,504.1 239.0,504.4 238.8,504.8 238.1,505.3 236.9,505.9 235.4,506.5 233.6,507.3 231.6,508.0" fill="none" stroke="#e07b1f" stroke-width="2.2" stroke-linejoin="round"/>
+<g transform="translate(215.4,427.0) rotate(11.3)">
+<rect x="-17.0" y="-13.0" width="34.0" height="26.0" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
 </g>
-<circle cx="238.5" cy="385.5" r="4.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.8"/>
-<circle cx="261.2" cy="499.2" r="8.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.8"/>
-<g transform="translate(261.2,499.2) rotate(11.3)">
-<rect x="-13.0" y="6.0" width="26.0" height="8.0" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.2"/>
+<circle cx="215.4" cy="427.0" r="4.2" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.6"/>
+<g transform="translate(233.9,519.6) rotate(11.3)">
+<rect x="-11.0" y="-9.0" width="22.0" height="15.0" rx="2.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.6"/>
+<rect x="-13.0" y="6.0" width="26.0" height="7.0" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.2"/>
 </g>
-<text x="125.4" y="153.5" font-size="11.5" fill="#4a6fa5" text-anchor="middle" font-weight="bold">クランク l1</text>
-<text x="90.6" y="330.4" font-size="11.5" fill="#3f8f57" text-anchor="middle" font-weight="bold">シャンク l2</text>
-<text x="264.5" y="381.5" font-size="11.5" fill="#8e5bd6" text-anchor="start" font-weight="bold">キャリア</text>
-<text x="264.5" y="396.5" font-size="10.5" fill="#8e5bd6" text-anchor="start" font-weight="normal">（＝足先ブロック）</text>
-<text x="278.5" y="458.0" font-size="11.5" fill="#e07b1f" text-anchor="start" font-weight="bold">バネ</text>
-<line x1="274.5" y1="454.0" x2="226.9" y2="453.6" stroke="#e07b1f" stroke-width="1.1" />
-<text x="172.3" y="269.5" font-size="11.5" fill="#5b6470" text-anchor="end" font-weight="bold">ガイドロッド</text>
-<line x1="176.3" y1="272.4" x2="203.7" y2="266.6" stroke="#5b6470" stroke-width="1.1" />
-<text x="189.0" y="504.4" font-size="10.5" fill="#9aa0a6" text-anchor="end" font-weight="normal">鉛直</text>
-<text x="47.1" y="510.2" font-size="11" fill="#c1121f" text-anchor="start" font-weight="bold">接地力の作用線は</text>
-<text x="47.1" y="525.2" font-size="11" fill="#c1121f" text-anchor="start" font-weight="bold">常に股 O を通る</text>
-<text x="430.0" y="98.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">B. ロッドの向きは自動で決まる</text>
-<text x="430.0" y="118.0" font-size="11.5" fill="#5b6470" text-anchor="start" font-weight="normal">支点 O と通過点 F が決まれば、ロッドの角度は一意</text>
-<line x1="440.0" y1="459.0" x2="740.0" y2="459.0" stroke="#9aa0a6" stroke-width="2.0" />
-<line x1="440.0" y1="459.0" x2="447.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="449.0" y1="459.0" x2="456.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="458.0" y1="459.0" x2="465.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="467.0" y1="459.0" x2="474.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="476.0" y1="459.0" x2="483.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="485.0" y1="459.0" x2="492.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="494.0" y1="459.0" x2="501.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="503.0" y1="459.0" x2="510.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="512.0" y1="459.0" x2="519.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="521.0" y1="459.0" x2="528.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="530.0" y1="459.0" x2="537.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="539.0" y1="459.0" x2="546.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="548.0" y1="459.0" x2="555.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="557.0" y1="459.0" x2="564.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="566.0" y1="459.0" x2="573.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="575.0" y1="459.0" x2="582.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="584.0" y1="459.0" x2="591.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="593.0" y1="459.0" x2="600.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="602.0" y1="459.0" x2="609.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="611.0" y1="459.0" x2="618.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="620.0" y1="459.0" x2="627.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="629.0" y1="459.0" x2="636.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="638.0" y1="459.0" x2="645.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="647.0" y1="459.0" x2="654.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="656.0" y1="459.0" x2="663.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="665.0" y1="459.0" x2="672.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="674.0" y1="459.0" x2="681.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="683.0" y1="459.0" x2="690.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="692.0" y1="459.0" x2="699.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="701.0" y1="459.0" x2="708.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="710.0" y1="459.0" x2="717.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="719.0" y1="459.0" x2="726.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="728.0" y1="459.0" x2="735.0" y2="468.0" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="567.6" y1="188.0" x2="476.4" y2="230.9" stroke="#b9c6d6" stroke-width="2.2" />
-<line x1="612.4" y1="188.0" x2="669.2" y2="271.3" stroke="#b9c6d6" stroke-width="2.2" />
-<line x1="476.4" y1="230.9" x2="550.8" y2="356.0" stroke="#c2d8c9" stroke-width="2.2" />
-<line x1="669.2" y1="271.3" x2="550.8" y2="356.0" stroke="#c2d8c9" stroke-width="2.2" />
-<line x1="590.0" y1="188.0" x2="530.4" y2="443.3" stroke="#b9c6d6" stroke-width="3.0" />
-<circle cx="550.8" cy="356.0" r="4.0" fill="#ffffff" stroke="#b9c6d6" stroke-width="1.6"/>
-<circle cx="530.4" cy="443.3" r="6.0" fill="#e8eaed" stroke="#b9c6d6" stroke-width="1.5"/>
-<line x1="567.6" y1="188.0" x2="489.0" y2="251.1" stroke="#4a6fa5" stroke-width="3.4" />
-<line x1="612.4" y1="188.0" x2="691.0" y2="251.1" stroke="#4a6fa5" stroke-width="3.4" />
-<line x1="489.0" y1="251.1" x2="590.0" y2="356.0" stroke="#3f8f57" stroke-width="3.4" />
-<line x1="691.0" y1="251.1" x2="590.0" y2="356.0" stroke="#3f8f57" stroke-width="3.4" />
-<line x1="590.0" y1="188.0" x2="590.0" y2="445.6" stroke="#5b6470" stroke-width="4.0" />
-<circle cx="590.0" cy="356.0" r="4.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.6"/>
-<circle cx="590.0" cy="445.6" r="6.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.5"/>
-<line x1="567.6" y1="188.0" x2="510.8" y2="271.3" stroke="#b9c6d6" stroke-width="2.2" />
-<line x1="612.4" y1="188.0" x2="703.6" y2="230.9" stroke="#b9c6d6" stroke-width="2.2" />
-<line x1="510.8" y1="271.3" x2="629.2" y2="356.0" stroke="#c2d8c9" stroke-width="2.2" />
-<line x1="703.6" y1="230.9" x2="629.2" y2="356.0" stroke="#c2d8c9" stroke-width="2.2" />
-<line x1="590.0" y1="188.0" x2="649.6" y2="443.3" stroke="#b9c6d6" stroke-width="3.0" />
-<circle cx="629.2" cy="356.0" r="4.0" fill="#ffffff" stroke="#b9c6d6" stroke-width="1.6"/>
-<circle cx="649.6" cy="443.3" r="6.0" fill="#e8eaed" stroke="#b9c6d6" stroke-width="1.5"/>
-<circle cx="590.0" cy="188.0" r="6.0" fill="#ffffff" stroke="#5b6470" stroke-width="2.2"/>
-<text x="578.0" y="178.0" font-size="13" fill="#5b6470" text-anchor="end" font-weight="bold">O</text>
-<text x="483.6" y="495.0" font-size="11" fill="#5b6470" text-anchor="start" font-weight="normal">足先 F が前後に動いても、ロッドは O を支点に振れるだけ。</text>
-<text x="483.6" y="512.0" font-size="11" fill="#5b6470" text-anchor="start" font-weight="normal">角度を決める機構は要らない</text>
-<text x="790.0" y="98.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">C. 足先まわり（ロッド軸に沿った断面）</text>
-<rect x="893.5" y="124.8" width="13.0" height="306.8" rx="0.0" fill="#dfe3e8" stroke="#5b6470" stroke-width="1.6"/>
-<rect x="855.8" y="158.6" width="88.4" height="46.8" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
-<rect x="889.6" y="161.2" width="3.9" height="41.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.2"/>
-<rect x="906.5" y="161.2" width="3.9" height="41.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.2"/>
-<circle cx="868.8" cy="182.0" r="4.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
-<circle cx="931.2" cy="182.0" r="4.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
-<line x1="835.0" y1="166.4" x2="855.8" y2="176.8" stroke="#3f8f57" stroke-width="3.5" />
-<line x1="965.0" y1="166.4" x2="944.2" y2="176.8" stroke="#3f8f57" stroke-width="3.5" />
-<polyline points="900.0,205.4 896.3,206.3 892.9,207.2 889.9,208.0 887.6,208.9 886.2,209.8 885.7,210.7 886.2,211.6 887.6,212.4 889.9,213.3 892.9,214.2 896.3,215.1 900.0,216.0 903.7,216.8 907.1,217.7 910.1,218.6 912.4,219.5 913.8,220.4 914.3,221.2 913.8,222.1 912.4,223.0 910.1,223.9 907.1,224.8 903.7,225.6 900.0,226.5 896.3,227.4 892.9,228.3 889.9,229.2 887.6,230.0 886.2,230.9 885.7,231.8 886.2,232.7 887.6,233.6 889.9,234.4 892.9,235.3 896.3,236.2 900.0,237.1 903.7,238.0 907.1,238.8 910.1,239.7 912.4,240.6 913.8,241.5 914.3,242.4 913.8,243.2 912.4,244.1 910.1,245.0 907.1,245.9 903.7,246.8 900.0,247.7 896.3,248.5 892.9,249.4 889.9,250.3 887.6,251.2 886.2,252.1 885.7,252.9 886.2,253.8 887.6,254.7 889.9,255.6 892.9,256.5 896.3,257.3 900.0,258.2 903.7,259.1 907.1,260.0 910.1,260.9 912.4,261.7 913.8,262.6 914.3,263.5 913.8,264.4 912.4,265.3 910.1,266.1 907.1,267.0 903.7,267.9 900.0,268.8 896.3,269.7 892.9,270.5 889.9,271.4 887.6,272.3 886.2,273.2 885.7,274.1 886.2,274.9 887.6,275.8 889.9,276.7 892.9,277.6 896.3,278.5 900.0,279.3 903.7,280.2 907.1,281.1 910.1,282.0 912.4,282.9 913.8,283.7 914.3,284.6 913.8,285.5 912.4,286.4 910.1,287.3 907.1,288.1 903.7,289.0 900.0,289.9 896.3,290.8 892.9,291.7 889.9,292.5 887.6,293.4 886.2,294.3 885.7,295.2 886.2,296.1 887.6,296.9 889.9,297.8 892.9,298.7 896.3,299.6 900.0,300.5 903.7,301.3 907.1,302.2 910.1,303.1 912.4,304.0 913.8,304.9 914.3,305.7 913.8,306.6 912.4,307.5 910.1,308.4 907.1,309.3 903.7,310.1 900.0,311.0 896.3,311.9 892.9,312.8 889.9,313.7 887.6,314.5 886.2,315.4 885.7,316.3 886.2,317.2 887.6,318.1 889.9,318.9 892.9,319.8 896.3,320.7 900.0,321.6 903.7,322.5 907.1,323.3 910.1,324.2 912.4,325.1 913.8,326.0 914.3,326.9 913.8,327.7 912.4,328.6 910.1,329.5 907.1,330.4 903.7,331.3 900.0,332.1 896.3,333.0 892.9,333.9 889.9,334.8 887.6,335.7 886.2,336.6 885.7,337.4 886.2,338.3 887.6,339.2 889.9,340.1 892.9,341.0 896.3,341.8 900.0,342.7 903.7,343.6 907.1,344.5 910.1,345.4 912.4,346.2 913.8,347.1 914.3,348.0 913.8,348.9 912.4,349.8 910.1,350.6 907.1,351.5 903.7,352.4 900.0,353.3 896.3,354.2 892.9,355.0 889.9,355.9 887.6,356.8 886.2,357.7 885.7,358.6 886.2,359.4 887.6,360.3 889.9,361.2 892.9,362.1 896.3,363.0 900.0,363.8 903.7,364.7 907.1,365.6 910.1,366.5 912.4,367.4 913.8,368.2 914.3,369.1 913.8,370.0 912.4,370.9 910.1,371.8 907.1,372.6 903.7,373.5 900.0,374.4" fill="none" stroke="#e07b1f" stroke-width="2.4" stroke-linejoin="round"/>
-<rect x="876.6" y="374.4" width="46.8" height="10.4" rx="0.0" fill="#dfe3e8" stroke="#5b6470" stroke-width="1.6"/>
-<rect x="881.8" y="260.0" width="36.4" height="7.8" rx="0.0" fill="#f2f4f6" stroke="#9aa0a6" stroke-width="1.3"/>
-<rect x="871.4" y="384.8" width="57.2" height="20.8" rx="2.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.8"/>
-<rect x="866.2" y="405.6" width="67.6" height="15.6" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.3"/>
-<line x1="800.0" y1="421.2" x2="1000.0" y2="421.2" stroke="#9aa0a6" stroke-width="2.0" />
-<line x1="800.0" y1="421.2" x2="807.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="809.0" y1="421.2" x2="816.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="818.0" y1="421.2" x2="825.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="827.0" y1="421.2" x2="834.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="836.0" y1="421.2" x2="843.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="845.0" y1="421.2" x2="852.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="854.0" y1="421.2" x2="861.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="863.0" y1="421.2" x2="870.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="872.0" y1="421.2" x2="879.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="881.0" y1="421.2" x2="888.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="890.0" y1="421.2" x2="897.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="899.0" y1="421.2" x2="906.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="908.0" y1="421.2" x2="915.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="917.0" y1="421.2" x2="924.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="926.0" y1="421.2" x2="933.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="935.0" y1="421.2" x2="942.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="944.0" y1="421.2" x2="951.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="953.0" y1="421.2" x2="960.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="962.0" y1="421.2" x2="969.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="971.0" y1="421.2" x2="978.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="980.0" y1="421.2" x2="987.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<line x1="989.0" y1="421.2" x2="996.0" y2="430.2" stroke="#9aa0a6" stroke-width="1.0" />
-<text x="1018.0" y="186.0" font-size="11.5" fill="#3f8f57" text-anchor="start" font-weight="bold">シャンクのピン F</text>
-<text x="1018.0" y="201.0" font-size="10.5" fill="#3f8f57" text-anchor="start" font-weight="normal">キャリアに 2 本が集まる</text>
-<text x="778.0" y="144.4" font-size="11.5" fill="#8e5bd6" text-anchor="end" font-weight="bold">キャリア</text>
-<text x="778.0" y="159.4" font-size="10.5" fill="#8e5bd6" text-anchor="end" font-weight="normal">（＝足先ブロック）</text>
-<text x="778.0" y="206.8" font-size="11.5" fill="#c9762b" text-anchor="end" font-weight="bold">リニアブッシュ</text>
-<text x="778.0" y="221.8" font-size="10.5" fill="#c9762b" text-anchor="end" font-weight="normal">ロッド上を 125〜199 mm 滑る</text>
-<text x="1018.0" y="290.0" font-size="11.5" fill="#e07b1f" text-anchor="start" font-weight="bold">圧縮コイルばね</text>
-<text x="1018.0" y="305.0" font-size="10.5" fill="#e07b1f" text-anchor="start" font-weight="normal">ロッドに巻く（座屈防止）</text>
-<text x="782.0" y="264.0" font-size="11.5" fill="#5b6470" text-anchor="end" font-weight="bold">底付きストッパ</text>
-<text x="782.0" y="279.0" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">密着させない</text>
-<text x="1018.0" y="383.6" font-size="11.5" fill="#5b6470" text-anchor="start" font-weight="bold">下側ばね座</text>
-<text x="1018.0" y="398.6" font-size="10.5" fill="#5b6470" text-anchor="start" font-weight="normal">セットカラー／E リング</text>
-<text x="782.0" y="414.8" font-size="11.5" fill="#333" text-anchor="end" font-weight="bold">足＋ゴムパッド</text>
-<line x1="1014.0" y1="182.0" x2="944.2" y2="182.0" stroke="#3f8f57" stroke-width="1.0" />
-<line x1="782.0" y1="140.4" x2="855.8" y2="163.8" stroke="#8e5bd6" stroke-width="1.0" />
-<line x1="782.0" y1="202.8" x2="889.6" y2="197.6" stroke="#c9762b" stroke-width="1.0" />
-<line x1="1014.0" y1="286.0" x2="915.0" y2="286.0" stroke="#e07b1f" stroke-width="1.0" />
-<line x1="786.0" y1="260.0" x2="881.8" y2="262.6" stroke="#5b6470" stroke-width="1.0" />
-<line x1="1014.0" y1="379.6" x2="923.4" y2="379.6" stroke="#5b6470" stroke-width="1.0" />
-<line x1="786.0" y1="410.8" x2="866.2" y2="410.8" stroke="#333" stroke-width="1.0" />
-<rect x="30.0" y="604.0" width="1120.0" height="248.0" rx="0.0" fill="#f7f9fb" stroke="#c9d3de" stroke-width="1.2"/>
-<text x="50.0" y="630.0" font-size="13.5" fill="#111" text-anchor="start" font-weight="bold">なぜこの方式でなければならないか</text>
-<text x="50.0" y="654.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">1. バネの軸は「股 O → 足先 F」を向いている必要がある。</text>
-<text x="50.0" y="671.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">バネを脚に対して固定の向きで付けると、脚を前後に振ったときに接地力の作用線が股からずれ、ピッチモーメントが出て蹴り出すたびに機首が上がる</text>
-<text x="50.0" y="687.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">（初回 Colab で発生。hopper/model.py の legbar のコメントに経緯がある）。</text>
-<text x="50.0" y="712.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">2. 足先ブロックは単独では向きが決まらない。</text>
-<text x="50.0" y="729.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">シャンク 2 本は同じ 1 本のピン F に集まる（別ピンにすると自由度が 1 個増えて機構が成立しない）ので、</text>
-<text x="50.0" y="745.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">ブロックは F まわりの自由な振り子になる。ここにバネを直付けしても角度が定まらない。</text>
-<text x="50.0" y="770.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">3. ロッドを股で支持すれば、向きは自動的に決まる。</text>
-<text x="50.0" y="787.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">支点 O と通過点 F が決まればロッドの角度は一意。角度を決める機構が要らない。</text>
-<text x="50.0" y="803.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">Raibert の元祖ホッパー（伸縮脚＋股関節）と同じ構成で、5 節リンクは「脚軸に沿ってキャリアを押し引きするアクチュエータ」として働く。</text>
-<text x="50.0" y="828.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">4. ガイドは必須。</text>
-<text x="50.0" y="845.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">圧縮コイルばねは「自由長 / コイル平均径」が 2.6（両端ピン）〜5.2（両端平座固定）を超えると座屈する。候補は 130 / 14 = 9.3 なので、ガイドなしでは確実に座屈する。</text>
-<text x="50.0" y="870.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">参考：2 本のシャンクの二等分線は O→F 方向と最大 2.1°（常用域 1° 以内）しかずれない。</text>
-<text x="50.0" y="887.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">ただし二等分線を機械的に作るには差動歯車が要るので、ロッド方式のほうが単純。</text>
+<g transform="translate(180.0,250.0) rotate(11.3)">
+<rect x="-14.0" y="-13.0" width="28.0" height="26.0" rx="3.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.8"/>
+</g>
+<circle cx="156.4" cy="250.0" r="4.0" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="203.6" cy="250.0" r="4.0" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="92.7" cy="335.0" r="4.0" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="298.4" cy="298.0" r="4.0" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="180.0" cy="250.0" r="4.5" fill="#ffffff" stroke="#5b6470" stroke-width="2.0"/>
+<line x1="236.7" y1="533.5" x2="162.2" y2="160.9" stroke="#c1121f" stroke-width="1.3" stroke-dasharray="7 4"/>
+<text x="261.0" y="262.0" font-size="11.5" fill="#4a6fa5" text-anchor="start" font-weight="bold">クランク l1</text>
+<text x="102.7" y="401.0" font-size="11.5" fill="#3f8f57" text-anchor="end" font-weight="bold">シャンク l2</text>
+<text x="154.0" y="214.0" font-size="11.5" fill="#5b6470" text-anchor="end" font-weight="bold">股軸 O</text>
+<text x="154.0" y="230.0" font-size="11" fill="#c9762b" text-anchor="end" font-weight="bold">首振りリニアブッシュ</text>
+<text x="154.0" y="244.0" font-size="10.5" fill="#c9762b" text-anchor="end" font-weight="normal">（股軸まわりに回転自由。</text>
+<text x="154.0" y="258.0" font-size="10.5" fill="#c9762b" text-anchor="end" font-weight="normal">ロッドはこの中を滑る）</text>
+<text x="180.3" y="185.7" font-size="11" fill="#5b6470" text-anchor="start" font-weight="bold">ロッド上端</text>
+<text x="180.3" y="199.7" font-size="10.5" fill="#5b6470" text-anchor="start" font-weight="normal">（屈むと胴体側へ出る）</text>
+<text x="241.4" y="421.0" font-size="11.5" fill="#8e5bd6" text-anchor="start" font-weight="bold">キャリア（＝足先ブロック）</text>
+<text x="241.4" y="436.0" font-size="10.5" fill="#8e5bd6" text-anchor="start" font-weight="normal">ロッドに固定。滑らない</text>
+<text x="255.6" y="481.9" font-size="11.5" fill="#e07b1f" text-anchor="start" font-weight="bold">バネ</text>
+<line x1="251.6" y1="477.9" x2="237.6" y2="477.9" stroke="#e07b1f" stroke-width="1.1" />
+<text x="257.9" y="523.6" font-size="11" fill="#333" text-anchor="start" font-weight="normal">足（ロッドを滑る）</text>
+<text x="40.0" y="563.5" font-size="11.5" fill="#c1121f" text-anchor="start" font-weight="bold">接地力の作用線は常に股 O を通る</text>
+<text x="420.0" y="98.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">B. 屈伸で何が動くか</text>
+<text x="420.0" y="118.0" font-size="11.5" fill="#5b6470" text-anchor="start" font-weight="normal">ロッドが股ブッシュを滑るので、股→足の長さはちゃんと変わる</text>
+<line x1="430.0" y1="419.3" x2="550.0" y2="419.3" stroke="#9aa0a6" stroke-width="2.0" />
+<line x1="430.0" y1="419.3" x2="437.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="439.0" y1="419.3" x2="446.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="448.0" y1="419.3" x2="455.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="457.0" y1="419.3" x2="464.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="466.0" y1="419.3" x2="473.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="475.0" y1="419.3" x2="482.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="484.0" y1="419.3" x2="491.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="493.0" y1="419.3" x2="500.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="502.0" y1="419.3" x2="509.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="511.0" y1="419.3" x2="518.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="520.0" y1="419.3" x2="527.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="529.0" y1="419.3" x2="536.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="538.0" y1="419.3" x2="545.0" y2="428.3" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="490.0" y1="182.1" x2="490.0" y2="425.5" stroke="#5b6470" stroke-width="3.6" />
+<line x1="474.4" y1="250.0" x2="412.2" y2="282.5" stroke="#4a6fa5" stroke-width="4.4" />
+<line x1="505.6" y1="250.0" x2="567.8" y2="282.5" stroke="#4a6fa5" stroke-width="4.4" />
+<line x1="412.2" y1="282.5" x2="490.0" y2="347.5" stroke="#3f8f57" stroke-width="3.2" />
+<line x1="567.8" y1="282.5" x2="490.0" y2="347.5" stroke="#3f8f57" stroke-width="3.2" />
+<polyline points="490.0,358.4 488.3,358.6 486.8,358.9 485.5,359.1 484.5,359.3 483.8,359.6 483.6,359.8 483.8,360.0 484.5,360.2 485.5,360.5 486.8,360.7 488.3,360.9 490.0,361.2 491.7,361.4 493.2,361.6 494.5,361.8 495.5,362.1 496.2,362.3 496.4,362.5 496.2,362.7 495.5,363.0 494.5,363.2 493.2,363.4 491.7,363.7 490.0,363.9 488.3,364.1 486.8,364.3 485.5,364.6 484.5,364.8 483.8,365.0 483.6,365.2 483.8,365.5 484.5,365.7 485.5,365.9 486.8,366.2 488.3,366.4 490.0,366.6 491.7,366.8 493.2,367.1 494.5,367.3 495.5,367.5 496.2,367.7 496.4,368.0 496.2,368.2 495.5,368.4 494.5,368.7 493.2,368.9 491.7,369.1 490.0,369.3 488.3,369.6 486.8,369.8 485.5,370.0 484.5,370.2 483.8,370.5 483.6,370.7 483.8,370.9 484.5,371.2 485.5,371.4 486.8,371.6 488.3,371.8 490.0,372.1 491.7,372.3 493.2,372.5 494.5,372.8 495.5,373.0 496.2,373.2 496.4,373.4 496.2,373.7 495.5,373.9 494.5,374.1 493.2,374.3 491.7,374.6 490.0,374.8 488.3,375.0 486.8,375.3 485.5,375.5 484.5,375.7 483.8,375.9 483.6,376.2 483.8,376.4 484.5,376.6 485.5,376.8 486.8,377.1 488.3,377.3 490.0,377.5 491.7,377.8 493.2,378.0 494.5,378.2 495.5,378.4 496.2,378.7 496.4,378.9 496.2,379.1 495.5,379.4 494.5,379.6 493.2,379.8 491.7,380.0 490.0,380.3 488.3,380.5 486.8,380.7 485.5,380.9 484.5,381.2 483.8,381.4 483.6,381.6 483.8,381.9 484.5,382.1 485.5,382.3 486.8,382.5 488.3,382.8 490.0,383.0 491.7,383.2 493.2,383.4 494.5,383.7 495.5,383.9 496.2,384.1 496.4,384.4 496.2,384.6 495.5,384.8 494.5,385.0 493.2,385.3 491.7,385.5 490.0,385.7 488.3,385.9 486.8,386.2 485.5,386.4 484.5,386.6 483.8,386.9 483.6,387.1 483.8,387.3 484.5,387.5 485.5,387.8 486.8,388.0 488.3,388.2 490.0,388.5 491.7,388.7 493.2,388.9 494.5,389.1 495.5,389.4 496.2,389.6 496.4,389.8 496.2,390.0 495.5,390.3 494.5,390.5 493.2,390.7 491.7,391.0 490.0,391.2 488.3,391.4 486.8,391.6 485.5,391.9 484.5,392.1 483.8,392.3 483.6,392.5 483.8,392.8 484.5,393.0 485.5,393.2 486.8,393.5 488.3,393.7 490.0,393.9 491.7,394.1 493.2,394.4 494.5,394.6 495.5,394.8 496.2,395.0 496.4,395.3 496.2,395.5 495.5,395.7 494.5,396.0 493.2,396.2 491.7,396.4 490.0,396.6 488.3,396.9 486.8,397.1 485.5,397.3 484.5,397.6 483.8,397.8 483.6,398.0 483.8,398.2 484.5,398.5 485.5,398.7 486.8,398.9 488.3,399.1 490.0,399.4 491.7,399.6 493.2,399.8 494.5,400.1 495.5,400.3 496.2,400.5 496.4,400.7 496.2,401.0 495.5,401.2 494.5,401.4 493.2,401.6 491.7,401.9 490.0,402.1" fill="none" stroke="#e07b1f" stroke-width="1.8" stroke-linejoin="round"/>
+<g transform="translate(490.0,347.5) rotate(0.0)">
+<rect x="-13.6" y="-10.4" width="27.2" height="20.8" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
+</g>
+<circle cx="490.0" cy="347.5" r="3.4" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.6"/>
+<g transform="translate(490.0,409.9) rotate(0.0)">
+<rect x="-8.8" y="-7.2" width="17.6" height="12.0" rx="2.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.6"/>
+<rect x="-10.4" y="4.8" width="20.8" height="5.6" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.2"/>
+</g>
+<g transform="translate(490.0,250.0) rotate(0.0)">
+<rect x="-11.2" y="-10.4" width="22.4" height="20.8" rx="3.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.8"/>
+</g>
+<circle cx="474.4" cy="250.0" r="3.2" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="505.6" cy="250.0" r="3.2" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="412.2" cy="282.5" r="3.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="567.8" cy="282.5" r="3.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="490.0" cy="250.0" r="3.6" fill="#ffffff" stroke="#5b6470" stroke-width="2.0"/>
+<text x="490.0" y="150.0" font-size="12" fill="#111" text-anchor="middle" font-weight="bold">屈（|OF| = 125）</text>
+<circle cx="490.0" cy="182.1" r="4.2" fill="#c1121f" stroke="#c1121f" stroke-width="1.0"/>
+<text x="499.0" y="186.1" font-size="10.5" fill="#c1121f" text-anchor="start" font-weight="bold">＋87</text>
+<line x1="490.0" y1="250.0" x2="406.0" y2="250.0" stroke="#c9d3de" stroke-width="1.0" />
+<line x1="490.0" y1="409.9" x2="406.0" y2="409.9" stroke="#c9d3de" stroke-width="1.0" />
+<line x1="412.0" y1="250.0" x2="412.0" y2="409.9" stroke="#5b6470" stroke-width="1" marker-start="url(#d2)" marker-end="url(#d1)"/>
+<text x="403.0" y="327.0" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">股→足</text>
+<text x="403.0" y="342.0" font-size="11.5" fill="#5b6470" text-anchor="end" font-weight="bold">205 mm</text>
+<line x1="620.0" y1="473.9" x2="740.0" y2="473.9" stroke="#9aa0a6" stroke-width="2.0" />
+<line x1="620.0" y1="473.9" x2="627.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="629.0" y1="473.9" x2="636.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="638.0" y1="473.9" x2="645.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="647.0" y1="473.9" x2="654.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="656.0" y1="473.9" x2="663.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="665.0" y1="473.9" x2="672.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="674.0" y1="473.9" x2="681.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="683.0" y1="473.9" x2="690.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="692.0" y1="473.9" x2="699.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="701.0" y1="473.9" x2="708.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="710.0" y1="473.9" x2="717.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="719.0" y1="473.9" x2="726.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="728.0" y1="473.9" x2="735.0" y2="482.9" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="680.0" y1="236.7" x2="680.0" y2="480.1" stroke="#5b6470" stroke-width="3.6" />
+<line x1="664.4" y1="250.0" x2="632.5" y2="312.5" stroke="#4a6fa5" stroke-width="4.4" />
+<line x1="695.6" y1="250.0" x2="727.5" y2="312.5" stroke="#4a6fa5" stroke-width="4.4" />
+<line x1="632.5" y1="312.5" x2="680.0" y2="402.1" stroke="#3f8f57" stroke-width="3.2" />
+<line x1="727.5" y1="312.5" x2="680.0" y2="402.1" stroke="#3f8f57" stroke-width="3.2" />
+<polyline points="680.0,413.0 678.3,413.2 676.8,413.5 675.5,413.7 674.5,413.9 673.8,414.2 673.6,414.4 673.8,414.6 674.5,414.8 675.5,415.1 676.8,415.3 678.3,415.5 680.0,415.8 681.7,416.0 683.2,416.2 684.5,416.4 685.5,416.7 686.2,416.9 686.4,417.1 686.2,417.3 685.5,417.6 684.5,417.8 683.2,418.0 681.7,418.3 680.0,418.5 678.3,418.7 676.8,418.9 675.5,419.2 674.5,419.4 673.8,419.6 673.6,419.8 673.8,420.1 674.5,420.3 675.5,420.5 676.8,420.8 678.3,421.0 680.0,421.2 681.7,421.4 683.2,421.7 684.5,421.9 685.5,422.1 686.2,422.3 686.4,422.6 686.2,422.8 685.5,423.0 684.5,423.3 683.2,423.5 681.7,423.7 680.0,423.9 678.3,424.2 676.8,424.4 675.5,424.6 674.5,424.9 673.8,425.1 673.6,425.3 673.8,425.5 674.5,425.8 675.5,426.0 676.8,426.2 678.3,426.4 680.0,426.7 681.7,426.9 683.2,427.1 684.5,427.4 685.5,427.6 686.2,427.8 686.4,428.0 686.2,428.3 685.5,428.5 684.5,428.7 683.2,428.9 681.7,429.2 680.0,429.4 678.3,429.6 676.8,429.9 675.5,430.1 674.5,430.3 673.8,430.5 673.6,430.8 673.8,431.0 674.5,431.2 675.5,431.4 676.8,431.7 678.3,431.9 680.0,432.1 681.7,432.4 683.2,432.6 684.5,432.8 685.5,433.0 686.2,433.3 686.4,433.5 686.2,433.7 685.5,433.9 684.5,434.2 683.2,434.4 681.7,434.6 680.0,434.9 678.3,435.1 676.8,435.3 675.5,435.5 674.5,435.8 673.8,436.0 673.6,436.2 673.8,436.5 674.5,436.7 675.5,436.9 676.8,437.1 678.3,437.4 680.0,437.6 681.7,437.8 683.2,438.0 684.5,438.3 685.5,438.5 686.2,438.7 686.4,439.0 686.2,439.2 685.5,439.4 684.5,439.6 683.2,439.9 681.7,440.1 680.0,440.3 678.3,440.5 676.8,440.8 675.5,441.0 674.5,441.2 673.8,441.5 673.6,441.7 673.8,441.9 674.5,442.1 675.5,442.4 676.8,442.6 678.3,442.8 680.0,443.1 681.7,443.3 683.2,443.5 684.5,443.7 685.5,444.0 686.2,444.2 686.4,444.4 686.2,444.6 685.5,444.9 684.5,445.1 683.2,445.3 681.7,445.6 680.0,445.8 678.3,446.0 676.8,446.2 675.5,446.5 674.5,446.7 673.8,446.9 673.6,447.1 673.8,447.4 674.5,447.6 675.5,447.8 676.8,448.1 678.3,448.3 680.0,448.5 681.7,448.7 683.2,449.0 684.5,449.2 685.5,449.4 686.2,449.6 686.4,449.9 686.2,450.1 685.5,450.3 684.5,450.6 683.2,450.8 681.7,451.0 680.0,451.2 678.3,451.5 676.8,451.7 675.5,451.9 674.5,452.2 673.8,452.4 673.6,452.6 673.8,452.8 674.5,453.1 675.5,453.3 676.8,453.5 678.3,453.7 680.0,454.0 681.7,454.2 683.2,454.4 684.5,454.7 685.5,454.9 686.2,455.1 686.4,455.3 686.2,455.6 685.5,455.8 684.5,456.0 683.2,456.2 681.7,456.5 680.0,456.7" fill="none" stroke="#e07b1f" stroke-width="1.8" stroke-linejoin="round"/>
+<g transform="translate(680.0,402.1) rotate(-0.0)">
+<rect x="-13.6" y="-10.4" width="27.2" height="20.8" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
+</g>
+<circle cx="680.0" cy="402.1" r="3.4" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.6"/>
+<g transform="translate(680.0,464.5) rotate(-0.0)">
+<rect x="-8.8" y="-7.2" width="17.6" height="12.0" rx="2.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.6"/>
+<rect x="-10.4" y="4.8" width="20.8" height="5.6" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.2"/>
+</g>
+<g transform="translate(680.0,250.0) rotate(-0.0)">
+<rect x="-11.2" y="-10.4" width="22.4" height="20.8" rx="3.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.8"/>
+</g>
+<circle cx="664.4" cy="250.0" r="3.2" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="695.6" cy="250.0" r="3.2" fill="#ffffff" stroke="#4a6fa5" stroke-width="1.6"/>
+<circle cx="632.5" cy="312.5" r="3.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="727.5" cy="312.5" r="3.2" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<circle cx="680.0" cy="250.0" r="3.6" fill="#ffffff" stroke="#5b6470" stroke-width="2.0"/>
+<text x="680.0" y="150.0" font-size="12" fill="#111" text-anchor="middle" font-weight="bold">伸（|OF| = 195）</text>
+<circle cx="680.0" cy="236.7" r="4.2" fill="#c1121f" stroke="#c1121f" stroke-width="1.0"/>
+<text x="689.0" y="240.7" font-size="10.5" fill="#c1121f" text-anchor="start" font-weight="bold">＋17</text>
+<line x1="680.0" y1="250.0" x2="764.0" y2="250.0" stroke="#c9d3de" stroke-width="1.0" />
+<line x1="680.0" y1="464.5" x2="764.0" y2="464.5" stroke="#c9d3de" stroke-width="1.0" />
+<line x1="758.0" y1="250.0" x2="758.0" y2="464.5" stroke="#5b6470" stroke-width="1" marker-start="url(#d2)" marker-end="url(#d1)"/>
+<text x="767.0" y="354.2" font-size="10.5" fill="#5b6470" text-anchor="start" font-weight="normal">股→足</text>
+<text x="767.0" y="369.2" font-size="11.5" fill="#5b6470" text-anchor="start" font-weight="bold">275 mm</text>
+<text x="420.0" y="534.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">赤丸＝ロッド上端。股ブッシュより上へ出る量が 87 → 17 mm と変わり、</text>
+<text x="420.0" y="552.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">その差ぶんだけ股→足が 205 → 275 mm に伸びる。ロッドは股で固定されていない。</text>
+<text x="420.0" y="576.0" font-size="11.5" fill="#c1121f" text-anchor="start" font-weight="bold">バネはこの屈伸では縮まない。接地して初めて縮む。</text>
+<text x="930.0" y="98.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">C. キャリアまわり（ロッド軸に沿った断面）</text>
+<rect x="1023.9" y="113.9" width="12.2" height="289.1" rx="0.0" fill="#dfe3e8" stroke="#5b6470" stroke-width="1.6"/>
+<rect x="988.4" y="135.9" width="83.3" height="44.1" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.8"/>
+<line x1="1023.9" y1="135.9" x2="1023.9" y2="180.1" stroke="#8e5bd6" stroke-width="1.4" />
+<circle cx="1000.6" cy="158.0" r="3.9" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<line x1="968.8" y1="143.3" x2="988.4" y2="153.1" stroke="#3f8f57" stroke-width="3.5" />
+<line x1="1036.1" y1="135.9" x2="1036.1" y2="180.1" stroke="#8e5bd6" stroke-width="1.4" />
+<circle cx="1059.4" cy="158.0" r="3.9" fill="#ffffff" stroke="#3f8f57" stroke-width="1.6"/>
+<line x1="1091.2" y1="143.3" x2="1071.7" y2="153.1" stroke="#3f8f57" stroke-width="3.5" />
+<polyline points="1030.0,182.5 1026.5,183.3 1023.3,184.1 1020.5,184.9 1018.3,185.7 1017.0,186.5 1016.5,187.2 1017.0,188.0 1018.3,188.8 1020.5,189.6 1023.3,190.4 1026.5,191.2 1030.0,192.0 1033.5,192.8 1036.7,193.6 1039.5,194.4 1041.7,195.2 1043.0,195.9 1043.5,196.7 1043.0,197.5 1041.7,198.3 1039.5,199.1 1036.7,199.9 1033.5,200.7 1030.0,201.5 1026.5,202.3 1023.3,203.1 1020.5,203.9 1018.3,204.7 1017.0,205.4 1016.5,206.2 1017.0,207.0 1018.3,207.8 1020.5,208.6 1023.3,209.4 1026.5,210.2 1030.0,211.0 1033.5,211.8 1036.7,212.6 1039.5,213.4 1041.7,214.1 1043.0,214.9 1043.5,215.7 1043.0,216.5 1041.7,217.3 1039.5,218.1 1036.7,218.9 1033.5,219.7 1030.0,220.5 1026.5,221.3 1023.3,222.1 1020.5,222.8 1018.3,223.6 1017.0,224.4 1016.5,225.2 1017.0,226.0 1018.3,226.8 1020.5,227.6 1023.3,228.4 1026.5,229.2 1030.0,230.0 1033.5,230.8 1036.7,231.6 1039.5,232.3 1041.7,233.1 1043.0,233.9 1043.5,234.7 1043.0,235.5 1041.7,236.3 1039.5,237.1 1036.7,237.9 1033.5,238.7 1030.0,239.5 1026.5,240.3 1023.3,241.0 1020.5,241.8 1018.3,242.6 1017.0,243.4 1016.5,244.2 1017.0,245.0 1018.3,245.8 1020.5,246.6 1023.3,247.4 1026.5,248.2 1030.0,249.0 1033.5,249.7 1036.7,250.5 1039.5,251.3 1041.7,252.1 1043.0,252.9 1043.5,253.7 1043.0,254.5 1041.7,255.3 1039.5,256.1 1036.7,256.9 1033.5,257.7 1030.0,258.4 1026.5,259.2 1023.3,260.0 1020.5,260.8 1018.3,261.6 1017.0,262.4 1016.5,263.2 1017.0,264.0 1018.3,264.8 1020.5,265.6 1023.3,266.4 1026.5,267.2 1030.0,267.9 1033.5,268.7 1036.7,269.5 1039.5,270.3 1041.7,271.1 1043.0,271.9 1043.5,272.7 1043.0,273.5 1041.7,274.3 1039.5,275.1 1036.7,275.9 1033.5,276.6 1030.0,277.4 1026.5,278.2 1023.3,279.0 1020.5,279.8 1018.3,280.6 1017.0,281.4 1016.5,282.2 1017.0,283.0 1018.3,283.8 1020.5,284.6 1023.3,285.3 1026.5,286.1 1030.0,286.9 1033.5,287.7 1036.7,288.5 1039.5,289.3 1041.7,290.1 1043.0,290.9 1043.5,291.7 1043.0,292.5 1041.7,293.3 1039.5,294.1 1036.7,294.8 1033.5,295.6 1030.0,296.4 1026.5,297.2 1023.3,298.0 1020.5,298.8 1018.3,299.6 1017.0,300.4 1016.5,301.2 1017.0,302.0 1018.3,302.8 1020.5,303.5 1023.3,304.3 1026.5,305.1 1030.0,305.9 1033.5,306.7 1036.7,307.5 1039.5,308.3 1041.7,309.1 1043.0,309.9 1043.5,310.7 1043.0,311.5 1041.7,312.2 1039.5,313.0 1036.7,313.8 1033.5,314.6 1030.0,315.4 1026.5,316.2 1023.3,317.0 1020.5,317.8 1018.3,318.6 1017.0,319.4 1016.5,320.2 1017.0,321.0 1018.3,321.7 1020.5,322.5 1023.3,323.3 1026.5,324.1 1030.0,324.9 1033.5,325.7 1036.7,326.5 1039.5,327.3 1041.7,328.1 1043.0,328.9 1043.5,329.7 1043.0,330.4 1041.7,331.2 1039.5,332.0 1036.7,332.8 1033.5,333.6 1030.0,334.4" fill="none" stroke="#e07b1f" stroke-width="2.4" stroke-linejoin="round"/>
+<rect x="1003.0" y="334.4" width="53.9" height="39.2" rx="2.0" fill="#e8eaed" stroke="#5b6470" stroke-width="1.8"/>
+<rect x="1020.2" y="336.9" width="3.7" height="34.3" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.2"/>
+<rect x="1036.1" y="336.9" width="3.7" height="34.3" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.2"/>
+<rect x="998.1" y="373.6" width="63.7" height="17.2" rx="2.0" fill="#4b4b4b" stroke="#333" stroke-width="1.3"/>
+<rect x="1012.9" y="395.6" width="34.3" height="7.4" rx="0.0" fill="#f2f4f6" stroke="#9aa0a6" stroke-width="1.3"/>
+<line x1="937.5" y1="390.8" x2="1122.5" y2="390.8" stroke="#9aa0a6" stroke-width="2.0" />
+<line x1="937.5" y1="390.8" x2="944.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="946.5" y1="390.8" x2="953.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="955.5" y1="390.8" x2="962.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="964.5" y1="390.8" x2="971.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="973.5" y1="390.8" x2="980.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="982.5" y1="390.8" x2="989.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="991.5" y1="390.8" x2="998.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1000.5" y1="390.8" x2="1007.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1009.5" y1="390.8" x2="1016.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1018.5" y1="390.8" x2="1025.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1027.5" y1="390.8" x2="1034.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1036.5" y1="390.8" x2="1043.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1045.5" y1="390.8" x2="1052.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1054.5" y1="390.8" x2="1061.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1063.5" y1="390.8" x2="1070.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1072.5" y1="390.8" x2="1079.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1081.5" y1="390.8" x2="1088.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1090.5" y1="390.8" x2="1097.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1099.5" y1="390.8" x2="1106.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<line x1="1108.5" y1="390.8" x2="1115.5" y2="399.8" stroke="#9aa0a6" stroke-width="1.0" />
+<text x="922.0" y="125.2" font-size="11.5" fill="#5b6470" text-anchor="end" font-weight="bold">ロッド φ5</text>
+<text x="922.0" y="140.2" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">↑ 股のブッシュへ</text>
+<text x="1138.0" y="162.0" font-size="11.5" fill="#3f8f57" text-anchor="start" font-weight="bold">シャンクのピン F</text>
+<text x="1138.0" y="177.0" font-size="10.5" fill="#3f8f57" text-anchor="start" font-weight="normal">キャリアに 2 本が集まる</text>
+<text x="922.0" y="176.7" font-size="11.5" fill="#8e5bd6" text-anchor="end" font-weight="bold">キャリア</text>
+<text x="922.0" y="191.7" font-size="10.5" fill="#8e5bd6" text-anchor="end" font-weight="normal">ロッドに固定（滑らない）</text>
+<text x="1138.0" y="260.0" font-size="11.5" fill="#e07b1f" text-anchor="start" font-weight="bold">圧縮コイルばね</text>
+<text x="1138.0" y="275.0" font-size="10.5" fill="#e07b1f" text-anchor="start" font-weight="normal">ロッドに巻く（座屈防止）</text>
+<text x="1138.0" y="353.1" font-size="11.5" fill="#c9762b" text-anchor="start" font-weight="bold">足</text>
+<text x="1138.0" y="368.1" font-size="10.5" fill="#c9762b" text-anchor="start" font-weight="normal">ロッドを滑る（＝ストローク）</text>
+<text x="1138.0" y="399.6" font-size="11.5" fill="#5b6470" text-anchor="start" font-weight="bold">伸び切りストッパ</text>
+<text x="1138.0" y="414.6" font-size="10.5" fill="#5b6470" text-anchor="start" font-weight="normal">E リング</text>
+<line x1="1134.0" y1="158.0" x2="1071.7" y2="158.0" stroke="#3f8f57" stroke-width="1.0" />
+<line x1="926.0" y1="172.7" x2="988.4" y2="167.8" stroke="#8e5bd6" stroke-width="1.0" />
+<line x1="926.0" y1="121.2" x2="1023.9" y2="121.2" stroke="#5b6470" stroke-width="1.0" />
+<line x1="1134.0" y1="256.0" x2="1046.0" y2="256.0" stroke="#e07b1f" stroke-width="1.0" />
+<line x1="1134.0" y1="349.1" x2="1039.8" y2="349.1" stroke="#c9762b" stroke-width="1.0" />
+<line x1="1134.0" y1="395.6" x2="1047.2" y2="398.1" stroke="#5b6470" stroke-width="1.0" />
+<rect x="30.0" y="619.0" width="1220.0" height="358.0" rx="0.0" fill="#f7f9fb" stroke="#c9d3de" stroke-width="1.2"/>
+<text x="50.0" y="645.0" font-size="13.5" fill="#111" text-anchor="start" font-weight="bold">なぜこの方式なのか</text>
+<text x="50.0" y="669.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">1. バネの軸は「股 O → 足先 F」を向いている必要がある。</text>
+<text x="50.0" y="686.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">バネを脚に対して固定の向きで付けると、脚を前後に振ったときに接地力の作用線が股からずれ、ピッチモーメントが出て蹴り出すたびに機首が上がる</text>
+<text x="50.0" y="702.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">（初回 Colab で発生。hopper/model.py の legbar のコメントに経緯がある）。</text>
+<text x="50.0" y="727.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">2. 足先ブロックは単独では向きが決まらない。</text>
+<text x="50.0" y="744.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">シャンク 2 本は同じ 1 本のピン F に集まる（別ピンにすると自由度が 1 個増えて機構が成立しない）ので、ブロックは F まわりの自由な振り子になる。</text>
+<text x="50.0" y="769.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">3. ロッドの線が股 O を通れば、向きは自動的に決まる。</text>
+<text x="50.0" y="786.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">ロッドをキャリアに固定し、股側を首振りするリニアブッシュで受ける。ブッシュがロッドの線を必ず O に通すので、角度を決める機構が要らない。</text>
+<text x="50.0" y="811.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">4. 長さ変化はロッドが股ブッシュを滑って吸収する。</text>
+<text x="50.0" y="828.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">股→足は 205〜275 mm（|OF| 125〜195 ＋ バネ 80）で変わる。ロッドを股で「固定」してしまうと股→足が一定になり、脚が伸縮できなくなる。</text>
+<text x="50.0" y="844.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">ロッドは軸力を受けない。力は 足 → バネ → キャリア → 5 節リンク → 股 と流れ、ロッドは向きを決める案内にすぎない。</text>
+<text x="50.0" y="869.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">5. ガイドは必須。</text>
+<text x="50.0" y="886.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">圧縮コイルばねは「自由長 / コイル平均径」が 2.6（両端ピン）〜5.2（両端平座固定）を超えると座屈する。候補は 130 / 14 = 9.3 なので、ガイドなしでは確実に座屈する。</text>
+<text x="50.0" y="911.0" font-size="12" fill="#111" text-anchor="start" font-weight="bold">MJCF との対応（hopper/model.py）</text>
+<text x="50.0" y="928.0" font-size="11.5" fill="#444" text-anchor="start" font-weight="normal">legbar の股ヒンジ → 股の首振りブッシュブロック。carrier の slide `cx` → ロッドが股ブッシュを滑る。foot の slide `fz` → 足がロッド下部を滑る（＝バネ本体）。</text>
 </svg>
