@@ -204,7 +204,7 @@ const DEF={mb:1.5,bw:300,bh:180,hb:0,mf:0.05,
            d0:40,l1:90,l2:130,ls0:80,ks:900,zs:0.2,kg:20000,mu:0.8,
            servo:3,stall:10.6,nl:30,jr:0.02,kp:30,kd:1.0,
            rate:200,hdes:5,vdes:0,L0:240,dlmax:50,retract:15,kh:0.5,kv:0.03,cn:0.5,kth:40,kthd:1,hipMode:1,kr:20000,dr:300,
-           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0,vLoop:1,vLam:0.3,vA:3.1,vB:-43,vRamp:0.02};
+           chgMode:0,chgPre:40,chgR:2.0,chgSv:0,chgRel:0,thrustMs:0,vLoop:1,vLam:0.3,vA:3.1,vB:-43,vRamp:0.02,sprAx:0,sprOff:0};   // sprAx: バネ軸 0=股→先端（ロッド方式） 1=下腿の二等分線（ロッド無し）。sprOff: 軸の固定オフセット [deg]（感度試験用）
 const KLAT=20000;   // 横方向（リンク剛性）の擬似拘束
 let P=Object.assign({},DEF);
 function applyServo(){const s=SERVOS[P.servo];if(s){P.stall=s.stall;P.nl=s.nl;P.jr=s.jr;P.kp=s.kp;P.kd=s.kd;}}
@@ -295,7 +295,15 @@ function kin(){
   const vTip={x:S.vx-S.om*rW.y+vJ.x, y:S.vy+S.om*rW.x+vJ.y};
   const vHip={x:S.vx-S.om*hipR.y, y:S.vy+S.om*hipR.x};
   const ux=tipW.x-hip.x, uy=tipW.y-hip.y, Ln=Math.hypot(ux,uy)||1e-9;
-  const u={x:ux/Ln,y:uy/Ln}, n={x:-u.y,y:u.x};
+  let u={x:ux/Ln,y:uy/Ln};
+  if(P.sprAx===1){                                             // 下腿 2 本の二等分線を足先ブロックの向きにする（機構設計要件 §7 の代案）
+    const da={x:f.F.x-f.A.x,y:f.F.y-f.A.y}, db={x:f.F.x-f.B.x,y:f.F.y-f.B.y};
+    const la=Math.hypot(da.x,da.y)||1e-9, lb=Math.hypot(db.x,db.y)||1e-9;
+    const bs={x:da.x/la+db.x/lb, y:da.y/la+db.y/lb}, lbs=Math.hypot(bs.x,bs.y)||1e-9;
+    u=R({x:bs.x/lbs,y:bs.y/lbs});
+  }
+  if(P.sprOff){const a=P.sprOff*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);u={x:ca*u.x-sa*u.y,y:sa*u.x+ca*u.y};}
+  const n={x:-u.y,y:u.x};
   const rest={x:tipW.x+g.ls0*u.x, y:tipW.y+g.ls0*u.y};
   const wdir=((vTip.x-vHip.x)*n.x+(vTip.y-vHip.y)*n.y)/Ln;      // 脚方向の角速度
   const vRest={x:vTip.x+g.ls0*wdir*n.x, y:vTip.y+g.ls0*wdir*n.y};
