@@ -21,8 +21,11 @@
 
 使い方:
   1. このフォルダを %APPDATA%\\Autodesk\\Autodesk Fusion 360\\API\\Scripts\\Spring\\ に置く
+     （AddIns\\ に置いてもスクリプトとして実行できる）
   2. Fusion で ユーティリティ → アドイン → スクリプト → Spring → 実行
   ※ 寸法を変えるときは下の「パラメータ」だけ直す
+  ※ パーツ デザイン ドキュメントでもアセンブリでも動く
+     （前者は 1 コンポーネントしか持てないのでルートに直接作る）
 """
 
 import math
@@ -92,11 +95,16 @@ def run(context):
                                              r * math.sin(a) * MM,
                                              z * MM))
 
-        # ---- 新規コンポーネント ----
+        # ---- 作る場所 ----
+        # 「パーツ デザイン ドキュメント」は 1 コンポーネントしか持てないので、
+        # 新規コンポーネントの作成に失敗したらルートに直接作る。
         root = design.rootComponent
-        occ = root.occurrences.addNewComponent(adsk.core.Matrix3D.create())
-        comp = occ.component
-        comp.name = NAME
+        try:
+            occ = root.occurrences.addNewComponent(adsk.core.Matrix3D.create())
+            comp = occ.component
+            comp.name = NAME
+        except Exception:
+            comp = root
 
         sk_path = comp.sketches.add(comp.xYConstructionPlane)
         sk_path.name = 'coil path'
@@ -140,14 +148,15 @@ def run(context):
         wire_len = Nt * math.sqrt((math.pi * Dm) ** 2 + pitch ** 2)
         vol = wire_len * math.pi / 4.0 * d * d
         load = SPRING_K * DEFLECTION
+        where = 'ルートに直接' if comp is root else '新規コンポーネントに'
         ui.messageBox(
-            '%s を生成しました。\n\n'
+            '%s を%s生成しました。\n\n'
             '線径 φ%.1f / 外径 φ%.1f / 内径 φ%.1f / 平均径 φ%.2f\n'
             '有効巻数 %.2f / 総巻数 %.2f / 密着長 %.1f mm\n'
             '自由長 %.1f mm → 縮み %.1f mm で高さ %.1f mm\n'
             'そのときのピッチ %.3f mm（コイル隙間 %.3f mm）/ 荷重 %.1f N\n'
             '線材長さ %.0f mm / 体積 %.0f mm³ / 質量（鋼 7.85）%.2f g'
-            % (NAME, d, OUTER_D, Dm - d, Dm, Na, Nt, solid_l,
+            % (NAME, where, d, OUTER_D, Dm - d, Dm, Na, Nt, solid_l,
                FREE_L, DEFLECTION, height, pitch, pitch - d, load,
                wire_len, vol, vol * 7.85e-3))
 
