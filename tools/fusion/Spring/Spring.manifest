@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "script",
+    "id": "3f7c91a2-6d04-4b58-9e13-2a75c8b0f441",
+    "author": "Hopper Leg Lab",
+    "description": {
+        "": "圧縮コイルばね（既定は サミニ 11-1437）をカタログ値から生成するスクリプト。縮み量を指定できるので、ストローク全域の干渉確認に使える。仕様は docs/hopper-mechanical-spec.md §7-4。"
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

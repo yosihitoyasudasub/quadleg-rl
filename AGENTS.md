@@ -20,6 +20,7 @@ Colab で Go1 が歩くところまでは動いている。2026-09-06 の派生�
 - `notebooks/02_hopper_mujoco.ipynb` — Colab(CPU) の薄いラッパー
 - `tools/webapp/hopper-2d.html`（ピッチ面）／`hopper-roll-2d.html`（ロール面） — 単一 HTML の 2D シミュレーター
 - `tools/fusion/HopperLeg/` — Fusion 360 アドイン。骨格・サーボ・ジョイントを生成。運動学は `hopper/kinematics.py` と同一式（一致確認済み）
+- `tools/fusion/Spring/` — Fusion 360 スクリプト。圧縮コイルばね（サミニ 11-1437）をカタログ値から生成。`DEFLECTION` で縮み状態を指定できる
 - `tools/make_leg_diagram.py` — `docs/img/hopper-leg-structure.svg` を運動学から生成。寸法を変えたら再生成する
 - `tools/make_shank_diagram.py` — `docs/img/hopper-shank.svg`（シャンク両端の関節構造）を生成。同上
 - `tools/make_spring_diagram.py` — `docs/img/hopper-spring.svg`（直列バネの支持方式）を生成。同上
