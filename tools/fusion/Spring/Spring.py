@@ -15,9 +15,11 @@
   DEFLECTION = 58    底付きストッパ位置
 
 形状のモデル化:
-  死巻（上下 1 巻ずつ）はピッチ 0 の平らな巻き、有効部は等ピッチ。
-  中心線の上昇 = p·Na、ソリッド高さ = p·Na + d となるので p = (自由長 − d) / Na とする。
-  これで自由長がカタログ値どおりになり、端面も平ら（研削端の座面）になる。
+  死巻（上下 1 巻ずつ）は線径ぶんのピッチ、有効部は等ピッチ。
+  ソリッド高さ = d + 2·dead_p + p·Na が自由長になるよう有効部のピッチ p を決める。
+  死巻をピッチ 0（完全に平ら）にすると同じ位置を 2 周することになり、
+  掃引したソリッドが自己交差して Fusion が ASM_SELF_INTER で失敗する。
+  実物の研削端の平らさは再現しない（質量・干渉には影響しない）。
 
 使い方:
   1. このフォルダを %APPDATA%\\Autodesk\\Autodesk Fusion 360\\API\\Scripts\\Spring\\ に置く
@@ -44,6 +46,7 @@ DEFLECTION = 0.0      # 縮み量。0 なら自由長
 G_MODULUS = 78500.0   # 横弾性係数 [N/mm²]（ピアノ線 SWP-A）
 RIGHT_HAND = True     # 巻き方向
 PTS_PER_TURN = 24     # スプラインの 1 巻あたり点数。粗くすると軽いが多角形になる
+DEAD_PITCH = 1.05     # 死巻のピッチ（線径の倍数）。1.0 だとコイルが接して掃引が自己交差する
 NAME = 'Spring 11-1437'
 
 MM = 0.1              # Fusion API の内部単位は cm
@@ -69,11 +72,18 @@ def run(context):
             Nt = Na + 2.0                                          # ＋死巻 2 巻
         solid_l = Nt * d
         height = FREE_L - DEFLECTION
-        if height < solid_l:
-            ui.messageBox('縮めすぎです。密着長 %.1f mm に対して高さ %.1f mm。'
-                          % (solid_l, height))
+        # 死巻にも線径ぶんのピッチを持たせる。ピッチ 0（完全に平ら）にすると
+        # 同じ位置を 2 周することになり、掃引したソリッドが自己交差して失敗する。
+        dead_p = d * DEAD_PITCH
+        # ソリッド高さ = d + 2·dead_p + pitch·Na が height になるよう有効部のピッチを決める
+        pitch = (height - d - 2.0 * dead_p) / Na
+        if pitch <= dead_p:
+            ui.messageBox(
+                '縮めすぎです。高さ %.1f mm では有効部のピッチが %.3f mm になり、\n'
+                '死巻のピッチ %.3f mm を下回ってコイルが重なります。\n'
+                '密着長は %.1f mm、この形状で作れる下限はおよそ %.1f mm です。'
+                % (height, pitch, dead_p, solid_l, d + (Na + 2.0) * dead_p))
             return
-        pitch = (height - d) / Na              # 有効部のピッチ（死巻はピッチ 0）
 
         # ---- 中心線の点列 ----
         r = Dm / 2.0
@@ -84,12 +94,12 @@ def run(context):
         steps = int(round(Nt * n))
         for i in range(steps + 1):
             turn = Nt * i / steps              # 0 〜 Nt [巻]
-            if turn <= 1.0:                    # 下の死巻：平ら
-                z = z0
-            elif turn <= 1.0 + Na:             # 有効部：等ピッチ
-                z = z0 + pitch * (turn - 1.0)
-            else:                              # 上の死巻：平ら
-                z = z0 + pitch * Na
+            if turn <= 1.0:                    # 下の死巻
+                z = z0 + dead_p * turn
+            elif turn <= 1.0 + Na:             # 有効部
+                z = z0 + dead_p + pitch * (turn - 1.0)
+            else:                              # 上の死巻
+                z = z0 + dead_p + pitch * Na + dead_p * (turn - 1.0 - Na)
             a = sign * 2.0 * math.pi * turn
             pts.add(adsk.core.Point3D.create(r * math.cos(a) * MM,
                                              r * math.sin(a) * MM,
