@@ -15,7 +15,7 @@
 </g>
 <g transform="translate(300.0,380.0) rotate(0.0)">
 <rect x="-8.8" y="-127.6" width="17.6" height="145.2" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.6"/>
-<rect x="-3.3" y="-123.2" width="6.6" height="39.6" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.2"/>
+<rect x="-3.3" y="-121.0" width="6.6" height="33.0" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.2"/>
 </g>
 <line x1="300.0" y1="380.0" x2="143.7" y2="225.2" stroke="#3f8f57" stroke-width="9.0" stroke-linecap="round" />
 <line x1="300.0" y1="380.0" x2="456.3" y2="225.2" stroke="#3f8f57" stroke-width="9.0" stroke-linecap="round" />
@@ -41,7 +41,7 @@
 <text x="191.1" y="307.6" font-size="11.5" fill="#c9762b" text-anchor="end" font-weight="bold">小リンク（長さ a）</text>
 <line x1="195.1" y1="303.6" x2="270.6" y2="310.3" stroke="#c9762b" stroke-width="1.0" stroke-linecap="round" />
 <text x="324.0" y="253.1" font-size="11.5" fill="#8e5bd6" text-anchor="start" font-weight="bold">足先ブロックの腕</text>
-<text x="324.0" y="267.1" font-size="10.5" fill="#8e5bd6" text-anchor="start" font-weight="normal">スロット（幅 3 × 長さ 18）</text>
+<text x="324.0" y="267.1" font-size="10.5" fill="#8e5bd6" text-anchor="start" font-weight="normal">スロット 幅 3（丸端 40 / 55）。腕は 2 枚</text>
 <line x1="320.0" y1="257.1" x2="310.8" y2="256.3" stroke="#8e5bd6" stroke-width="1.0" stroke-linecap="round" />
 <text x="342.0" y="420.0" font-size="11.5" fill="#c9762b" text-anchor="start" font-weight="bold">ガイド管（腕と一体）</text>
 <text x="342.0" y="434.0" font-size="10.5" fill="#c9762b" text-anchor="start" font-weight="normal">内径 15.2、長さ 110</text>
@@ -52,7 +52,7 @@
 <text x="40.0" y="778.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">F→C は常に角 A1–F–A2 の二等分線。ブロックの軸は C と F で決まる。</text>
 <text x="40.0" y="800.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">荷重の流れ: 接地力 → 足 → ばね → 管 → ブロック → ピン F → シャンク 2 本。</text>
 <text x="40.0" y="818.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">軸は F を通るので、接地力は F まわりにモーメントを作らない。</text>
-<text x="40.0" y="836.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">小リンクが受けるのは足パッドの摩擦（横力）× 100 mm のモーメントだけ（横力 30 N で約 140 N）。</text>
+<text x="40.0" y="836.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">小リンクが受けるのは足パッドの摩擦（横力）× 100 mm のモーメントだけ（横力 30 N で 50〜70 N。設計は 140 N で見る）。</text>
 <text x="640.0" y="96.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">B. 脚を振ったとき — C はスロットを滑り、軸は二等分線を向き続ける</text>
 <g transform="translate(760.0,330.0) rotate(-14.6)">
 <rect x="-10.8" y="2.5" width="21.5" height="137.5" rx="2.0" fill="#fff4e5" stroke="#c9762b" stroke-width="1.0"/>
@@ -65,7 +65,7 @@
 </g>
 <g transform="translate(760.0,330.0) rotate(-14.6)">
 <rect x="-5.0" y="-72.5" width="10.0" height="82.5" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.2"/>
-<rect x="-1.9" y="-70.0" width="3.8" height="22.5" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="0.9"/>
+<rect x="-1.9" y="-68.8" width="3.8" height="18.8" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="0.9"/>
 </g>
 <line x1="760.0" y1="330.0" x2="662.9" y2="273.2" stroke="#3f8f57" stroke-width="6.8" stroke-linecap="round" />
 <line x1="760.0" y1="330.0" x2="817.0" y2="233.0" stroke="#3f8f57" stroke-width="6.8" stroke-linecap="round" />
@@ -95,7 +95,7 @@
 </g>
 <g transform="translate(1010.0,330.0) rotate(14.6)">
 <rect x="-5.0" y="-72.5" width="10.0" height="82.5" rx="3.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.2"/>
-<rect x="-1.9" y="-70.0" width="3.8" height="22.5" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="0.9"/>
+<rect x="-1.9" y="-68.8" width="3.8" height="18.8" rx="1.5" fill="#ffffff" stroke="#8e5bd6" stroke-width="0.9"/>
 </g>
 <line x1="1010.0" y1="330.0" x2="953.0" y2="233.0" stroke="#3f8f57" stroke-width="6.8" stroke-linecap="round" />
 <line x1="1010.0" y1="330.0" x2="1107.1" y2="273.2" stroke="#3f8f57" stroke-width="6.8" stroke-linecap="round" />
@@ -118,30 +118,33 @@
 <text x="640.0" y="564.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">振り方向で符号が反転する。固定の向き誤差なら 3° が限界（5° で転倒。hopper-log §8.12）だが、</text>
 <text x="640.0" y="580.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">この誤差は蹴り出し（対称姿勢）で消えるので効かない。2D の全条件でロッド方式と同一性能。</text>
 <text x="640.0" y="612.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">C. Z 方向の層（ピン A2 とピン C を通る展開断面。上が膝側、v = 0 がピン A2 の高さ）</text>
-<rect x="699.0" y="700.0" width="28.0" height="133.4" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.4"/>
-<text x="713.0" y="677.0" font-size="10.5" fill="#c9762b" text-anchor="middle" font-weight="bold">リンク①</text>
+<rect x="657.0" y="700.0" width="28.0" height="133.4" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.4"/>
+<text x="671.0" y="677.0" font-size="10.5" fill="#c9762b" text-anchor="middle" font-weight="bold">リンク①</text>
+<rect x="688.5" y="658.6" width="35.0" height="211.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.4"/>
+<text x="706.0" y="640.2" font-size="10.5" fill="#8e5bd6" text-anchor="middle" font-weight="bold">腕①</text>
 <rect x="730.5" y="778.2" width="56.0" height="156.4" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.4"/>
 <text x="758.5" y="759.8" font-size="10.5" fill="#3f8f57" text-anchor="middle" font-weight="bold">シャンク①</text>
 <rect x="793.5" y="778.2" width="56.0" height="156.4" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.4"/>
 <text x="821.5" y="759.8" font-size="10.5" fill="#3f8f57" text-anchor="middle" font-weight="bold">シャンク②</text>
 <rect x="856.5" y="658.6" width="35.0" height="211.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.4"/>
-<text x="874.0" y="640.2" font-size="10.5" fill="#8e5bd6" text-anchor="middle" font-weight="bold">腕</text>
+<text x="874.0" y="640.2" font-size="10.5" fill="#8e5bd6" text-anchor="middle" font-weight="bold">腕②</text>
 <rect x="895.0" y="700.0" width="28.0" height="133.4" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.4"/>
 <text x="909.0" y="677.0" font-size="10.5" fill="#c9762b" text-anchor="middle" font-weight="bold">リンク②</text>
+<rect x="688.5" y="667.8" width="35.0" height="73.6" rx="0.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.0"/>
 <rect x="856.5" y="667.8" width="35.0" height="73.6" rx="0.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.0"/>
-<rect x="671.0" y="711.5" width="266.0" height="13.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
-<rect x="664.7" y="702.3" width="7.0" height="32.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
-<rect x="930.7" y="702.3" width="7.0" height="32.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
+<rect x="640.2" y="711.5" width="299.6" height="13.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
+<rect x="633.9" y="702.3" width="7.0" height="32.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
+<rect x="933.5" y="702.3" width="7.0" height="32.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
 <rect x="783.0" y="808.1" width="154.0" height="13.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
 <rect x="849.5" y="808.1" width="45.5" height="13.8" rx="0.0" fill="#e8eaed" stroke="#9aa0a6" stroke-width="1.0"/>
 <text x="965.0" y="709.2" font-size="11" fill="#5b6470" text-anchor="start" font-weight="bold">ピン C φ3 × 22</text>
-<text x="965.0" y="727.6" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">リンク①・腕（スロット）・リンク② を貫く</text>
+<text x="965.0" y="727.6" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">リンク①・腕①・腕②・リンク② を貫く</text>
 <text x="965.0" y="743.7" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">両端 E リング</text>
-<text x="965.0" y="810.4" font-size="11" fill="#5b6470" text-anchor="start" font-weight="bold">ピン A2 φ3 × 14</text>
+<text x="965.0" y="810.4" font-size="11" fill="#5b6470" text-anchor="start" font-weight="bold">ピン A2 φ3 × 12</text>
 <text x="965.0" y="828.8" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">シャンク②・スペーサ 3.25・リンク②</text>
-<text x="965.0" y="847.2" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">A1 は鏡像: シャンク①・リンク①</text>
-<text x="965.0" y="863.3" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">（腕を避ける必要がないのでスペーサ無し）</text>
-<text x="671.0" y="957.6" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">z = −6.5</text>
+<text x="965.0" y="847.2" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">A1 は鏡像（完全に左右対称）</text>
+<text x="965.0" y="863.3" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">（腕はこの位置には無い。スペーサは層を保つため）</text>
+<text x="643.0" y="957.6" font-size="10" fill="#5b6470" text-anchor="start" font-weight="normal">z = −9.5</text>
 <text x="923.0" y="957.6" font-size="10" fill="#5b6470" text-anchor="end" font-weight="normal">+9.5 mm</text>
-<text x="640.0" y="989.8" font-size="10.5" fill="#333" text-anchor="start" font-weight="normal">シャンク①②は §5-1 の足先と同じ層。小リンクは各シャンクの外面に、腕はブロックの片方の耳を上へ延ばす。</text>
+<text x="640.0" y="989.8" font-size="10.5" fill="#333" text-anchor="start" font-weight="normal">シャンク①②は §5-1 の足先と同じ層。腕はブロックの二股の耳を両方とも上へ延ばし、小リンクはその外側に置く。</text>
 </svg>

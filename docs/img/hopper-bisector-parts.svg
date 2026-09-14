@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1010" viewBox="0 0 1280 1010" font-family="Segoe UI, Meiryo, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1020" viewBox="0 0 1280 1020" font-family="Segoe UI, Meiryo, sans-serif" font-size="12">
 <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0.5 L8,4 L0,7.5 z" fill="#5b6470"/></marker><marker id="a2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto"><path d="M8,0.5 L0,4 L8,7.5 z" fill="#5b6470"/></marker></defs>
-<rect x="0.0" y="0.0" width="1280.0" height="1010.0" rx="0.0" fill="#ffffff" stroke="none" stroke-width="0.0"/>
+<rect x="0.0" y="0.0" width="1280.0" height="1020.0" rx="0.0" fill="#ffffff" stroke="none" stroke-width="0.0"/>
 <text x="22.0" y="34.0" font-size="19" fill="#111" text-anchor="start" font-weight="bold">菱形リンクの部品図（二等分線方式・§7-2）</text>
 <text x="22.0" y="56.0" font-size="12.5" fill="#5b6470" text-anchor="start" font-weight="normal">機構としての動きは img/hopper-bisector.png を見ること。ここは作るための寸法。単位 mm、板厚方向を z とする</text>
 <text x="40.0" y="96.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">A. 小リンク（2 枚。左右で同じ形）</text>
@@ -56,7 +56,7 @@
 <text x="500.0" y="242.8" font-size="11" fill="#333" text-anchor="start" font-weight="normal">穴はシャンクの中心線（K–F を結ぶ線）上。左右とも同じ位置。</text>
 <text x="500.0" y="259.8" font-size="11" fill="#333" text-anchor="start" font-weight="normal">主スパン 幅 10 に対して縁肉 3.5 mm。§5-2 の断面のまま開けられる。</text>
 <text x="500.0" y="276.8" font-size="11" fill="#333" text-anchor="start" font-weight="normal">足先側のボス（幅 15）には掛からない。</text>
-<text x="860.0" y="96.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">C. 足先ブロックの腕</text>
+<text x="860.0" y="96.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">C. 足先ブロックの腕（2 枚。両方の耳を延長する）</text>
 <path d="M 941.6 480.0 L 941.6 222.4 A 18.4 18.4 0 0 1 978.4 222.4 L 978.4 480.0 Z" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.6"/>
 <rect x="918.6" y="480.0" width="82.8" height="46.0" rx="2.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.6"/>
 <text x="960.0" y="507.6" font-size="10.5" fill="#8e5bd6" text-anchor="middle" font-weight="normal">ブロック本体へ</text>
@@ -90,51 +90,50 @@
 <text x="1019.8" y="332.0" font-size="10.5" fill="#c1121f" text-anchor="start" font-weight="normal">（両端に 2 mm の余裕）</text>
 <line x1="949.9" y1="480.0" x2="904.8" y2="494.7" stroke="#8e5bd6" stroke-width="0.9" />
 <text x="900.8" y="498.7" font-size="10.5" fill="#8e5bd6" text-anchor="end" font-weight="normal">F（φ6 H7）</text>
-<text x="860.0" y="560.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">厚さ 2.5（ブロックの片方の耳をそのまま上へ延ばす）。</text>
-<text x="860.0" y="576.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">z = +4.75 〜 +7.25 の層。材質はブロックと同じ。質量 1.3 g</text>
+<text x="860.0" y="560.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">厚さ 2.5。ブロックの二股の耳を両方とも上へ延ばす（z = ±4.75〜±7.25）。</text>
+<text x="860.0" y="576.0" font-size="11" fill="#333" text-anchor="start" font-weight="normal">材質はブロックと同じ。質量 1.3 g × 2 枚。</text>
+<text x="860.0" y="594.0" font-size="11" fill="#c1121f" text-anchor="start" font-weight="bold">1 枚だけだとピン C の偶力を受けられない（D を見ること）</text>
 <text x="40.0" y="614.0" font-size="14.5" fill="#111" text-anchor="start" font-weight="bold">D. ピンまわりの組立断面（z 方向。上が膝側）</text>
-<text x="230.0" y="646.0" font-size="12.5" fill="#111" text-anchor="middle" font-weight="bold">ピン A2（A1 は鏡像）</text>
-<text x="230.0" y="662.0" font-size="10.5" fill="#5b6470" text-anchor="middle" font-weight="normal">シャンク② ＋ スペーサ ＋ リンク②</text>
-<rect x="145.5" y="684.2" width="26.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
-<text x="158.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク①</text>
-<rect x="174.8" y="704.6" width="52.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
-<text x="200.8" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク①</text>
-<rect x="233.2" y="704.6" width="52.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
-<text x="259.2" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク②</text>
-<rect x="291.8" y="677.4" width="32.5" height="81.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.3"/>
-<text x="308.0" y="772.0" font-size="9.5" fill="#8e5bd6" text-anchor="middle" font-weight="normal">腕</text>
-<rect x="327.5" y="684.2" width="26.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
-<text x="340.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク②</text>
-<rect x="223.5" y="719.9" width="143.0" height="10.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
-<rect x="285.2" y="719.9" width="42.2" height="10.2" rx="0.0" fill="#e8eaed" stroke="#9aa0a6" stroke-width="1.1"/>
-<line x1="306.7" y1="714.8" x2="332.7" y2="672.8" stroke="#9aa0a6" stroke-width="0.9" />
-<text x="336.7" y="676.8" font-size="10.5" fill="#9aa0a6" text-anchor="start" font-weight="normal">スペーサ 3.25</text>
-<text x="336.7" y="688.8" font-size="10" fill="#9aa0a6" text-anchor="start" font-weight="normal">（腕の層を飛び越える）</text>
-<text x="230.0" y="820.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">φ3 × 15。A1 側は腕が無いのでスペーサ不要（φ3 × 12）</text>
-<text x="640.0" y="646.0" font-size="12.5" fill="#111" text-anchor="middle" font-weight="bold">ピン C</text>
-<text x="640.0" y="662.0" font-size="10.5" fill="#5b6470" text-anchor="middle" font-weight="normal">リンク① ＋ 腕（スロット）＋ リンク②</text>
-<rect x="555.5" y="684.2" width="26.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
-<text x="568.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク①</text>
-<rect x="584.8" y="704.6" width="52.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
-<text x="610.8" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク①</text>
-<rect x="643.2" y="704.6" width="52.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
-<text x="669.2" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク②</text>
-<rect x="701.8" y="677.4" width="32.5" height="81.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.3"/>
-<text x="718.0" y="772.0" font-size="9.5" fill="#8e5bd6" text-anchor="middle" font-weight="normal">腕</text>
-<rect x="737.5" y="684.2" width="26.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
-<text x="750.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク②</text>
-<rect x="701.8" y="691.0" width="32.5" height="54.4" rx="0.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.0"/>
-<rect x="529.5" y="719.9" width="253.5" height="10.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
-<rect x="523.6" y="713.1" width="6.5" height="23.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
-<rect x="777.1" y="713.1" width="6.5" height="23.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
-<line x1="526.9" y1="708.0" x2="512.9" y2="670.0" stroke="#5b6470" stroke-width="0.9" />
-<text x="508.9" y="674.0" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">E リング × 2</text>
-<text x="640.0" y="820.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">φ3 × 22。腕のスロットの中を滑るので、ここだけ締め付けない</text>
-<rect x="30.0" y="838.0" width="1220.0" height="156.0" rx="0.0" fill="#f7f9fb" stroke="#c9d3de" stroke-width="1.2"/>
-<text x="50.0" y="864.0" font-size="13.5" fill="#111" text-anchor="start" font-weight="bold">組む順番と確認</text>
-<text x="50.0" y="888.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">1. シャンク①② に φ3 の穴（F から 30）を開ける。2. 小リンクを 2 枚作る（穴間 30）。3. 足先ブロックに腕とスロットを付ける。4. ジョイントを組む。</text>
-<text x="50.0" y="910.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   ジョイント: A1・A2・C は回転、腕と C は「ピン-スロット」（スライダにすると拘束が 1 つ多く、過拘束になる）。F は既存の回転に足先ブロックを足す。</text>
-<text x="50.0" y="932.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   検算: 菱形は対辺が平行なので、リンク①（A1→C）は常にシャンク②（F→K2）と平行。全姿勢で差 0.000°。Fusion の計測で確かめられる。</text>
-<text x="50.0" y="954.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   質量: 小リンク 1.54 g × 2 ＋ ピン 3 本 2.74 g ＋ スペーサ 0.18 g ＋ E リング 0.1 g ＝ 6.1 g、腕 1.3 g。合計 7.4 g が足の質量に加わる。</text>
-<text x="50.0" y="982.0" font-size="11.5" fill="#c1121f" text-anchor="start" font-weight="bold">※ 精度が効くのは「4 辺が等しいこと」だけ。穴間 30 mm を左右 4 箇所で揃える。絶対位置の精度は要らない。</text>
+<text x="300.0" y="646.0" font-size="12.5" fill="#111" text-anchor="middle" font-weight="bold">ピン C（左右対称に受ける）</text>
+<text x="300.0" y="662.0" font-size="10.5" fill="#5b6470" text-anchor="middle" font-weight="normal">リンク① ＋ 腕① ＋ 〔空〕＋ 腕② ＋ リンク②</text>
+<rect x="195.5" y="684.2" width="22.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
+<text x="206.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク①</text>
+<rect x="220.2" y="677.4" width="27.5" height="81.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.3"/>
+<text x="234.0" y="772.0" font-size="9.5" fill="#8e5bd6" text-anchor="middle" font-weight="normal">腕①</text>
+<rect x="253.2" y="704.6" width="44.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
+<text x="275.2" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク①</text>
+<rect x="302.8" y="704.6" width="44.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
+<text x="324.8" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク②</text>
+<rect x="352.2" y="677.4" width="27.5" height="81.6" rx="0.0" fill="#efe3f7" stroke="#8e5bd6" stroke-width="1.3"/>
+<text x="366.0" y="772.0" font-size="9.5" fill="#8e5bd6" text-anchor="middle" font-weight="normal">腕②</text>
+<rect x="382.5" y="684.2" width="22.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
+<text x="393.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク②</text>
+<rect x="220.2" y="691.0" width="27.5" height="54.4" rx="0.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.0"/>
+<rect x="352.2" y="691.0" width="27.5" height="54.4" rx="0.0" fill="#ffffff" stroke="#8e5bd6" stroke-width="1.0"/>
+<rect x="182.3" y="719.9" width="235.4" height="10.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
+<rect x="177.3" y="713.1" width="5.5" height="23.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
+<rect x="412.8" y="713.1" width="5.5" height="23.8" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.0"/>
+<line x1="180.1" y1="708.0" x2="170.1" y2="668.0" stroke="#5b6470" stroke-width="0.9" />
+<text x="166.1" y="672.0" font-size="10.5" fill="#5b6470" text-anchor="end" font-weight="normal">E リング × 2</text>
+<text x="300.0" y="820.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">φ3 × 22。リンク①(−8.5) を 腕①(−6) が、リンク②(+8.5) を 腕②(+6) が受ける。</text>
+<text x="300.0" y="836.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">スパン 2.5 mm、曲げ 93 MPa（SF 2.2）。スロットの中を滑るので締め付けない。</text>
+<text x="880.0" y="646.0" font-size="12.5" fill="#111" text-anchor="middle" font-weight="bold">ピン A2（A1 は鏡像）</text>
+<text x="880.0" y="662.0" font-size="10.5" fill="#5b6470" text-anchor="middle" font-weight="normal">シャンク② ＋ スペーサ ＋ リンク②</text>
+<rect x="882.8" y="704.6" width="44.0" height="81.6" rx="0.0" fill="#d8efdc" stroke="#3f8f57" stroke-width="1.3"/>
+<text x="904.8" y="799.2" font-size="9.5" fill="#3f8f57" text-anchor="middle" font-weight="normal">シャンク②</text>
+<rect x="962.5" y="684.2" width="22.0" height="81.6" rx="0.0" fill="#ffe0b2" stroke="#c9762b" stroke-width="1.3"/>
+<text x="973.5" y="778.8" font-size="9.5" fill="#c9762b" text-anchor="middle" font-weight="normal">リンク②</text>
+<rect x="874.5" y="719.9" width="121.0" height="10.2" rx="0.0" fill="#c8ccd2" stroke="#5b6470" stroke-width="1.3"/>
+<rect x="926.8" y="719.9" width="35.8" height="10.2" rx="0.0" fill="#e8eaed" stroke="#9aa0a6" stroke-width="1.1"/>
+<line x1="944.9" y1="714.8" x2="966.9" y2="674.8" stroke="#9aa0a6" stroke-width="0.9" />
+<text x="970.9" y="678.8" font-size="10.5" fill="#9aa0a6" text-anchor="start" font-weight="normal">スペーサ 3.25</text>
+<text x="880.0" y="820.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">φ3 × 12。腕はこの位置（F から 30 mm、シャンクの上）には無いので、</text>
+<text x="880.0" y="836.0" font-size="10.5" fill="#333" text-anchor="middle" font-weight="normal">スペーサはリンクを層の位置に保つためだけ。A1 側も同じ。</text>
+<rect x="30.0" y="856.0" width="1220.0" height="148.0" rx="0.0" fill="#f7f9fb" stroke="#c9d3de" stroke-width="1.2"/>
+<text x="50.0" y="880.0" font-size="13.5" fill="#111" text-anchor="start" font-weight="bold">組む順番と確認</text>
+<text x="50.0" y="902.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">1. シャンク①② に φ3 の穴（F から 30）を開ける。2. 小リンクを 2 枚作る（穴間 30）。3. 足先ブロックに腕とスロットを付ける。4. ジョイントを組む。</text>
+<text x="50.0" y="924.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   ジョイント: A1・A2・C は回転、腕と C は「ピン-スロット」（スライダにすると拘束が 1 つ多く、過拘束になる）。F は既存の回転に足先ブロックを足す。</text>
+<text x="50.0" y="946.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   検算: 菱形は対辺が平行なので、リンク①（A1→C）は常にシャンク②（F→K2）と平行。全姿勢で差 0.000°。Fusion の計測で確かめられる。</text>
+<text x="50.0" y="968.0" font-size="11.5" fill="#333" text-anchor="start" font-weight="normal">   質量: 小リンク 1.54×2 ＋ 腕 1.3×2 ＋ ピン C 1.23 ＋ ピン A 0.67×2 ＋ スペーサ 0.18×2 ＋ E リング 0.1 ＝ 8.7 g が足の質量に加わる。</text>
+<text x="50.0" y="994.0" font-size="11.5" fill="#c1121f" text-anchor="start" font-weight="bold">※ 精度が効くのは「4 辺が等しいこと」だけ。穴間 30 mm を左右 4 箇所で揃える。絶対位置の精度は要らない。</text>
 </svg>
