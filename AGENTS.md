@@ -25,6 +25,7 @@ Colab で Go1 が歩くところまでは動いている。2026-09-06 の派生�
 - `tools/make_shank_diagram.py` — `docs/img/hopper-shank.svg`（シャンク両端の関節構造）を生成。同上
 - `tools/make_spring_diagram.py` — `docs/img/hopper-spring.svg`（直列バネの支持方式）を生成。同上
 - `tools/make_bisector_diagram.py` — `docs/img/hopper-bisector.svg`（足先ブロックの向きを決める菱形リンク、案 1）を生成。同上
+- `tools/make_link_parts_diagram.py` — `docs/img/hopper-bisector-parts.svg`（菱形リンクの部品図）を生成。同上
 - `tools/hopper_stroke_sweep.js` — バネのストローク・ばね定数を決める 2D 掃引（`docs/hopper-log.md` §8.11）
 - `tools/hopper_spring_axis.js` — バネ軸の向き（ロッド方式 vs 二等分線）と向き誤差の感度（`docs/hopper-log.md` §8.12）
 - `tools/spring_check.js` — 候補のばね（カタログ品・特注）が成立するか 2D で判定。`node tools/spring_check.js --k 1.5 --lf 91 --od 15 --dmax 55`
