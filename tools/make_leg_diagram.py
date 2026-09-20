@@ -19,7 +19,7 @@ P1, P2 = (-20.0, 0.0), (20.0, 0.0)
 K1 = (f['A'][0] * 1000, f['A'][1] * 1000)
 K2 = (f['B'][0] * 1000, f['B'][1] * 1000)
 F = (f['F'][0] * 1000, f['F'][1] * 1000)
-FT = (0.0, F[1] - 80.0)          # 足の接地点（バネ自然長 80 mm）
+FT = (0.0, F[1] - 100.0)         # 足の接地点（バネ自由長 100 mm。サミニ 11-1437）
 
 SC, OX, OY = 1.25, 300.0, 200.0
 X = lambda x: OX + x * SC
@@ -27,14 +27,14 @@ Y = lambda y: OY - y * SC
 
 out = []
 A = out.append
-A('<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="690" viewBox="0 0 1060 690" '
+A('<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="710" viewBox="0 0 1060 710" '
   'font-family="Segoe UI, Meiryo, sans-serif" font-size="13">')
 A('<defs>'
   '<marker id="dim" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">'
   '<path d="M0,0 L8,4 L0,8 z" fill="#5b6470"/></marker>'
   '<marker id="dim2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto">'
   '<path d="M8,0 L0,4 L8,8 z" fill="#5b6470"/></marker></defs>')
-A('<rect width="1060" height="690" fill="#ffffff"/>')
+A('<rect width="1060" height="710" fill="#ffffff"/>')
 A('<text x="22" y="30" font-size="18" font-weight="bold">'
   '一本脚ホッパー 脚の構造（5 節リンク ＋ 直列バネ ＋ ロール軸）</text>')
 A('<text x="22" y="50" font-size="12" fill="#5b6470">'
@@ -72,12 +72,12 @@ for i in range(1, n):
 pts.append('%.0f,%.0f' % (x1, y1))
 A('<polyline points="%s" fill="none" stroke="#c9762b" stroke-width="2.4"/>' % ' '.join(pts))
 A('<rect x="%.0f" y="%.0f" width="%.0f" height="%.0f" rx="2" fill="#5b6470" stroke="#333"/>'
-  % (X(-25), Y(-225), 50 * SC, 6 * SC))
+  % (X(-25), Y(-245), 50 * SC, 6 * SC))
 A('<line x1="%.0f" y1="%.0f" x2="%.0f" y2="%.0f" stroke="#999" stroke-width="2"/>'
-  % (X(-62), Y(-231), X(62), Y(-231)))
+  % (X(-62), Y(-251), X(62), Y(-251)))
 for gx in range(-58, 62, 12):
     A('<line x1="%.0f" y1="%.0f" x2="%.0f" y2="%.0f" stroke="#c8c8c8"/>'
-      % (X(gx), Y(-231), X(gx - 7), Y(-238)))
+      % (X(gx), Y(-251), X(gx - 7), Y(-258)))
 for c, lbl, dx, dy in ((P1, 'P1', -32, -6), (P2, 'P2', 13, -6), (K1, 'K1', -32, 5),
                        (K2, 'K2', 13, 5), (F, 'F', 15, 5)):
     A('<circle cx="%.1f" cy="%.1f" r="4.5" fill="#fff" stroke="#222" stroke-width="1.6"/>'
@@ -104,16 +104,16 @@ A('<line x1="%.0f" y1="%.0f" x2="%.0f" y2="%.0f" stroke="#5b6470" stroke-width="
   'marker-start="url(#dim2)" marker-end="url(#dim)"/>' % (X(122), Y(0), X(122), Y(-145)))
 A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">先端長 145</text>' % (X(126), Y(-72)))
 A('<line x1="%.0f" y1="%.0f" x2="%.0f" y2="%.0f" stroke="#5b6470" stroke-width="1" '
-  'marker-start="url(#dim2)" marker-end="url(#dim)"/>' % (X(122), Y(-145), X(122), Y(-225)))
-A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">バネ 80</text>' % (X(126), Y(-185)))
+  'marker-start="url(#dim2)" marker-end="url(#dim)"/>' % (X(122), Y(-145), X(122), Y(-245)))
+A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">バネ 100</text>' % (X(126), Y(-195)))
 A('<line x1="%.0f" y1="%.0f" x2="%.0f" y2="%.0f" stroke="#5b6470" stroke-width="1" '
-  'marker-start="url(#dim2)" marker-end="url(#dim)"/>' % (X(-132), Y(0), X(-132), Y(-225)))
-A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">L0 = 240</text>' % (X(-186), Y(-106)))
+  'marker-start="url(#dim2)" marker-end="url(#dim)"/>' % (X(-132), Y(0), X(-132), Y(-245)))
+A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">L0 = 260</text>' % (X(-186), Y(-106)))
 A('<text x="%.0f" y="%.0f" font-size="11" fill="#5b6470">（股→接地）</text>' % (X(-192), Y(-120)))
 A('<text x="%.0f" y="%.0f" font-size="11" fill="#4a6fa5">θ1 = −143.5°</text>' % (X(-62), Y(-52)))
 A('<text x="%.0f" y="%.0f" font-size="11" fill="#4a6fa5">θ2 = −36.5°</text>' % (X(16), Y(-52)))
 A('<text x="%.0f" y="%.0f" font-size="11" fill="#2f9e8f">内角 90.5°</text>' % (X(19), Y(-133)))
-A('<text x="%.0f" y="%.0f" font-size="11" fill="#333">ゴムパッド φ50</text>' % (X(30), Y(-222)))
+A('<text x="%.0f" y="%.0f" font-size="11" fill="#333">ゴムパッド φ50</text>' % (X(30), Y(-242)))
 for i, t in enumerate([
         '①② XM540-W270（脚長、10.6 N·m / 30 rpm）　③ XH540-W150（ロール、7.1 N·m / 70 rpm）',
         'P1 / P2: サーボ出力軸（駆動）　K1 / K2: 膝（受動）　F: 足先（下腿 2 本が合流 ＝ 閉ループ）',
@@ -125,15 +125,15 @@ for i, t in enumerate([
 # ======== B: Z 方向の層構成 ========
 BX, BY = 560, 80
 A('<text x="%d" y="%d" font-size="14" font-weight="bold">'
-  'B. Z 方向の層構成（脚長サーボの軸に沿った断面）</text>' % (BX, BY))
-z0 = BX + 24
-zx = lambda z: z0 + (z + 44) * 4.15
+  'B. Z 方向の層構成（脚長サーボの軸に沿った断面。§4-6 向かい合わせ）</text>' % (BX, BY))
+z0 = BX + 10
+zx = lambda z: z0 + (z + 50) * 3.5
 leg = []
-for a, b, fill, st, lbl in ((-44, 0, '#ffe9d2', '#c9762b', 'サーボ本体 44'),
-                            (0, 2.6, '#f6d5b0', '#c9762b', 'ホーン'),
-                            (2.6, 8.6, '#dbe6f3', '#4a6fa5', 'クランク 6'),
-                            (8.6, 12.6, '#e8e2f6', '#8e5bd6', '軸受'),
-                            (12.6, 16.6, '#e3e7ec', '#5b6470', '外側板')):
+for a, b, fill, st, lbl in ((-49.1, -5.1, '#ffe9d2', '#c9762b', 'サーボ② 本体 44'),
+                            (-5.1, -2.5, '#f6d5b0', '#c9762b', 'ホーン②'),
+                            (-2.5, 2.5, '#dbe6f3', '#4a6fa5', 'クランク①② 5'),
+                            (2.5, 5.1, '#f6d5b0', '#c9762b', 'ホーン①'),
+                            (5.1, 49.1, '#ffe9d2', '#c9762b', 'サーボ① 本体 44')):
     A('<rect x="%.0f" y="%d" width="%.0f" height="52" fill="%s" stroke="%s" stroke-width="1.6"/>'
       % (zx(a), BY + 26, zx(b) - zx(a), fill, st))
     cx = (zx(a) + zx(b)) / 2
@@ -143,19 +143,23 @@ for a, b, fill, st, lbl in ((-44, 0, '#ffe9d2', '#c9762b', 'サーボ本体 44')
 for i, (cx, lbl, st) in enumerate(leg):
     A('<text x="%.0f" y="%d" font-size="10.5" fill="%s">%s</text>' % (cx + 4, BY + 90 + 15 * i, st, lbl))
 A('<line x1="%.0f" y1="%d" x2="%.0f" y2="%d" stroke="#c0392b" stroke-width="1.6" '
-  'stroke-dasharray="8 3 2 3"/>' % (zx(-48), BY + 52, zx(21), BY + 52))
-A('<text x="%.0f" y="%d" font-size="11" fill="#c0392b">サーボ軸（Z）</text>' % (zx(21) + 5, BY + 56))
+  'stroke-dasharray="8 3 2 3"/>' % (zx(-52), BY + 52, zx(52), BY + 52))
+A('<text x="%.0f" y="%d" font-size="11" fill="#c0392b">サーボ軸（Z）</text>' % (zx(52) + 5, BY + 56))
+A('<line x1="%.0f" y1="%d" x2="%.0f" y2="%d" stroke="#4a6fa5" stroke-width="1" stroke-dasharray="4 3"/>'
+  % (zx(0), BY + 20, zx(0), BY + 82))
+A('<text x="%.0f" y="%d" font-size="10.5" fill="#4a6fa5" text-anchor="middle">脚面 z = 0</text>' % (zx(0), BY + 18))
 BY = BY + 68
 A('<text x="%d" y="%d" font-size="11.5" font-weight="600" fill="#c0392b">'
-  'クランクを片持ちにしない</text>' % (BX, BY + 118))
+  '2 個のサーボは脚面を挟んで向かい合わせ（§4-6）</text>' % (BX, BY + 118))
 for i, t in enumerate([
-        '設計荷重ではクランク先端に 107 N。ホーン側だけで受けるとサーボ出力軸に',
-        'ラジアル荷重が集中する。外側にもう 1 枚板を置き、軸受で受けて両持ちにする',
-        '（コの字フレーム）。脚長サーボ 2 個は軸が平行なので外側板は共用できる。']):
+        '両クランクが同じ脚面 z = 0 に載る（可動域で XY が重ならないので同じ z でよい）。',
+        '脚が平面のままなので出力軸にスラストが出ず、ブラケットの面外モーメントも左右で相殺。',
+        '脚サーボ 2 個が z = ±27 に対称に載るので機体重心も脚面に来る。股の厚みは約 98 mm。',
+        '両持ちにするなら各クランクの反対面（クランク① は z −3〜−6、x −33〜−7）に軸受板。']):
     A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">%s</text>' % (BX, BY + 138 + i * 17, t))
 
 # ======== C: 関節の断面 ========
-CX, CY = 560, 348
+CX, CY = 560, 364
 A('<text x="%d" y="%d" font-size="14" font-weight="bold">'
   'C. 膝 K・足先 F の関節（二面せん断 = クレビス）</text>' % (CX, CY))
 cx0, cy0 = 620, CY + 26
@@ -198,9 +202,9 @@ A('<rect x="%d" y="%d" width="452" height="82" fill="#fdf6e8" stroke="#c98a12" s
 A('<text x="%d" y="%d" font-size="11.5" font-weight="600" fill="#8a5d00">'
   '質量制約: 下腿＋足で 50 g（150 g で転倒）</text>' % (CX + 12, CY + 273))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  '実部品で積むと 54 g。重いのはバネ 14 g と段付ボルト 3 本で 8.7 g。</text>' % (CX + 12, CY + 291))
+  '実部品で積むと 61.9 g（§8）。重いのはばね 14.5 g（規格品 サミニ 11-1437）とシャンク 2 本 15 g。</text>' % (CX + 12, CY + 291))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  'バネを硬くする（k 900 → 2000）と 5.6 g に減り 48 g に収まる。</text>' % (CX + 12, CY + 308))
+  '削り代はシャンクの肉厚（PA-CF 1.0 → 0.8）と足先ブロックの肉抜き。ばねは動かせない。</text>' % (CX + 12, CY + 308))
 A('<text x="%d" y="%d" font-size="11" fill="#8a5d00">'
   '※ 50 g と 150 g の間は未検証。実質量が出たらシミュレーションで確認できる</text>' % (CX + 12, CY + 325))
 A('</svg>')

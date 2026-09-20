@@ -416,8 +416,10 @@ def build_model(p):
     horn = dict(hornD=p['hornD'], pcd=p['pcd'], n=p['nHole'], holeD=p['holeD'], centerD=p['centerD'])
     ctx = dict(p=p, mm=mm, T=T, horn=horn)
 
-    # Z 層（サーボ①② のケース前面を 0 とする）
-    #   サーボ本体 -D〜0 / ホーン 0〜hT / クランク①② lay(0) / 下腿① lay(1) / 下腿② lay(2) / バネ・足 lay(3)
+    # Z 層（サーボ② のケース前面を 0 とする）
+    #   サーボ② 本体 -D〜0 / ホーン② 0〜hT / クランク①② lay(0) / 下腿① lay(1) / 下腿② lay(2) / バネ・足 lay(3)
+    #   サーボ① は脚面を挟んで反対側（要件 §4-6 向かい合わせ）: ホーン① lay(0)+T〜+hT、本体はその先 D
+    #   ※ 下腿①②を Z に積む簡略版。要件 §5-1 の二股（下腿がクランクを挟む）は再現していない
     def lay(i):
         return hT + i * s
 
@@ -430,7 +432,8 @@ def build_model(p):
     shank2 = make_link(root, ctx, 'Shank 2 (l2)', [g['K2'], g['F']], z=z_sh2)
     spring = make_spring(root, ctx, g, z=z_spring)
 
-    sv1 = make_servo_xy(root, ctx, 'Servo 1 ' + p['servoName'], g['P1'], 90.0, z0=-D, horn_z=(0.0, hT))
+    sv1 = make_servo_xy(root, ctx, 'Servo 1 ' + p['servoName'], g['P1'], 90.0,
+                        z0=z_crank + T + hT, horn_z=(z_crank + T, z_crank + T + hT))   # +Z 側、ホーン −Z 向き（§4-6）
     sv2 = make_servo_xy(root, ctx, 'Servo 2 ' + p['servoName'], g['P2'], 90.0, z0=-D, horn_z=(0.0, hT))
     sv3 = make_servo_yz(root, ctx, 'Servo 3 ' + p['servoName3'], z_mid)
     axis = make_roll_axis(root, ctx, z_mid)
