@@ -202,7 +202,7 @@ A('<rect x="%d" y="%d" width="452" height="82" fill="#fdf6e8" stroke="#c98a12" s
 A('<text x="%d" y="%d" font-size="11.5" font-weight="600" fill="#8a5d00">'
   '質量制約: 下腿＋足で 50 g（150 g で転倒）</text>' % (CX + 12, CY + 273))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
-  '実部品で積むと 61.9 g（§8）。重いのはばね 14.5 g（規格品 サミニ 11-1437）とシャンク 2 本 15 g。</text>' % (CX + 12, CY + 291))
+  '実部品で積むと 64.5 g（§8）。重いのはばね 14.5 g（規格品 サミニ 11-1437）とシャンク 2 本 16.8 g。</text>' % (CX + 12, CY + 291))
 A('<text x="%d" y="%d" font-size="11.5" fill="#5b6470">'
   '削り代はシャンクの肉厚（PA-CF 1.0 → 0.8）と足先ブロックの肉抜き。ばねは動かせない。</text>' % (CX + 12, CY + 308))
 A('<text x="%d" y="%d" font-size="11" fill="#8a5d00">'
